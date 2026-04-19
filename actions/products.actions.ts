@@ -1,22 +1,21 @@
 "use server";
 
 import { getSupabaseServer } from "@/lib/auth";
-import { createClient } from "@/utils/supabase/server";
 import { Database } from "@/types/database.types";
 
-type PlanType = Database["public"]["Enums"]["plan_type"];
+type ProductBadge = Database["public"]["Enums"]["product_badge"];
+type ProductStatus = Database["public"]["Enums"]["product_status"];
 
-export type TreeSortOption = "newest" | "price_asc" | "price_desc" | "age_asc" | "age_desc";
+export type ProductSortOption = "newest" | "price_asc" | "price_desc" | "weight_asc" | "weight_desc";
 
-export interface GetTreesOptions {
+export interface GetProductsOptions {
     filters?: {
-        planType?: PlanType[];
+        badge?: ProductBadge[];
+        status?: ProductStatus[];
         minPrice?: number;
         maxPrice?: number;
-        minAge?: number;
-        maxAge?: number;
     };
-    sort?: TreeSortOption;
+    sort?: ProductSortOption;
     page?: number;
     limit?: number;
     excludeId?: string;
@@ -24,23 +23,12 @@ export interface GetTreesOptions {
 
 // ── PUBLIC ─────────────────────────────────────────────────────────
 
-export async function getAvailableTrees(options?: GetTreesOptions) {
+export async function getMangoProducts(options?: GetProductsOptions) {
     const supabase = await getSupabaseServer();
 
     let query = supabase
-        .from("trees")
-        .select(`
-      *,
-      farmers (
-        id,
-        farm_name,
-        location,
-        is_organic,
-        profile_id
-      )
-    `, { count: "exact" })
-        .eq("status", "available")
-        .eq("is_verified", true);
+        .from("mango_products")
+        .select("*", { count: "exact" });
 
     // Apply filters
     if (options?.excludeId) {
@@ -48,21 +36,18 @@ export async function getAvailableTrees(options?: GetTreesOptions) {
     }
 
     if (options?.filters) {
-        const { planType, minPrice, maxPrice, minAge, maxAge } = options.filters;
-        if (planType && planType.length > 0) {
-            query = query.in("plan_type", planType);
+        const { badge, status, minPrice, maxPrice } = options.filters;
+        if (badge && badge.length > 0) {
+            query = query.in("badge", badge);
+        }
+        if (status && status.length > 0) {
+            query = query.in("status", status);
         }
         if (minPrice !== undefined) {
             query = query.gte("price", minPrice);
         }
         if (maxPrice !== undefined) {
             query = query.lte("price", maxPrice);
-        }
-        if (minAge !== undefined) {
-            query = query.gte("age_years", minAge);
-        }
-        if (maxAge !== undefined) {
-            query = query.lte("age_years", maxAge);
         }
     }
 
@@ -78,16 +63,16 @@ export async function getAvailableTrees(options?: GetTreesOptions) {
             case "price_desc":
                 query = query.order("price", { ascending: false });
                 break;
-            case "age_asc":
-                query = query.order("age_years", { ascending: true });
+            case "weight_asc":
+                query = query.order("weight_kg", { ascending: true });
                 break;
-            case "age_desc":
-                query = query.order("age_years", { ascending: false });
+            case "weight_desc":
+                query = query.order("weight_kg", { ascending: false });
                 break;
         }
     } else {
         // Default sort
-        query = query.order("source", { ascending: true }).order("created_at", { ascending: false });
+        query = query.order("created_at", { ascending: false });
     }
 
     // Apply pagination
@@ -102,7 +87,7 @@ export async function getAvailableTrees(options?: GetTreesOptions) {
     if (error) throw new Error(error.message);
 
     return {
-        trees: data,
+        products: data,
         totalCount: count || 0,
         page,
         limit,
@@ -110,45 +95,14 @@ export async function getAvailableTrees(options?: GetTreesOptions) {
     };
 }
 
-export async function getTreeById(treeId: string) {
+export async function getProductById(productId: string) {
     const supabase = await getSupabaseServer();
 
     const { data, error } = await supabase
-        .from("trees")
-        .select(`
-      *,
-      farmers (
-        id,
-        farm_name,
-        location,
-        is_organic
-      ),
-      rentals (
-        id,
-        status,
-        user_id,
-        profiles (
-          full_name,
-          avatar_url
-        )
-      )
-    `)
-        .eq("id", treeId)
-        .single();
-
-    if (error) throw new Error(error.message);
-    return data;
-}
-
-
-export async function getTreeUpdates(treeId: string) {
-    const supabase = await getSupabaseServer();
-
-    const { data, error } = await supabase
-        .from("tree_updates")
+        .from("mango_products")
         .select("*")
-        .eq("tree_id", treeId)
-        .order("posted_at", { ascending: false });
+        .eq("id", productId)
+        .single();
 
     if (error) throw new Error(error.message);
     return data;

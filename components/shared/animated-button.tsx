@@ -42,7 +42,7 @@ export function AnimatedButton({
     );
 
     const baseClasses = cn(
-        "group relative inline-flex w-full sm:w-auto justify-center items-center gap-3 overflow-hidden border px-8 py-4 text-[0.8125rem] font-bold uppercase tracking-[0.2em] transition-colors duration-300",
+        "group relative inline-flex w-full justify-center items-center gap-3 overflow-hidden border px-8 py-4 text-[0.8125rem] font-bold uppercase tracking-[0.2em] transition-colors duration-300",
         disabled && "opacity-60 cursor-not-allowed bg-muted text-muted-foreground border-transparent",
         !disabled && hoverTextClassName,
         className

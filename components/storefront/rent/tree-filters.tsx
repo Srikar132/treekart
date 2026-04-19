@@ -1,0 +1,318 @@
+"use client";
+
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useCallback, useTransition, useState, useEffect } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Loader2, SlidersHorizontal, X } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import type { Database } from "@/types/database.types";
+
+type PlanType = Database["public"]["Enums"]["plan_type"];
+
+const PLANS: { value: PlanType; label: string; range: string }[] = [
+  { value: "basic", label: "Basic", range: "20–30 kg" },
+  { value: "standard", label: "Standard", range: "40–50 kg" },
+  { value: "max", label: "Max", range: "60+ kg" },
+];
+
+const MAX_PRICE = 15000;
+const MAX_AGE = 50;
+
+type Props = {
+  activePlans: PlanType[];
+  activeMinPrice?: number;
+  activeMaxPrice?: number;
+  activeMinAge?: number;
+  activeMaxAge?: number;
+};
+
+export function TreeFilters({
+  activePlans,
+  activeMinPrice,
+  activeMaxPrice,
+  activeMinAge,
+  activeMaxAge,
+}: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Local state for sliders so they update immediately while dragging
+  const [priceRange, setPriceRange] = useState([
+    activeMinPrice || 0,
+    activeMaxPrice || MAX_PRICE,
+  ]);
+  const [ageRange, setAgeRange] = useState([
+    activeMinAge || 0,
+    activeMaxAge || MAX_AGE,
+  ]);
+
+  // Sync sliders if props change externally (like clearing all or clicking a pill)
+  useEffect(() => {
+    setPriceRange([activeMinPrice || 0, activeMaxPrice || MAX_PRICE]);
+  }, [activeMinPrice, activeMaxPrice]);
+
+  useEffect(() => {
+    setAgeRange([activeMinAge || 0, activeMaxAge || MAX_AGE]);
+  }, [activeMinAge, activeMaxAge]);
+
+  const updateParams = useCallback(
+    (updates: { key: string; value: string | null }[]) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const { key, value } of updates) {
+        if (value === null || value === "") {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+      params.delete("page");
+      startTransition(() => {
+        router.push(`${pathname}?${params.toString()}`);
+      });
+    },
+    [router, pathname, searchParams]
+  );
+
+  function togglePlan(plan: PlanType) {
+    const current = new Set(activePlans);
+    if (current.has(plan)) {
+      current.delete(plan);
+    } else {
+      current.add(plan);
+    }
+    updateParams([
+      { key: "plan", value: current.size > 0 ? Array.from(current).join(",") : null },
+    ]);
+  }
+
+  function clearAll() {
+    startTransition(() => {
+      router.push(pathname);
+      setIsOpen(false);
+    });
+  }
+
+  const hasActiveFilters =
+    activePlans.length > 0 ||
+    activeMinPrice ||
+    activeMaxPrice ||
+    activeMinAge ||
+    activeMaxAge;
+
+  const ActivePills = () => (
+    <>
+      {activePlans.map((p) => (
+        <button
+          key={p}
+          onClick={() => togglePlan(p)}
+          className="flex items-center gap-1 text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-full hover:bg-destructive/10 hover:text-destructive border border-primary/20 transition-colors"
+        >
+          {p} <X size={12} />
+        </button>
+      ))}
+      {(activeMinPrice || activeMaxPrice) && (
+        <button
+          onClick={() =>
+            updateParams([
+              { key: "minPrice", value: null },
+              { key: "maxPrice", value: null },
+            ])
+          }
+          className="flex items-center gap-1 text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-full hover:bg-destructive/10 hover:text-destructive border border-primary/20 transition-colors"
+        >
+          ₹{activeMinPrice || 0} - ₹{activeMaxPrice || `${MAX_PRICE}+`} <X size={12} />
+        </button>
+      )}
+      {(activeMinAge || activeMaxAge) && (
+        <button
+          onClick={() =>
+            updateParams([
+              { key: "minAge", value: null },
+              { key: "maxAge", value: null },
+            ])
+          }
+          className="flex items-center gap-1 text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-full hover:bg-destructive/10 hover:text-destructive border border-primary/20 transition-colors"
+        >
+          Age: {activeMinAge || 0}-{activeMaxAge || `${MAX_AGE}+`} yrs <X size={12} />
+        </button>
+      )}
+    </>
+  );
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Top bar trigger & active filters */}
+      <div className="flex items-center gap-4">
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger render={<Button variant="outline" className="gap-2 font-semibold" />}>
+              {isPending ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <SlidersHorizontal size={16} />
+              )}
+              Filter
+              {hasActiveFilters ? (
+                <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                  {(activePlans.length > 0 ? 1 : 0) +
+                    (activeMinPrice || activeMaxPrice ? 1 : 0) +
+                    (activeMinAge || activeMaxAge ? 1 : 0)}
+                </span>
+              ) : null}
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+            <SheetHeader className="mb-6">
+              <SheetTitle className="flex items-center justify-between">
+                <span>Filters</span>
+                {hasActiveFilters ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearAll}
+                    className="h-8 px-2 text-xs text-muted-foreground hover:text-destructive mr-7"
+                  >
+                    Clear all
+                  </Button>
+                ) : null}
+              </SheetTitle>
+            </SheetHeader>
+
+            <div className="space-y-8 px-4 pb-4">
+              {/* Plan type */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold tracking-wider uppercase text-foreground">
+                  Plan Type
+                </h4>
+                <div className="space-y-3">
+                  {PLANS.map((plan) => (
+                    <div key={plan.value} className="flex items-center gap-3">
+                      <Checkbox
+                        id={`plan-${plan.value}`}
+                        checked={activePlans.includes(plan.value)}
+                        onCheckedChange={() => togglePlan(plan.value)}
+                      />
+                      <Label
+                        htmlFor={`plan-${plan.value}`}
+                        className="flex-1 cursor-pointer flex items-center justify-between"
+                      >
+                        <span className="text-sm font-medium">{plan.label}</span>
+                        <span className="text-xs text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded">
+                          {plan.range}
+                        </span>
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Price range */}
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold tracking-wider uppercase text-foreground">
+                    Price Range
+                  </h4>
+                  <span className="text-xs font-mono bg-secondary px-2 py-0.5 rounded">
+                    ₹{priceRange[0]} -{" "}
+                    {priceRange[1] >= MAX_PRICE ? `₹${MAX_PRICE}+` : `₹${priceRange[1]}`}
+                  </span>
+                </div>
+                <Slider
+                  defaultValue={[activeMinPrice || 0, activeMaxPrice || MAX_PRICE]}
+                  value={priceRange}
+                  onValueChange={(vals) => setPriceRange(vals as number[])}
+                  onValueCommitted={(vals) => {
+                    const v = vals as number[];
+                    updateParams([
+                      {
+                        key: "minPrice",
+                        value: v[0] > 0 ? String(v[0]) : null,
+                      },
+                      {
+                        key: "maxPrice",
+                        value: v[1] < MAX_PRICE ? String(v[1]) : null,
+                      },
+                    ]);
+                  }}
+                  max={MAX_PRICE}
+                  step={500}
+                  className="w-full"
+                />
+              </div>
+
+              <Separator />
+
+              {/* Age range */}
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold tracking-wider uppercase text-foreground">
+                    Tree Age
+                  </h4>
+                  <span className="text-xs font-mono bg-secondary px-2 py-0.5 rounded">
+                    {ageRange[0]} -{" "}
+                    {ageRange[1] >= MAX_AGE ? `${MAX_AGE}+ yrs` : `${ageRange[1]} yrs`}
+                  </span>
+                </div>
+                <Slider
+                  defaultValue={[activeMinAge || 0, activeMaxAge || MAX_AGE]}
+                  value={ageRange}
+                  onValueChange={(vals) => setAgeRange(vals as number[])}
+                  onValueCommitted={(vals) => {
+                    const v = vals as number[];
+                    updateParams([
+                      {
+                        key: "minAge",
+                        value: v[0] > 0 ? String(v[0]) : null,
+                      },
+                      {
+                        key: "maxAge",
+                        value: v[1] < MAX_AGE ? String(v[1]) : null,
+                      },
+                    ]);
+                  }}
+                  max={MAX_AGE}
+                  step={1}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        {/* Active filter pills inline next to button on desktop */}
+        {hasActiveFilters ? (
+          <div className="hidden sm:flex items-center flex-wrap gap-2">
+            <span className="text-sm text-muted-foreground mr-1">Active:</span>
+            <ActivePills />
+            <button
+              onClick={clearAll}
+              className="text-sm underline text-muted-foreground hover:text-foreground ml-2"
+            >
+              Clear All
+            </button>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Mobile active pills */}
+      {hasActiveFilters ? (
+        <div className="flex sm:hidden items-center flex-wrap gap-2">
+          <ActivePills />
+        </div>
+      ) : null}
+    </div>
+  );
+}

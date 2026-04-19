@@ -73,15 +73,18 @@ export function Footer() {
                         <ul className="space-y-4 p-sm mb-6">
                             <li className="flex items-center gap-3">
                                 <Phone className="w-4 h-4 shrink-0 text-primary" />
-                                <span>+91 99122 17619</span>
+                                <div className="flex flex-col">
+                                    <span>+91 99122 17619</span>
+                                    <span>+91 98480 62600</span>
+                                </div>
                             </li>
                             <li className="flex items-center gap-3">
                                 <Mail className="w-4 h-4 shrink-0 text-primary" />
-                                <span>support@treekart.com</span>
+                                <span>treekart.in@gmail.com</span>
                             </li>
                             <li className="flex items-start gap-3">
                                 <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
-                                <span>1234 Mango Grove,<br />Hyderabad, India.</span>
+                                <span>Rajamundry, Andhra Pradesh, India</span>
                             </li>
                         </ul>
                         <div className="flex gap-3">

@@ -10,7 +10,7 @@ const trendingProducts: TreeProduct[] = [
         title: "Banganapalli Tree",
         price: 60.00,
         oldPrice: 70.00,
-        image: "/images/mango_banganapalli.png",
+        images: ["/images/mango_banganapalli.png"],
         isSale: true,
     },
     {
@@ -18,7 +18,7 @@ const trendingProducts: TreeProduct[] = [
         title: "Alphonso Tree",
         price: 60.00,
         oldPrice: 70.00,
-        image: "/images/mango_alphonso.png",
+        images: ["/images/mango_alphonso.png"],
         isSale: true,
     },
     {
@@ -26,7 +26,7 @@ const trendingProducts: TreeProduct[] = [
         title: "Kesar Tree",
         price: 60.00,
         oldPrice: 70.00,
-        image: "/images/mango_basket.png",
+        images: ["/images/mango_basket.png"],
         isSale: true,
     },
     {
@@ -34,7 +34,7 @@ const trendingProducts: TreeProduct[] = [
         title: "Dasheri Tree",
         price: 60.00,
         oldPrice: 70.00,
-        image: "/images/mango_alphonso.png",
+        images: ["/images/mango_alphonso.png"],
         isSale: true,
     }
 ];
@@ -58,14 +58,14 @@ const itemVariants: Variants = {
 
 export function TrendingProducts() {
     return (
-        <section className="section bg-background">
+        <section className="section">
             <div className="container">
                 <div className="section-header text-center mb-12">
                     <h2 className="text-4xl md:text-5xl font-black tracking-tight">Available for Lease</h2>
                     <p className="mt-4 p-base text-muted-foreground">Select a premium organic mango tree and start your farm journey today.</p>
                 </div>
 
-                <motion.div 
+                <motion.div
                     variants={containerVariants}
                     initial="hidden"
                     whileInView="visible"
@@ -79,16 +79,16 @@ export function TrendingProducts() {
                     ))}
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.4, duration: 0.5 }}
                     className="flex justify-center"
                 >
-                    <AnimatedButton 
-                        href="/trees" 
-                        label="View All Trees" 
+                    <AnimatedButton
+                        href="/trees"
+                        label="View All Trees"
                         className="border-foreground bg-foreground text-background"
                         fillClassName="bg-primary"
                         hoverTextClassName="hover:text-primary-foreground"

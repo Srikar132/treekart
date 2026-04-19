@@ -40,7 +40,7 @@ const itemVariants = {
 
 export function HowItWorks() {
     return (
-        <section className="section bg-muted/30">
+        <section className="section">
             <div className="container">
                 <motion.div
                     initial="hidden"

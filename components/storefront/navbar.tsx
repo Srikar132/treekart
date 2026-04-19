@@ -11,16 +11,19 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useMangoCart } from "@/store/use-mango-cart";
 
 const navLinks = [
     { name: "Rent Trees", href: "/rent" },
-    { name: "Mango Shop", href: "/store" },
+    { name: "Mango Store", href: "/store" },
     { name: "Blog", href: "/blog" },
     { name: "About Us", href: "/about" },
     { name: "Contact", href: "/contact" },
 ];
 
 function NavContent() {
+    const { toggleCart, totalItems } = useMangoCart();
+
     return (
         <div className="container flex h-16 items-center justify-between">
             {/* Left: Menu Icon + Logo */}
@@ -30,7 +33,7 @@ function NavContent() {
                 </div>
                 <Link href="/" className="flex items-center">
                     <Image
-                        src="/logo.png"
+                        src="/logo.webp"
                         alt="TreeKart Logo"
                         width={280}
                         height={80}
@@ -85,16 +88,18 @@ function NavContent() {
 
                 <Tooltip>
                     <TooltipTrigger>
-                        <Link
-                            href="/cart"
-                            className="relative text-foreground hover:text-primary transition-colors inline-flex items-center"
+                        <div
+                            onClick={toggleCart}
+                            className="relative text-foreground hover:text-primary transition-colors inline-flex items-center cursor-pointer"
                         >
                             <ShoppingBag className="w-5 h-5 lg:w-[22px] lg:h-[22px]" strokeWidth={1.5} />
-                            <span className="absolute -top-1.5 -right-2 flex h-4 w-4 lg:h-[18px] lg:w-[18px] items-center justify-center rounded-full bg-primary text-[9px] lg:text-[10px] font-bold text-primary-foreground">
-                                0
-                            </span>
+                            {totalItems() > 0 && (
+                                <span className="absolute -top-1.5 -right-2 flex h-4 w-4 lg:h-[18px] lg:w-[18px] items-center justify-center rounded-full bg-primary text-[9px] lg:text-[10px] font-bold text-primary-foreground">
+                                    {totalItems()}
+                                </span>
+                            )}
                             <span className="sr-only">Cart</span>
-                        </Link>
+                        </div>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" sideOffset={5}>
                         <p>Cart</p>
@@ -121,7 +126,7 @@ export function Navbar() {
     return (
         <>
             {/* Normal Navbar - sits at the top and scrolls away naturally */}
-            <header className="relative z-40 w-full bg-background border-b">
+            <header className="relative z-40 w-full bg-transparent  border-b">
                 <NavContent />
             </header>
 

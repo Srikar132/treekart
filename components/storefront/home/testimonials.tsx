@@ -45,12 +45,12 @@ const cardVariants = {
 
 export function Testimonials() {
     return (
-        <section className="section bg-background relative overflow-hidden">
+        <section className="section brelative overflow-hidden">
             {/* Decorative background element */}
-            <div className="absolute -top-40 -left-40 w-96 h-96 bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
+            {/* <div className="absolute -top-40 -left-40 w-96 h-96 bg-primary/5 rounded-full blur-[80px] pointer-events-none" /> */}
 
             <div className="container relative z-10">
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-100px" }}
@@ -61,7 +61,7 @@ export function Testimonials() {
                     <p className="p-base text-muted-foreground">Don't just take our word for it. Here is what our tree lessors have to say.</p>
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                     variants={containerVariants}
                     initial="hidden"
                     whileInView="visible"
@@ -73,17 +73,17 @@ export function Testimonials() {
                             <Card className="h-full border-border/50 bg-white/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
                                 <CardContent className="p-6 md:p-8 flex flex-col h-full relative">
                                     <Quote className="absolute top-6 right-6 w-8 h-8 text-primary/10 rotate-180" />
-                                    
+
                                     <div className="flex gap-1 mb-6">
                                         {[...Array(testimonial.rating)].map((_, j) => (
                                             <Star key={j} className="w-4 h-4 fill-primary text-primary" />
                                         ))}
                                     </div>
-                                    
+
                                     <p className="text-foreground/80 leading-relaxed mb-8 flex-1 italic">
                                         "{testimonial.text}"
                                     </p>
-                                    
+
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
                                             {testimonial.name.charAt(0)}

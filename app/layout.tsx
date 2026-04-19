@@ -20,6 +20,8 @@ export const metadata: Metadata = {
   description: "Rent a real Alphonso mango tree on our farm. GPS tracking, 10-day updates, fresh mangoes delivered every season.",
 };
 
+import { QueryProvider } from "@/components/providers/query-provider";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -29,9 +31,11 @@ export default function RootLayout({
       className={`${dmSans.variable} ${dmMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <TooltipProvider delay={100}>
-          {children}
-        </TooltipProvider>
+        <QueryProvider>
+          <TooltipProvider delay={100}>
+            {children}
+          </TooltipProvider>
+        </QueryProvider>
       </body>
     </html>
   );

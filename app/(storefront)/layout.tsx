@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/storefront/app-sidebar";
+import { CartSidebar } from "@/components/storefront/cart-sidebar";
 import { Footer } from "@/components/storefront/footer";
 import { Navbar } from "@/components/storefront/navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -20,6 +21,8 @@ export default function StorefrontLayout({
                     <Footer />
                 </div>
             </div>
+
+            <CartSidebar />
         </SidebarProvider>
     );
 }

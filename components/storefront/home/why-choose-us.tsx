@@ -62,7 +62,7 @@ const rightFeatures = [
 
 export function WhyChooseUs() {
     return (
-        <section className="section bg-background overflow-hidden">
+        <section className="section overflow-hidden">
             <div className="container">
 
                 {/* Section Header */}
@@ -92,7 +92,7 @@ export function WhyChooseUs() {
                     className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-8 items-center mt-16 md:mt-24"
                 >
                     {/* Left Features */}
-                    <div className="flex flex-col gap-10 md:gap-16 order-2 lg:order-1">
+                    <div className="flex flex-col gap-10 md:gap-16 order-1">
                         {leftFeatures.map((feature, idx) => (
                             <motion.div key={idx} variants={itemVariants} className="flex gap-4 md:gap-6">
                                 <div className="shrink-0">{feature.icon}</div>
@@ -107,7 +107,7 @@ export function WhyChooseUs() {
                     {/* Center Image */}
                     <motion.div
                         variants={itemVariants}
-                        className="relative flex justify-center items-center order-1 lg:order-2 w-full max-w-md mx-auto lg:max-w-full"
+                        className="relative flex justify-center items-center order-2 w-full max-w-md mx-auto lg:max-w-full"
                     >
                         <div className="relative aspect-square w-full">
                             <Image
@@ -122,7 +122,7 @@ export function WhyChooseUs() {
                     </motion.div>
 
                     {/* Right Features */}
-                    <div className="flex flex-col gap-10 md:gap-16 order-3 lg:order-3">
+                    <div className="flex flex-col gap-10 md:gap-16 order-3">
                         {rightFeatures.map((feature, idx) => (
                             <motion.div key={idx} variants={itemVariants} className="flex gap-4 md:gap-6 text-right justify-end">
                                 <div>
