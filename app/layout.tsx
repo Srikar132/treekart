@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 
 import { QueryProvider } from "@/components/providers/query-provider";
 import Script from "next/script";
+import { Toaster } from "sonner";
 
 export default function RootLayout({
   children,
@@ -37,6 +38,7 @@ export default function RootLayout({
             {children}
           </TooltipProvider>
         </QueryProvider>
+        <Toaster />
 
         <Script
           id="razorpay-checkout-js"

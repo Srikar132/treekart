@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { MapPin, Info } from "lucide-react";
 import { type DeliveryAddress, INDIAN_STATES } from "@/types/checkout";
 import { cn } from "@/lib/utils";
@@ -21,37 +20,7 @@ type Props = {
   errors?: Partial<Record<keyof DeliveryAddress, string>>;
 };
 
-const STORAGE_KEY = "treekart_delivery_address";
-
 export function AddressForm({ value, onChange, errors }: Props) {
-  const [saveDetails, setSaveDetails] = useState(false);
-
-  // Load saved address on mount
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        // Only overwrite if the saved data actually has content
-        if (parsed.name || parsed.line1) {
-          onChange(parsed);
-          setSaveDetails(true);
-        }
-      } catch (e) {
-        console.error("Failed to load saved address", e);
-      }
-    }
-  }, []);
-
-  // Save to localStorage if checkbox is checked
-  useEffect(() => {
-    if (saveDetails) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  }, [value, saveDetails]);
-
   const set = (key: keyof DeliveryAddress) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>
       onChange({ ...value, [key]: e.target.value } as DeliveryAddress);
@@ -81,8 +50,9 @@ export function AddressForm({ value, onChange, errors }: Props) {
             placeholder="John Doe"
             value={value.name}
             onChange={set("name")}
+            disabled
             className={cn(
-              "h-12 rounded-none border-border bg-background text-sm focus-visible:ring-primary transition-all",
+              "h-12 rounded-none border-border bg-muted/50 text-sm focus-visible:ring-primary transition-all cursor-not-allowed",
               errors?.name && "border-destructive focus-visible:ring-destructive"
             )}
           />
@@ -96,16 +66,14 @@ export function AddressForm({ value, onChange, errors }: Props) {
             Phone Number
           </Label>
           <div className="relative">
-             <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pr-2 border-r border-border/50 pointer-events-none">
-                <span className="text-xs font-bold text-muted-foreground/60">+91</span>
-             </div>
             <Input
               id="phone"
               placeholder="98765 43210"
               value={value.phone}
               onChange={set("phone")}
+              disabled
               className={cn(
-                "h-12 rounded-none border-border bg-background pl-16 text-sm focus-visible:ring-primary transition-all",
+                "h-12 rounded-none border-border bg-muted/50 text-sm focus-visible:ring-primary transition-all cursor-not-allowed",
                 errors?.phone && "border-destructive focus-visible:ring-destructive"
               )}
             />
@@ -162,7 +130,7 @@ export function AddressForm({ value, onChange, errors }: Props) {
             onValueChange={(v) => onChange({ ...value, state: v } as DeliveryAddress)}
           >
             <SelectTrigger className={cn(
-              "h-12 rounded-none border-border bg-background text-sm focus:ring-0 focus:border-primary transition-all",
+              "!h-12 !w-full rounded-none border-border bg-background text-sm focus:ring-0 focus:border-primary transition-all",
               errors?.state && "border-destructive"
             )}>
               <SelectValue placeholder="Select State" />
@@ -201,22 +169,7 @@ export function AddressForm({ value, onChange, errors }: Props) {
         </div>
       </div>
 
-      <div className="flex items-center space-x-3 pt-4 border-t border-border/40">
-        <Checkbox
-          id="save"
-          checked={saveDetails}
-          onCheckedChange={(v) => setSaveDetails(!!v)}
-          className="h-5 w-5 rounded-none border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-        />
-        <Label
-          htmlFor="save"
-          className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80 cursor-pointer select-none"
-        >
-          Remember this address for future harvests
-        </Label>
-      </div>
-
-      <div className="flex items-start gap-4 p-6 bg-secondary/20 border border-border/40">
+      <div className="flex items-start gap-4 p-6 bg-secondary/20 border border-border/40 mt-4">
         <Info size={16} className="text-primary mt-0.5 flex-shrink-0" />
         <p className="text-[9px] uppercase tracking-[0.2em] leading-relaxed text-muted-foreground font-medium">
           <span className="text-foreground font-black">Data Privacy:</span> Your delivery coordinates are only shared with our logistics partners during the harvest window. You can modify these anytime via your account dashboard.

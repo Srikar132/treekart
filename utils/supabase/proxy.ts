@@ -13,7 +13,8 @@ const publicRoutes = [
     '/auth',
     '/auth/signin',
     '/auth/signup',
-    '/trees'
+    '/trees',
+    '/admin/login'
 ]
 
 const protectedRoutes = [
@@ -29,6 +30,8 @@ const adminRoutes = [
 const farmerRoutes = [
     '/farmer'
 ]
+
+
 
 
 export async function updateSession(request: NextRequest) {
@@ -62,6 +65,8 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
+
+
     // Do not run code between createServerClient and
     // supabase.auth.getClaims(). A simple mistake could make it very hard to debug
     // issues with users being randomly logged out.
@@ -72,27 +77,44 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    const pathname = request.nextUrl.pathname
+    const pathname = request.nextUrl.pathname;
 
-    // 1. Define Public and Protected Routes
+
+
+
+
+
+    // 1. Define Public and Protected Routes 
     const isPublicRoute =
         pathname === '/' ||
         publicRoutes.some((route) => route !== '/' && pathname.startsWith(route))
 
     const isAuthRoute =
         pathname.startsWith('/auth/signin') ||
-        pathname.startsWith('/auth/signup')
+        pathname.startsWith('/auth/signup') ||
+        pathname === '/admin/login'
 
     const isAdminRoute = pathname.startsWith('/admin')
     const isFarmerRoute = pathname.startsWith('/farmer')
     const isProtectedRoute = !isPublicRoute
 
+    if (isAdminRoute) {
+        return NextResponse.redirect(new URL('/', request.url))
+    }
+
     // 2. Not Logged In
     if (!user) {
         if (isProtectedRoute && !isPublicRoute) {
             const url = request.nextUrl.clone()
-            url.pathname = '/auth/signin'
-            url.searchParams.set('redirectTo', pathname + request.nextUrl.search)
+
+            // Handle Admin specific login page
+            if (isAdminRoute) {
+                url.pathname = '/admin/login'
+            } else {
+                url.pathname = '/auth/signin'
+                url.searchParams.set('redirectTo', pathname + request.nextUrl.search)
+            }
+
             return NextResponse.redirect(url)
         }
         return supabaseResponse

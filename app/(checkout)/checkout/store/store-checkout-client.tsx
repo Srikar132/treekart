@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useMangoCart } from "@/store/use-mango-cart";
+import { useDeliveryAddress } from "@/store/use-delivery-address";
 import {
   createMangoOrder,
   verifyAndFulfilOrder,
@@ -51,15 +52,15 @@ export default function StoreCheckoutClient({ user }: StoreCheckoutClientProps) 
   const { openRazorpay, loaded: razorpayLoaded } = useRazorpay();
 
   const [step, setStep] = useState<CheckoutStep>("details");
-  const [address, setAddress] = useState<DeliveryAddress>({
-    name: user.full_name || "",
-    phone: user.phone || "",
-    line1: "",
-    city: "",
-    state: "",
-    pincode: "",
-  });
+  const { address, setAddress: updateStoreAddress, _hasHydrated } = useDeliveryAddress();
   const [addressErrors, setAddressErrors] = useState<Partial<Record<keyof DeliveryAddress, string>>>();
+
+  // Sync user profile data to address store if not already set
+  useEffect(() => {
+    if (_hasHydrated && !address.name && user.full_name) {
+      updateStoreAddress({ name: user.full_name, phone: user.phone });
+    }
+  }, [_hasHydrated, user.full_name, user.phone, address.name, updateStoreAddress]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successOrderId, setSuccessOrderId] = useState<string | null>(null);
@@ -170,7 +171,7 @@ export default function StoreCheckoutClient({ user }: StoreCheckoutClientProps) 
           <div className="space-y-10">
             <AddressForm
               value={address}
-              onChange={setAddress}
+              onChange={updateStoreAddress}
               errors={addressErrors}
             />
 

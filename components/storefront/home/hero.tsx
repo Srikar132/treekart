@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // ─── Slide data ─────────────────────────────────────────────────────────────
 const slides = [
@@ -48,7 +48,7 @@ const eyebrowVariants: Variants = {
         y: 0,
         transition: { duration: 0.55, ease: "easeOut", delay: 0.3 },
     },
-    exit: { opacity: 0, y: -12, transition: { duration: 0.3 } },
+    exit: { opacity: 0, y: -8, transition: { duration: 0.25 } },
 };
 
 const headlineVariants: Variants = {
@@ -59,7 +59,7 @@ const headlineVariants: Variants = {
         y: 0,
         transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const, delay: 0.45 },
     },
-    exit: { opacity: 0, y: -20, transition: { duration: 0.3 } },
+    exit: { opacity: 0, y: -10, transition: { duration: 0.25 } },
 };
 
 const subVariants: Variants = {
@@ -69,7 +69,7 @@ const subVariants: Variants = {
         y: 0,
         transition: { duration: 0.55, ease: "easeOut", delay: 0.62 },
     },
-    exit: { opacity: 0, y: 10, transition: { duration: 0.25 } },
+    exit: { opacity: 0, y: 5, transition: { duration: 0.2 } },
 };
 
 const btnVariants: Variants = {
@@ -80,7 +80,7 @@ const btnVariants: Variants = {
         y: 0,
         transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const, delay: 0.78 },
     },
-    exit: { opacity: 0, scale: 0.95, y: 8, transition: { duration: 0.25 } },
+    exit: { opacity: 0, scale: 1.02, transition: { duration: 0.2 } },
 };
 
 import { AnimatedButton } from "@/components/shared/animated-button";
@@ -158,8 +158,8 @@ export function HeroSection() {
             <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/35 to-black/60 pointer-events-none" />
 
             {/* ── Content ── */}
-            <AnimatePresence initial={false}>
-                <div
+            <AnimatePresence mode="wait" initial={false}>
+                <motion.div
                     key={`content-${slide.id}`}
                     className="relative z-10 flex flex-col items-center gap-7 px-4 max-w-3xl mx-auto text-center pointer-events-none"
                 >
@@ -220,7 +220,7 @@ export function HeroSection() {
                             fillClassName="bg-white"
                         />
                     </motion.div>
-                </div>
+                </motion.div>
             </AnimatePresence>
 
             {/* ── Prev / Next arrows ── */}

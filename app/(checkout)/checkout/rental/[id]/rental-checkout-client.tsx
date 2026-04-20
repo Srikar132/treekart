@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useRentalStore } from "@/store/use-rental-store";
+import { useDeliveryAddress } from "@/store/use-delivery-address";
 import {
   reserveTree,
   createRentalOrder,
@@ -76,15 +77,15 @@ export default function RentalCheckoutClient({ tree, user }: RentalCheckoutClien
   const { openRazorpay, loaded: razorpayLoaded } = useRazorpay();
 
   const [step, setStep] = useState<CheckoutStep>("details");
-  const [address, setAddress] = useState<DeliveryAddress>({
-    name: user.full_name || "",
-    phone: user.phone || "",
-    line1: "",
-    city: "",
-    state: "",
-    pincode: "",
-  });
+  const { address, setAddress: updateStoreAddress, _hasHydrated } = useDeliveryAddress();
   const [addressErrors, setAddressErrors] = useState<Partial<Record<keyof DeliveryAddress, string>>>();
+
+  // Sync user profile data to address store if not already set
+  useEffect(() => {
+    if (_hasHydrated && !address.name && user.full_name) {
+      updateStoreAddress({ name: user.full_name, phone: user.phone });
+    }
+  }, [_hasHydrated, user.full_name, user.phone, address.name, updateStoreAddress]);
   const [visitRequested, setVisitRequested] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -185,7 +186,7 @@ export default function RentalCheckoutClient({ tree, user }: RentalCheckoutClien
           <div className="space-y-10">
             <AddressForm
               value={address}
-              onChange={setAddress}
+              onChange={updateStoreAddress}
               errors={addressErrors}
             />
 
