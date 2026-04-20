@@ -71,12 +71,18 @@ export function ShareDialog({
 
   return (
     <Dialog>
-      <DialogTrigger>
-        {trigger || (
-          <Button variant="outline" size="icon" className="rounded-full">
-            <Share2 className="w-4 h-4" />
-          </Button>
-        )}
+      <DialogTrigger
+        render={
+          React.isValidElement(trigger) ? (
+            trigger
+          ) : trigger ? (
+            <span className="inline-block">{trigger}</span>
+          ) : (
+            <Button variant="outline" size="icon" className="rounded-full" />
+          )
+        }
+      >
+        {!trigger && <Share2 className="w-4 h-4" />}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md rounded-2xl p-5">
         <DialogHeader>
@@ -94,16 +100,18 @@ export function ShareDialog({
             </div>
             <TooltipProvider>
               <Tooltip open={copied}>
-                <TooltipTrigger>
-                  <Button
-                    type="submit"
-                    size="icon"
-                    variant="outline"
-                    onClick={handleCopy}
-                    className="h-12 w-12 rounded-lg shrink-0 border-muted hover:bg-primary hover:text-white transition-all duration-300"
-                  >
-                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  </Button>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="submit"
+                      size="icon"
+                      variant="outline"
+                      onClick={handleCopy}
+                      className="h-12 w-12 rounded-lg shrink-0 border-muted hover:bg-primary hover:text-white transition-all duration-300"
+                    />
+                  }
+                >
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 </TooltipTrigger>
                 <TooltipContent side="top" className="bg-primary text-white border-none font-bold">
                   <p>Copied!</p>

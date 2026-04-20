@@ -60,6 +60,46 @@ export type Database = {
         Relationships: []
       }
 
+      blogs: {
+        Row: {
+          id: string
+          title: string
+          slug: string
+          excerpt: string | null
+          content: string | null
+          cover_image: string | null
+          author: string | null
+          category: string | null
+          published_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          slug: string
+          excerpt?: string | null
+          content?: string | null
+          cover_image?: string | null
+          author?: string | null
+          category?: string | null
+          published_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          slug?: string
+          excerpt?: string | null
+          content?: string | null
+          cover_image?: string | null
+          author?: string | null
+          category?: string | null
+          published_at?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+
       custom_plan_leads: {
         Row: {
           admin_notes: string | null
@@ -93,6 +133,69 @@ export type Database = {
           phone?: string | null
           status?: Database["public"]["Enums"]["lead_status"] | null
           tree_count?: number | null
+        }
+        Relationships: []
+      }
+      hero_slides: {
+        Row: {
+          id: string
+          title: string
+          subtitle: string | null
+          image_url: string
+          cta_text: string | null
+          cta_link: string | null
+          order_index: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          subtitle?: string | null
+          image_url: string
+          cta_text?: string | null
+          cta_link?: string | null
+          order_index?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          subtitle?: string | null
+          image_url?: string
+          cta_text?: string | null
+          cta_link?: string | null
+          order_index?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          id: string
+          name: string
+          role: string | null
+          content: string
+          avatar_url: string | null
+          rating: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          role?: string | null
+          content: string
+          avatar_url?: string | null
+          rating?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          role?: string | null
+          content?: string
+          avatar_url?: string | null
+          rating?: number
+          created_at?: string
         }
         Relationships: []
       }
@@ -194,28 +297,33 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string | null
+          is_verified: boolean | null
           full_name: string | null
-          id: string
           phone: string | null
+          id: string
           role: Database["public"]["Enums"]["user_role"] | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
           full_name?: string | null
-          id: string
           phone?: string | null
+          id: string
+          is_verified?: boolean | null
           role?: Database["public"]["Enums"]["user_role"] | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string | null
           full_name?: string | null
-          id?: string
           phone?: string | null
+          id?: string
+          is_verified?: boolean | null
           role?: Database["public"]["Enums"]["user_role"] | null
         }
-        Relationships: []
+        Relationships: [
+
+        ]
       }
       rentals: {
         Row: {

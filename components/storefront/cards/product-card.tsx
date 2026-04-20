@@ -6,6 +6,12 @@ import { ShoppingBag, Search, Loader2 } from "lucide-react";
 import type { Database } from "@/types/database.types";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type MangoProduct = Database["public"]["Tables"]["mango_products"]["Row"];
 
@@ -77,32 +83,51 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
                 {/* Hover Actions */}
                 <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-3 opacity-100 translate-y-0 lg:opacity-0 lg:translate-y-4 lg:group-hover:opacity-100 lg:group-hover:translate-y-0 transition-all duration-300 z-20">
-                    <button
-                        onClick={handleAddToCart}
-                        disabled={isAdding}
-                        className="w-10 h-10 rounded-full bg-white text-foreground flex items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-colors disabled:bg-muted disabled:text-muted-foreground"
-                        title="Add to Cart"
-                    >
-                        {isAdding ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                            <ShoppingBag className="w-4 h-4" />
-                        )}
-                    </button>
-                    <Link
-                        href={`/shop/products/${product.id}`}
-                        className="w-10 h-10 rounded-full bg-white text-foreground flex items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-colors"
-                        title="Quick View"
-                    >
-                        <Search className="w-4 h-4" />
-                    </Link>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger
+                                render={
+                                    <button
+                                        onClick={handleAddToCart}
+                                        disabled={isAdding}
+                                        className="w-10 h-10 rounded-full bg-white text-foreground flex items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-colors disabled:bg-muted disabled:text-muted-foreground"
+                                    />
+                                }
+                            >
+                                {isAdding ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <ShoppingBag className="w-4 h-4" />
+                                )}
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="bg-primary text-white border-none font-bold">
+                                <p>Add to Cart</p>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger
+                                render={
+                                    <Link
+                                        href={`/store/${product.id}`}
+                                        className="w-10 h-10 rounded-full bg-white text-foreground flex items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-colors"
+                                    />
+                                }
+                            >
+                                <Search className="w-4 h-4" />
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="bg-primary text-white border-none font-bold">
+                                <p>Quick View</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
             </div>
 
             {/* Text Content */}
             <div className="text-center mt-auto">
                 <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest mb-1">{product.variety}</p>
-                <Link href={`/shop/products/${product.id}`} className="inline-block hover:text-primary transition-colors">
+                <Link href={`/store/${product.id}`} className="inline-block hover:text-primary transition-colors">
                     <h3 className="text-base font-bold text-foreground mb-1">{product.name}</h3>
                 </Link>
                 <div className="flex items-center justify-center gap-2 font-medium">

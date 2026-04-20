@@ -12,7 +12,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarFooter,
+    useSidebar,
 } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 
 const menuItems = [
     {
@@ -21,14 +24,14 @@ const menuItems = [
         url: "/",
     },
     {
-        title: "Mango Shop",
+        title: "Mango Store",
         icon: Store,
         url: "/store",
     },
     {
         title: "Rent Trees",
         icon: Package,
-        url: "/products",
+        url: "/rent",
     },
     {
         title: "Blog",
@@ -48,17 +51,31 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
-    return (
-        <Sidebar variant="floating" >
-            <SidebarContent>
+    const { setOpenMobile } = useSidebar();
 
-                {/* Logo Section */}
-                <div className="px-6 py-8">
-                    <Link href="/" className="flex items-center gap-2">
+    const handleClose = () => {
+        setOpenMobile(false);
+    };
+
+    return (
+        <Sidebar variant="floating">
+            <SidebarContent>
+                {/* Header with Logo and Close Button */}
+                <div className="flex items-center justify-between px-6 py-8">
+                    <Link href="/" onClick={handleClose} className="flex items-center gap-2">
                         <span className="text-2xl font-bold tracking-tight text-primary">
                             Treekart
                         </span>
                     </Link>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="md:hidden -mr-2"
+                        onClick={handleClose}
+                    >
+                        <X className="w-5 h-5" />
+                        <span className="sr-only">Close Sidebar</span>
+                    </Button>
                 </div>
 
                 {/* Navigation Menu */}
@@ -68,12 +85,11 @@ export function AppSidebar() {
                             {menuItems.map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton
+                                        render={<Link href={item.url} onClick={handleClose} className="flex items-center gap-3" />}
                                         className="h-12 px-4 text-[15px] font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
                                     >
-                                        <Link href={item.url} className="flex items-center gap-3">
-                                            <item.icon className="w-5 h-5" strokeWidth={1.8} />
-                                            <span>{item.title}</span>
-                                        </Link>
+                                        <item.icon className="w-5 h-5" strokeWidth={1.8} />
+                                        <span>{item.title}</span>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}
@@ -87,7 +103,8 @@ export function AppSidebar() {
             <SidebarFooter className="border-t p-4 w-full">
                 <div className="flex items-center w-full gap-3">
                     <Link
-                        href="/login"
+                        href="/auth/signin"
+                        onClick={handleClose}
                         className="flex items-center w-full gap-2 px-4 py-2.5 rounded-md border border-sidebar-border hover:bg-sidebar-accent transition-colors text-sm font-medium"
                     >
                         <User className="w-4 h-4" strokeWidth={2} />

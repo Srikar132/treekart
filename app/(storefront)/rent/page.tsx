@@ -13,6 +13,7 @@ type SearchParams = {
   maxPrice?: string;
   minAge?: string;
   maxAge?: string;
+  status?: string;
   page?: string;
 };
 
@@ -34,6 +35,7 @@ export default async function RentPage({ searchParams }: Props) {
       maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
       minAge: params.minAge ? Number(params.minAge) : undefined,
       maxAge: params.maxAge ? Number(params.maxAge) : undefined,
+      status: params.status ? (params.status.split(",") as any) : undefined,
     },
     sort: (params.sort as TreeSortOption) || "newest",
     page: params.page ? Number(params.page) : 1,
@@ -60,13 +62,14 @@ export default async function RentPage({ searchParams }: Props) {
             activeMaxPrice={options.filters.maxPrice}
             activeMinAge={options.filters.minAge}
             activeMaxAge={options.filters.maxAge}
+            activeStatus={options.filters.status as any}
           />
           <TreeSort activeSort={options.sort} />
         </div>
 
         {/* Results Info */}
         <div className="text-sm text-muted-foreground">
-          Showing <span className="font-semibold text-foreground">{initialData.trees.length}</span> of <span className="font-semibold text-foreground">{initialData.totalCount}</span> trees available
+          Showing <span className="font-semibold text-foreground">{initialData.trees.length}</span> of <span className="font-semibold text-foreground">{initialData.totalCount}</span> trees
         </div>
 
         {/* Grid and Infinite Scroll */}

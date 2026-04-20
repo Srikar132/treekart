@@ -200,7 +200,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 label={isAdding ? "Adding..." : "Add to Cart"}
                 onClick={handleAddToCart}
                 disabled={isAdding}
-                className="flex-1 h-16 text-lg font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all rounded-xl bg-primary text-white border-transparent tracking-normal uppercase"
+                className="flex-1 h-16 text-lg font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all  bg-primary text-white border-transparent tracking-normal uppercase"
                 fillClassName="bg-white"
                 hoverTextClassName="hover:text-primary"
               />
@@ -212,7 +212,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
               fillClassName="bg-primary"
               hoverTextClassName="hover:text-primary-foreground"
               onClick={handleBuyNow}
-              className="w-full h-16 text-lg font-bold rounded-xl bg-white text-black border-2 border-black hover:bg-gray-50 transition-all uppercase tracking-wider shadow-sm"
+              className="w-full h-16 text-lg font-bold  bg-white text-black border-2 border-black hover:bg-gray-50 transition-all uppercase tracking-wider shadow-sm"
             >
               Buy It Now
             </AnimatedButton>

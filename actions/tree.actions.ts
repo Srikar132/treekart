@@ -1,8 +1,10 @@
 "use server";
 
-import { getSupabaseServer } from "@/lib/auth";
-import { createClient } from "@/utils/supabase/server";
+import { getSupabaseServer, requireUser, requireAdmin } from "@/lib/auth";
 import { Database } from "@/types/database.types";
+import Razorpay from "razorpay";
+import crypto from "crypto";
+import { revalidatePath } from "next/cache";
 
 type PlanType = Database["public"]["Enums"]["plan_type"];
 
@@ -15,6 +17,7 @@ export interface GetTreesOptions {
         maxPrice?: number;
         minAge?: number;
         maxAge?: number;
+        status?: Database["public"]["Enums"]["tree_status"][];
     };
     sort?: TreeSortOption;
     page?: number;
@@ -22,6 +25,10 @@ export interface GetTreesOptions {
     excludeId?: string;
 }
 
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID!,
+    key_secret: process.env.RAZORPAY_KEY_SECRET!,
+});
 // ── PUBLIC ─────────────────────────────────────────────────────────
 
 export async function getAvailableTrees(options?: GetTreesOptions) {
@@ -37,10 +44,19 @@ export async function getAvailableTrees(options?: GetTreesOptions) {
         location,
         is_organic,
         profile_id
+      ),
+      rentals (
+        status,
+        profiles (
+          full_name,
+          avatar_url
+        )
       )
     `, { count: "exact" })
-        .eq("status", "available")
         .eq("is_verified", true);
+
+    const statusFilter = options?.filters?.status || ["available"];
+    query = query.in("status", statusFilter);
 
     // Apply filters
     if (options?.excludeId) {
@@ -152,4 +168,235 @@ export async function getTreeUpdates(treeId: string) {
 
     if (error) throw new Error(error.message);
     return data;
+}
+
+
+
+// TREE RENTALS -- CHECKOUT
+
+export async function reserveTree(treeId: string) {
+    const user = await requireUser();
+    const supabase = await getSupabaseServer();
+
+    // Check tree is still available
+    const { data: tree, error: fetchError } = await supabase
+        .from("trees")
+        .select("id, status, price, plan_type, yield_min_kg, yield_max_kg, variety")
+        .eq("id", treeId)
+        .single();
+
+    if (fetchError || !tree) throw new Error("Tree not found");
+    if (tree.status !== "available") throw new Error("Tree is no longer available");
+
+    // Mark as reserved — 15 min TTL handled by pg_cron (see note below)
+    const { error } = await supabase
+        .from("trees")
+        .update({ status: "inactive" }) // use inactive as "reserved"
+        .eq("id", treeId)
+        .eq("status", "available"); // atomic check — prevents race condition
+
+    if (error) throw new Error("Failed to reserve tree");
+
+    return tree;
+}
+
+
+export async function releaseTreeReservation(treeId: string) {
+    const supabase = await getSupabaseServer();
+    await supabase
+        .from("trees")
+        .update({ status: "available" })
+        .eq("id", treeId)
+        .eq("status", "inactive");
+}
+
+export async function createRentalOrder(input: {
+    treeId: string;
+    deliveryAddress: {
+        name: string;
+        phone: string;
+        line1: string;
+        city: string;
+        state: string;
+        pincode: string;
+    };
+    visitRequested: boolean;
+}) {
+    const user = await requireUser();
+    const supabase = await getSupabaseServer();
+
+    // Fetch tree price
+    const { data: tree } = await supabase
+        .from("trees")
+        .select("price, plan_type, variety")
+        .eq("id", input.treeId)
+        .single();
+
+    if (!tree) throw new Error("Tree not found");
+
+    const totalPaise = Math.round((tree.price ?? 0) * 100);
+
+    // Create Razorpay order
+    const rzpOrder = await razorpay.orders.create({
+        amount: totalPaise,
+        currency: "INR",
+        receipt: `rental_${Date.now()}`,
+        notes: {
+            tree_id: input.treeId,
+            user_id: user.id,
+            plan_type: tree.plan_type ?? "",
+        },
+    });
+
+    return {
+        rzpOrderId: rzpOrder.id,
+        amount: totalPaise,
+        currency: "INR",
+        keyId: process.env.RAZORPAY_KEY_ID!,
+        treeDetails: tree,
+        deliveryAddress: input.deliveryAddress,
+        visitRequested: input.visitRequested,
+    };
+}
+
+
+export async function verifyAndFulfilRental(payload: {
+    treeId: string;
+    rzpOrderId: string;
+    rzpPaymentId: string;
+    rzpSignature: string;
+    deliveryAddress: {
+        name: string;
+        phone: string;
+        line1: string;
+        city: string;
+        state: string;
+        pincode: string;
+    };
+    visitRequested: boolean;
+}) {
+    const user = await requireUser();
+    const supabase = await getSupabaseServer();
+
+    // Verify HMAC signature
+    const body = `${payload.rzpOrderId}|${payload.rzpPaymentId}`;
+    const expectedSig = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+        .update(body)
+        .digest("hex");
+
+    if (expectedSig !== payload.rzpSignature) {
+        // Release tree reservation on failure
+        await releaseTreeReservation(payload.treeId);
+        throw new Error("Payment verification failed");
+    }
+
+    // Get current season
+    const now = new Date();
+    const season =
+        now.getMonth() >= 3
+            ? `${now.getFullYear()}-${(now.getFullYear() + 1).toString().slice(2)}`
+            : `${now.getFullYear() - 1}-${now.getFullYear().toString().slice(2)}`;
+
+    // Create rental record
+    const { data: rental, error: rentalError } = await supabase
+        .from("rentals")
+        .insert({
+            user_id: user.id,
+            tree_id: payload.treeId,
+            season,
+            status: "active",
+            payment_id: payload.rzpPaymentId,
+            delivery_address: payload.deliveryAddress as any,
+            visit_requested: payload.visitRequested,
+        })
+        .select()
+        .single();
+
+    if (rentalError) throw new Error("Failed to create rental: " + rentalError.message);
+
+    // Lock tree as rented
+    await supabase
+        .from("trees")
+        .update({ status: "rented" })
+        .eq("id", payload.treeId);
+
+    revalidatePath("/account");
+    revalidatePath("/rent");
+
+    return { success: true, rentalId: rental.id };
+}
+
+type TreeInsert = Database["public"]["Tables"]["trees"]["Insert"];
+type TreeUpdate = Database["public"]["Tables"]["trees"]["Update"];
+
+// ── ADMIN ──────────────────────────────────────────────────────────
+
+export async function getAllTreesForAdmin() {
+    await requireAdmin();
+    const supabase = await getSupabaseServer();
+
+    const { data, error } = await supabase
+        .from("trees")
+        .select(`
+          *,
+          farmers (farm_name)
+        `)
+        .order("created_at", { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return data;
+}
+
+export async function createTree(input: TreeInsert) {
+    await requireAdmin();
+    const supabase = await getSupabaseServer();
+
+    const { data, error } = await supabase
+        .from("trees")
+        .insert(input)
+        .select()
+        .single();
+
+    if (error) throw new Error(error.message);
+    
+    revalidatePath("/admin/trees");
+    revalidatePath("/rent");
+    return data;
+}
+
+export async function updateTree(id: string, input: TreeUpdate) {
+    await requireAdmin();
+    const supabase = await getSupabaseServer();
+
+    const { data, error } = await supabase
+        .from("trees")
+        .update(input)
+        .eq("id", id)
+        .select()
+        .single();
+
+    if (error) throw new Error(error.message);
+
+    revalidatePath("/admin/trees");
+    revalidatePath(`/admin/trees/${id}`);
+    revalidatePath("/rent");
+    revalidatePath(`/rent/${id}`);
+    return data;
+}
+
+export async function deleteTree(id: string) {
+    await requireAdmin();
+    const supabase = await getSupabaseServer();
+
+    const { error } = await supabase
+        .from("trees")
+        .delete()
+        .eq("id", id);
+
+    if (error) throw new Error(error.message);
+
+    revalidatePath("/admin/trees");
+    revalidatePath("/rent");
+    return { success: true };
 }

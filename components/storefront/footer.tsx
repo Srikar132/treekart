@@ -60,7 +60,7 @@ export function Footer() {
                     <motion.div variants={itemVariants}>
                         <h4 className="mb-6">Support</h4>
                         <ul className="space-y-4 p-sm">
-                            <li><Link href="/login" className="hover:text-primary transition-colors">Your Account</Link></li>
+                            <li><Link href="/auth/signin" className="hover:text-primary transition-colors">Your Account</Link></li>
                             <li><Link href="/delivery" className="hover:text-primary transition-colors">Delivery Information</Link></li>
                             <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
                             <li><Link href="/terms" className="hover:text-primary transition-colors">Terms & Conditions</Link></li>
@@ -71,16 +71,16 @@ export function Footer() {
                     <motion.div variants={itemVariants}>
                         <h4 className="mb-6">Follow Us</h4>
                         <ul className="space-y-4 p-sm mb-6">
-                            <li className="flex items-center gap-3">
-                                <Phone className="w-4 h-4 shrink-0 text-primary" />
-                                <div className="flex flex-col">
-                                    <span>+91 99122 17619</span>
-                                    <span>+91 98480 62600</span>
+                            <li className="flex items-start gap-3">
+                                <Phone className="w-4 h-4 shrink-0 text-primary mt-1" />
+                                <div className="flex flex-col space-y-1">
+                                    <Link href="tel:+919912217619" className="hover:text-primary transition-colors">+91 99122 17619</Link>
+                                    <Link href="tel:+919848062600" className="hover:text-primary transition-colors">+91 98480 62600</Link>
                                 </div>
                             </li>
                             <li className="flex items-center gap-3">
                                 <Mail className="w-4 h-4 shrink-0 text-primary" />
-                                <span>treekart.in@gmail.com</span>
+                                <Link href="mailto:info@treekart.in">info@treekart.in</Link>
                             </li>
                             <li className="flex items-start gap-3">
                                 <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-primary" />

@@ -4,7 +4,8 @@ import { cn } from "@/lib/utils";
 
 interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     href?: string;
-    label: string;
+    label: React.ReactNode;
+    icon?: React.ReactNode;
     className?: string;
     fillClassName?: string;
     hoverTextClassName?: string;
@@ -14,6 +15,7 @@ interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
 export function AnimatedButton({ 
     href, 
     label, 
+    icon,
     className, 
     fillClassName = "bg-white", 
     hoverTextClassName = "hover:text-foreground", 
@@ -31,6 +33,7 @@ export function AnimatedButton({
                     fillClassName
                 )}
             />
+            {icon && <span className="relative z-10">{icon}</span>}
             <span className="relative z-10">{label}</span>
             {!hideArrow && (
                 <ArrowRight
@@ -62,3 +65,4 @@ export function AnimatedButton({
         </button>
     );
 }
+

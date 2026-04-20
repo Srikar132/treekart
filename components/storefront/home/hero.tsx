@@ -14,7 +14,7 @@ const slides = [
         eyebrow: "Farm-to-Doorstep Since 2024",
         headline: ["Own a Mango Tree.", "Taste the Season."],
         sub: "Rent a real Alphonso mango tree on our farm. GPS-tracked, 10-day updates, fresh mangoes delivered every season.",
-        cta: { label: "Rent a Tree", href: "/plans" },
+        cta: { label: "Rent a Tree", href: "/rent" },
     },
     {
         id: 1,
@@ -133,7 +133,7 @@ export function HeroSection() {
             onTouchEnd={handleDragEnd}
         >
             {/* ── Background images ── */}
-            <AnimatePresence mode="wait" initial={false}>
+            <AnimatePresence initial={false}>
                 <motion.div
                     key={`bg-${slide.id}`}
                     className="absolute inset-0"
@@ -158,7 +158,7 @@ export function HeroSection() {
             <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/35 to-black/60 pointer-events-none" />
 
             {/* ── Content ── */}
-            <AnimatePresence mode="wait" initial={false}>
+            <AnimatePresence initial={false}>
                 <div
                     key={`content-${slide.id}`}
                     className="relative z-10 flex flex-col items-center gap-7 px-4 max-w-3xl mx-auto text-center pointer-events-none"

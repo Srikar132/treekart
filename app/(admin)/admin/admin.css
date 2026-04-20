@@ -1,0 +1,102 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-sans); /* Admin uses Sans for headings */
+
+  /* InApp Admin brand tokens */
+  --color-admin-primary: oklch(0.65 0.18 35); /* #E5603E InApp Orange */
+  --color-admin-success: oklch(0.72 0.25 145);
+  --color-admin-info: oklch(0.68 0.18 250);
+  
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+:root {
+  --background: oklch(0.98 0.005 240); /* #F8F9FA Light Admin BG */
+  --foreground: oklch(0.25 0.02 240); /* #212529 Dark Gray Text */
+  
+  --card: oklch(1 0 0); /* White Surfaces */
+  --card-foreground: oklch(0.25 0.02 240);
+  
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.25 0.02 240);
+  
+  --primary: oklch(0.65 0.18 35); /* InApp Orange */
+  --primary-foreground: oklch(1 0 0);
+  
+  --secondary: oklch(0.92 0.01 240); /* Light Gray */
+  --secondary-foreground: oklch(0.25 0.02 240);
+  
+  --muted: oklch(0.95 0.01 240);
+  --muted-foreground: oklch(0.55 0.02 240);
+  
+  --accent: oklch(0.96 0.04 35); /* Very light orange tint */
+  --accent-foreground: oklch(0.65 0.18 35);
+  
+  --destructive: oklch(0.58 0.25 27);
+  --border: oklch(0.90 0.01 240); /* Clean subtle border */
+  --input: oklch(0.90 0.01 240);
+  --ring: oklch(0.65 0.18 35);
+  
+  --radius: 0.75rem; /* 12px rounded cards like InApp */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5 {
+    @apply font-bold tracking-tight text-foreground;
+  }
+}
+
+@layer components {
+  /* Admin-specific component overrides */
+  .admin-sidebar {
+    @apply fixed left-0 top-0 h-screen w-64 bg-card border-r border-border z-50;
+  }
+  
+  .admin-main {
+    @apply lg:pl-64 min-h-screen bg-background;
+  }
+  
+  .admin-container {
+    @apply max-w-7xl mx-auto p-4 md:p-8;
+  }
+  
+  .data-card {
+    @apply bg-card border border-border p-6 shadow-sm hover:shadow-md transition-shadow;
+  }
+}

@@ -6,6 +6,11 @@ import { CheckCircle, Info, Leaf, MapPin, Calendar, Wheat, Share2 } from "lucide
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AnimatedButton } from "@/components/shared/animated-button";
 import { ShareDialog } from "@/components/shared/share-dialog";
+import { useRentalStore } from "@/store/use-rental-store";
+import { useRouter } from "next/navigation";
+import { Database } from "@/types/database.types";
+
+type PlanType = Database["public"]["Enums"]["plan_type"];
 
 interface TreeInfoProps {
   tree: {
@@ -50,6 +55,23 @@ const item = {
 };
 
 export function TreeInfo({ tree }: TreeInfoProps) {
+  const router = useRouter();
+  const { setPlan } = useRentalStore();
+
+  const handleRentClick = () => {
+    setPlan({
+      treeId: tree.id,
+      planType: tree.plan_type as PlanType,
+      variety: tree.variety,
+      price: tree.price,
+      yieldMinKg: tree.yield_min_kg,
+      yieldMaxKg: tree.yield_max_kg,
+      photos: (tree as any).photos || [], // Photos might not be in the tree type but are in the store type
+      gpsLat: (tree as any).gps_lat || 0,
+      gpsLng: (tree as any).gps_lng || 0,
+    });
+    router.push(`/checkout/rental/${tree.id}`);
+  };
   const isRented = tree.status === "rented";
   const activeRental = tree.rentals?.find(r => r.status === "active") || tree.rentals?.[0];
 
@@ -163,9 +185,9 @@ export function TreeInfo({ tree }: TreeInfoProps) {
               <span>Available for immediate lease. Season starts in 2 months.</span>
             </div>
             <AnimatedButton
-              href={`/checkout/rental?id=${tree.id}`}
+              onClick={handleRentClick}
               label="Rent This Tree Now"
-              className="w-full h-16 text-lg font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all rounded-xl bg-primary text-white border-transparent tracking-normal uppercase"
+              className="w-full h-16 text-lg font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all bg-primary text-white border-transparent tracking-normal uppercase"
               fillClassName="bg-white"
               hoverTextClassName="hover:text-primary"
             />

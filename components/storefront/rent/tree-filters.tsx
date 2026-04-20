@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Loader2, SlidersHorizontal, X } from "lucide-react";
+import { AnimatedButton } from "@/components/shared/animated-button";
 import {
   Sheet,
   SheetContent,
@@ -25,6 +26,11 @@ const PLANS: { value: PlanType; label: string; range: string }[] = [
   { value: "max", label: "Max", range: "60+ kg" },
 ];
 
+const STATUS_OPTIONS: { value: string; label: string }[] = [
+  { value: "available", label: "Available" },
+  { value: "rented", label: "Rented" },
+];
+
 const MAX_PRICE = 15000;
 const MAX_AGE = 50;
 
@@ -34,6 +40,7 @@ type Props = {
   activeMaxPrice?: number;
   activeMinAge?: number;
   activeMaxAge?: number;
+  activeStatus?: string[];
 };
 
 export function TreeFilters({
@@ -42,6 +49,7 @@ export function TreeFilters({
   activeMaxPrice,
   activeMinAge,
   activeMaxAge,
+  activeStatus = ["available"],
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -98,6 +106,18 @@ export function TreeFilters({
     ]);
   }
 
+  function toggleStatus(status: string) {
+    const current = new Set(activeStatus);
+    if (current.has(status)) {
+      current.delete(status);
+    } else {
+      current.add(status);
+    }
+    updateParams([
+      { key: "status", value: current.size > 0 ? Array.from(current).join(",") : null },
+    ]);
+  }
+
   function clearAll() {
     startTransition(() => {
       router.push(pathname);
@@ -110,7 +130,8 @@ export function TreeFilters({
     activeMinPrice ||
     activeMaxPrice ||
     activeMinAge ||
-    activeMaxAge;
+    activeMaxAge ||
+    (activeStatus.length > 0 && !(activeStatus.length === 1 && activeStatus[0] === "available"));
 
   const ActivePills = () => (
     <>
@@ -121,6 +142,15 @@ export function TreeFilters({
           className="flex items-center gap-1 text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-full hover:bg-destructive/10 hover:text-destructive border border-primary/20 transition-colors"
         >
           {p} <X size={12} />
+        </button>
+      ))}
+      {activeStatus.filter(s => s !== 'available').map((s) => (
+        <button
+          key={s}
+          onClick={() => toggleStatus(s)}
+          className="flex items-center gap-1 text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-full hover:bg-destructive/10 hover:text-destructive border border-primary/20 transition-colors capitalize"
+        >
+          {s} <X size={12} />
         </button>
       ))}
       {(activeMinPrice || activeMaxPrice) && (
@@ -157,21 +187,30 @@ export function TreeFilters({
       {/* Top bar trigger & active filters */}
       <div className="flex items-center gap-4">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger render={<Button variant="outline" className="gap-2 font-semibold" />}>
-              {isPending ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <SlidersHorizontal size={16} />
-              )}
-              Filter
-              {hasActiveFilters ? (
-                <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-                  {(activePlans.length > 0 ? 1 : 0) +
-                    (activeMinPrice || activeMaxPrice ? 1 : 0) +
-                    (activeMinAge || activeMaxAge ? 1 : 0)}
-                </span>
-              ) : null}
-          </SheetTrigger>
+          <SheetTrigger
+            render={
+              <AnimatedButton
+                label={
+                  <div className="flex items-center gap-2">
+                    Filter
+                    {hasActiveFilters && (
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                        {(activePlans.length > 0 ? 1 : 0) +
+                          (activeMinPrice || activeMaxPrice ? 1 : 0) +
+                          (activeMinAge || activeMaxAge ? 1 : 0) +
+                          (activeStatus.length > 0 && !(activeStatus.length === 1 && activeStatus[0] === "available") ? 1 : 0)}
+                      </span>
+                    )}
+                  </div>
+                }
+                icon={isPending ? <Loader2 size={16} className="animate-spin" /> : <SlidersHorizontal size={16} />}
+                className="h-10 border-sidebar-border px-4"
+                fillClassName="bg-primary"
+                hoverTextClassName="hover:text-primary-foreground"
+                hideArrow
+              />
+            }
+          />
           <SheetContent side="left" className="w-[300px] sm:w-[400px]">
             <SheetHeader className="mb-6">
               <SheetTitle className="flex items-center justify-between">
@@ -211,6 +250,32 @@ export function TreeFilters({
                         <span className="text-xs text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded">
                           {plan.range}
                         </span>
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Status type */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold tracking-wider uppercase text-foreground">
+                  Status
+                </h4>
+                <div className="space-y-3">
+                  {STATUS_OPTIONS.map((status) => (
+                    <div key={status.value} className="flex items-center gap-3">
+                      <Checkbox
+                        id={`status-${status.value}`}
+                        checked={activeStatus.includes(status.value)}
+                        onCheckedChange={() => toggleStatus(status.value)}
+                      />
+                      <Label
+                        htmlFor={`status-${status.value}`}
+                        className="flex-1 cursor-pointer flex items-center justify-between"
+                      >
+                        <span className="text-sm font-medium">{status.label}</span>
                       </Label>
                     </div>
                   ))}

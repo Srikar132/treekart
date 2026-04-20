@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, User, ShoppingBag } from "lucide-react";
@@ -23,6 +23,13 @@ const navLinks = [
 
 function NavContent() {
     const { toggleCart, totalItems } = useMangoCart();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const itemCount = mounted ? totalItems() : 0;
 
     return (
         <div className="container flex h-16 items-center justify-between">
@@ -37,7 +44,7 @@ function NavContent() {
                         alt="TreeKart Logo"
                         width={280}
                         height={80}
-                        quality={100}
+                        quality={75}
                         className="h-8 lg:h-10 w-auto object-contain"
                         priority
                     />
@@ -57,29 +64,33 @@ function NavContent() {
 
             {/* Right: Actions */}
             <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
-                <Tooltip>
-                    <TooltipTrigger>
-                        <div
-                            className="text-foreground hover:text-primary transition-colors cursor-pointer"
-                            aria-label="Search"
-                        >
-                            <Search className="w-5 h-5 lg:w-[22px] lg:h-[22px]" strokeWidth={1.5} />
-                        </div>
+                {/* <Tooltip>
+                    <TooltipTrigger
+                        render={
+                            <div
+                                className="text-foreground hover:text-primary transition-colors cursor-pointer"
+                                aria-label="Search"
+                            />
+                        }
+                    >
+                        <Search className="w-5 h-5 lg:w-[22px] lg:h-[22px]" strokeWidth={1.5} />
                     </TooltipTrigger>
                     <TooltipContent side="bottom" sideOffset={5}>
                         <p>Search</p>
                     </TooltipContent>
-                </Tooltip>
+                </Tooltip> */}
 
                 <Tooltip>
-                    <TooltipTrigger>
-                        <Link
-                            href="/account"
-                            className="text-foreground hover:text-primary transition-colors inline-flex items-center"
-                        >
-                            <User className="w-5 h-5 lg:w-[22px] lg:h-[22px]" strokeWidth={1.5} />
-                            <span className="sr-only">Account</span>
-                        </Link>
+                    <TooltipTrigger
+                        render={
+                            <Link
+                                href="/account"
+                                className="text-foreground hover:text-primary transition-colors inline-flex items-center"
+                            />
+                        }
+                    >
+                        <User className="w-5 h-5 lg:w-[22px] lg:h-[22px]" strokeWidth={1.5} />
+                        <span className="sr-only">Account</span>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" sideOffset={5}>
                         <p>Account</p>
@@ -87,19 +98,21 @@ function NavContent() {
                 </Tooltip>
 
                 <Tooltip>
-                    <TooltipTrigger>
-                        <div
-                            onClick={toggleCart}
-                            className="relative text-foreground hover:text-primary transition-colors inline-flex items-center cursor-pointer"
-                        >
-                            <ShoppingBag className="w-5 h-5 lg:w-[22px] lg:h-[22px]" strokeWidth={1.5} />
-                            {totalItems() > 0 && (
-                                <span className="absolute -top-1.5 -right-2 flex h-4 w-4 lg:h-[18px] lg:w-[18px] items-center justify-center rounded-full bg-primary text-[9px] lg:text-[10px] font-bold text-primary-foreground">
-                                    {totalItems()}
-                                </span>
-                            )}
-                            <span className="sr-only">Cart</span>
-                        </div>
+                    <TooltipTrigger
+                        render={
+                            <div
+                                onClick={toggleCart}
+                                className="relative text-foreground hover:text-primary transition-colors inline-flex items-center cursor-pointer"
+                            />
+                        }
+                    >
+                        <ShoppingBag className="w-5 h-5 lg:w-[22px] lg:h-[22px]" strokeWidth={1.5} />
+                        {itemCount > 0 && (
+                            <span className="absolute -top-1.5 -right-2 flex h-4 w-4 lg:h-[18px] lg:w-[18px] items-center justify-center rounded-full bg-primary text-[9px] lg:text-[10px] font-bold text-primary-foreground">
+                                {itemCount}
+                            </span>
+                        )}
+                        <span className="sr-only">Cart</span>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" sideOffset={5}>
                         <p>Cart</p>

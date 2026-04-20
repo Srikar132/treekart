@@ -11,14 +11,7 @@ import type { Database } from "@/types/database.types";
 
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 
-export type DeliveryAddress = {
-  name: string;
-  phone: string;
-  line1: string;
-  city: string;
-  state: string;
-  pincode: string;
-};
+import { type DeliveryAddress } from "@/types/checkout";
 
 // Shape stored in orders.items (Json column)
 type OrderItemRecord = {

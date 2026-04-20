@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Loader2, SlidersHorizontal, X } from "lucide-react";
+import { AnimatedButton } from "@/components/shared/animated-button";
 import {
   Sheet,
   SheetContent,
@@ -160,21 +161,29 @@ export function ProductFilters({
       {/* Top bar trigger & active filters */}
       <div className="flex items-center gap-4">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger render={<Button variant="outline" className="gap-2 font-semibold" />}>
-              {isPending ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <SlidersHorizontal size={16} />
-              )}
-              Filter
-              {hasActiveFilters ? (
-                <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-                  {(activeBadges.length > 0 ? 1 : 0) +
-                    (activeStatuses.length > 0 ? 1 : 0) +
-                    (activeMinPrice || activeMaxPrice ? 1 : 0)}
-                </span>
-              ) : null}
-          </SheetTrigger>
+          <SheetTrigger
+            render={
+              <AnimatedButton
+                label={
+                  <div className="flex items-center gap-2">
+                    Filter
+                    {hasActiveFilters && (
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                        {(activeBadges.length > 0 ? 1 : 0) +
+                          (activeStatuses.length > 0 ? 1 : 0) +
+                          (activeMinPrice || activeMaxPrice ? 1 : 0)}
+                      </span>
+                    )}
+                  </div>
+                }
+                icon={isPending ? <Loader2 size={16} className="animate-spin" /> : <SlidersHorizontal size={16} />}
+                className="h-10 border-sidebar-border px-4"
+                fillClassName="bg-primary"
+                hoverTextClassName="hover:text-primary-foreground"
+                hideArrow
+              />
+            }
+          />
           <SheetContent side="left" className="w-[300px] sm:w-[400px]">
             <SheetHeader className="mb-6">
               <SheetTitle className="flex items-center justify-between">

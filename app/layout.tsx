@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, DM_Mono } from "next/font/google";
+import { DM_Sans, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -9,10 +9,10 @@ const dmSans = DM_Sans({
   weight: ["300", "400", "500", "700"],
 });
 
-const dmMono = DM_Mono({
+const dmMono = Bricolage_Grotesque({
   variable: "--font-mono",
   subsets: ["latin"],
-  weight: ["300", "400"],
+  weight: ["300", "400", "500", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 };
 
 import { QueryProvider } from "@/components/providers/query-provider";
+import Script from "next/script";
 
 export default function RootLayout({
   children,
@@ -36,6 +37,12 @@ export default function RootLayout({
             {children}
           </TooltipProvider>
         </QueryProvider>
+
+        <Script
+          id="razorpay-checkout-js"
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );

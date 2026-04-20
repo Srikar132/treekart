@@ -1,7 +1,8 @@
 "use server";
 
-import { getSupabaseServer } from "@/lib/auth";
+import { getSupabaseServer, requireAdmin } from "@/lib/auth";
 import { Database } from "@/types/database.types";
+import { revalidatePath } from "next/cache";
 
 type ProductBadge = Database["public"]["Enums"]["product_badge"];
 type ProductStatus = Database["public"]["Enums"]["product_status"];
@@ -106,4 +107,75 @@ export async function getProductById(productId: string) {
 
     if (error) throw new Error(error.message);
     return data;
+}
+
+type ProductInsert = Database["public"]["Tables"]["mango_products"]["Insert"];
+type ProductUpdate = Database["public"]["Tables"]["mango_products"]["Update"];
+
+// ── ADMIN ──────────────────────────────────────────────────────────
+
+export async function getAllProductsForAdmin() {
+    await requireAdmin();
+    const supabase = await getSupabaseServer();
+
+    const { data, error } = await supabase
+        .from("mango_products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return data;
+}
+
+export async function createProduct(input: ProductInsert) {
+    await requireAdmin();
+    const supabase = await getSupabaseServer();
+
+    const { data, error } = await supabase
+        .from("mango_products")
+        .insert(input)
+        .select()
+        .single();
+
+    if (error) throw new Error(error.message);
+
+    revalidatePath("/admin/products");
+    revalidatePath("/store");
+    return data;
+}
+
+export async function updateProduct(id: string, input: ProductUpdate) {
+    await requireAdmin();
+    const supabase = await getSupabaseServer();
+
+    const { data, error } = await supabase
+        .from("mango_products")
+        .update(input)
+        .eq("id", id)
+        .select()
+        .single();
+
+    if (error) throw new Error(error.message);
+
+    revalidatePath("/admin/products");
+    revalidatePath(`/admin/products/${id}`);
+    revalidatePath("/store");
+    revalidatePath(`/store/${id}`);
+    return data;
+}
+
+export async function deleteProduct(id: string) {
+    await requireAdmin();
+    const supabase = await getSupabaseServer();
+
+    const { error } = await supabase
+        .from("mango_products")
+        .delete()
+        .eq("id", id);
+
+    if (error) throw new Error(error.message);
+
+    revalidatePath("/admin/products");
+    revalidatePath("/store");
+    return { success: true };
 }

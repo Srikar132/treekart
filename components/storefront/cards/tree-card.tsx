@@ -4,13 +4,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
 } from "@/components/ui/carousel";
 import { motion } from "framer-motion";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type TreeProduct = {
     id: string | number;
@@ -29,7 +35,7 @@ export function TreeCard({ product }: TreeCardProps) {
     const images = product.images && product.images.length > 0 ? product.images : ["/assets/images/placeholder.jpg"];
 
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -72,10 +78,21 @@ export function TreeCard({ product }: TreeCardProps) {
                 </Carousel>
 
                 {/* Hover Actions */}
-                <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-3 opacity-100 translate-y-0 lg:opacity-0 lg:translate-y-4 lg:group-hover:opacity-100 lg:group-hover:translate-y-0 transition-all duration-300 z-20 pointer-events-none">
-                    <button className="w-10 h-10 rounded-full bg-white text-foreground flex items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-colors pointer-events-auto" title="Quick View">
-                        <Search className="w-4 h-4" />
-                    </button>
+                <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-3 opacity-100 translate-y-0 lg:opacity-0 lg:translate-y-4 lg:group-hover:opacity-100 lg:group-hover:translate-y-0 transition-all duration-300 z-20">
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger
+                                render={
+                                    <button className="w-10 h-10 rounded-full bg-white text-foreground flex items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-colors" title="Quick View" />
+                                }
+                            >
+                                <Search className="w-4 h-4" />
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="bg-primary text-white border-none font-bold">
+                                <p>Quick View</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
             </div>
 
