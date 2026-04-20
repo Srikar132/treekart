@@ -73,8 +73,8 @@ export default async function AdminTreesPage() {
                   <td className="py-5 px-6">
                     <div className="flex items-center gap-4">
                       <div className="h-12 w-12 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
-                        {tree.images?.[0] ? (
-                          <img src={tree.images[0]} alt={tree.variety} className="w-full h-full object-cover" />
+                        {tree.photos?.[0] ? (
+                          <img src={tree.photos[0]} alt={tree.variety} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-slate-400">
                             <Plus size={16} />
@@ -89,7 +89,7 @@ export default async function AdminTreesPage() {
                   </td>
                   <td className="py-5 px-6">
                     <p className="text-xs font-bold text-slate-900 uppercase tracking-tight">{tree.farmers?.farm_name || 'Individual'}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{tree.location_name}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{tree.farmers?.location}</p>
                   </td>
                   <td className="py-5 px-6">
                     <Badge variant="outline" className="rounded-md text-[9px] font-black uppercase tracking-widest border-slate-200 px-3 py-1">

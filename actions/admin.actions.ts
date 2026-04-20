@@ -100,7 +100,10 @@ export async function adminGetAllRentals() {
     .select(`
       *,
       profiles (full_name , phone),
-      trees (variety)
+      trees (
+        variety,
+        farmers (location)
+      )
     `)
     .order("rented_at", { ascending: false });
 
@@ -199,4 +202,15 @@ export async function adminDeleteTreeUpdate(id: string) {
   const supabase = await getSupabaseServer();
   const { error } = await supabase.from("tree_updates").delete().eq("id", id);
   if (error) throw new Error(error.message);
+}
+
+export async function adminGetAllFarmers() {
+  await requireAdmin();
+  const supabase = await getSupabaseServer();
+  const { data, error } = await supabase
+    .from("farmers")
+    .select("id, farm_name, location")
+    .eq("status", "approved");
+  if (error) throw new Error(error.message);
+  return data;
 }

@@ -5,6 +5,7 @@ import { Database } from "@/types/database.types";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
+import { getSupabasePublic } from "@/utils/supabase/public";
 
 type PlanType = Database["public"]["Enums"]["plan_type"];
 
@@ -32,7 +33,7 @@ const razorpay = new Razorpay({
 // ── PUBLIC ─────────────────────────────────────────────────────────
 
 export async function getAvailableTrees(options?: GetTreesOptions) {
-    const supabase = await getSupabaseServer();
+    const supabase = await getSupabasePublic();
 
     let query = supabase
         .from("trees")
@@ -127,7 +128,7 @@ export async function getAvailableTrees(options?: GetTreesOptions) {
 }
 
 export async function getTreeById(treeId: string) {
-    const supabase = await getSupabaseServer();
+    const supabase = await getSupabasePublic();
 
     const { data, error } = await supabase
         .from("trees")
@@ -158,7 +159,7 @@ export async function getTreeById(treeId: string) {
 
 
 export async function getTreeUpdates(treeId: string) {
-    const supabase = await getSupabaseServer();
+    const supabase = await getSupabasePublic();
 
     const { data, error } = await supabase
         .from("tree_updates")
@@ -359,7 +360,7 @@ export async function createTree(input: TreeInsert) {
         .single();
 
     if (error) throw new Error(error.message);
-    
+
     revalidatePath("/admin/trees");
     revalidatePath("/rent");
     return data;

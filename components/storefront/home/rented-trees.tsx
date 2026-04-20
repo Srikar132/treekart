@@ -1,7 +1,6 @@
 import { getAvailableTrees } from "@/actions/tree.actions";
 import { TreeCard, type TreeProduct } from "@/components/storefront/cards/tree-card";
 import { AnimatedButton } from "@/components/shared/animated-button";
-import { NoResults } from "@/components/ui/no-results";
 
 export async function RentedTrees() {
     try {

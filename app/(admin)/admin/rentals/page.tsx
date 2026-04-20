@@ -78,7 +78,7 @@ export default async function AdminRentalsPage() {
                       </div>
                       <div>
                         <p className="text-xs font-black text-slate-900 uppercase">{rental.trees?.variety}</p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{rental.trees?.location_name}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{rental.trees?.farmers?.location}</p>
                       </div>
                     </div>
                   </td>

@@ -1,46 +1,23 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-
-const publicRoutes = [
+// Routes that are always accessible — no auth required
+const publicPrefixes = [
     '/',
     '/store',
     '/rent',
     '/blog',
     '/about',
     '/contact',
+    '/faq',
     '/api',
     '/auth',
-    '/auth/signin',
-    '/auth/signup',
     '/trees',
-    '/admin/login'
 ]
-
-const protectedRoutes = [
-    '/account',
-    '/checkout',
-    '/orders'
-]
-
-const adminRoutes = [
-    '/admin'
-]
-
-const farmerRoutes = [
-    '/farmer'
-]
-
-
-
 
 export async function updateSession(request: NextRequest) {
-    let supabaseResponse = NextResponse.next({
-        request,
-    })
+    let supabaseResponse = NextResponse.next({ request })
 
-    // With Fluid compute, don't put this client in a global environment
-    // variable. Always create a new one on each request.
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
@@ -50,10 +27,10 @@ export async function updateSession(request: NextRequest) {
                     return request.cookies.getAll()
                 },
                 setAll(cookiesToSet, headers) {
-                    cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-                    supabaseResponse = NextResponse.next({
-                        request,
-                    })
+                    cookiesToSet.forEach(({ name, value }) =>
+                        request.cookies.set(name, value)
+                    )
+                    supabaseResponse = NextResponse.next({ request })
                     cookiesToSet.forEach(({ name, value, options }) =>
                         supabaseResponse.cookies.set(name, value, options)
                     )
@@ -65,69 +42,51 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
-
-
-    // Do not run code between createServerClient and
-    // supabase.auth.getClaims(). A simple mistake could make it very hard to debug
-    // issues with users being randomly logged out.
-
-    // IMPORTANT: If you remove getUser() and you use server-side rendering
-    // with the Supabase client, your users may be randomly logged out.
+    // IMPORTANT: Do not put any logic between createServerClient and getUser().
     const {
         data: { user },
     } = await supabase.auth.getUser()
 
-    const pathname = request.nextUrl.pathname;
+    const pathname = request.nextUrl.pathname
 
-
-
-
-
-
-    // 1. Define Public and Protected Routes 
-    const isPublicRoute =
-        pathname === '/' ||
-        publicRoutes.some((route) => route !== '/' && pathname.startsWith(route))
-
-    const isAuthRoute =
+    // Route classification
+    const isAuthPage =
         pathname.startsWith('/auth/signin') ||
         pathname.startsWith('/auth/signup') ||
         pathname === '/admin/login'
 
-    const isAdminRoute = pathname.startsWith('/admin')
+    // Exclude /admin/login so it's always accessible (needed for the login form itself)
+    const isAdminRoute = pathname.startsWith('/admin') && pathname !== '/admin/login'
     const isFarmerRoute = pathname.startsWith('/farmer')
-    const isProtectedRoute = !isPublicRoute
 
-    if (isAdminRoute) {
-        return NextResponse.redirect(new URL('/', request.url))
-    }
+    const isPublicRoute =
+        pathname === '/' ||
+        publicPrefixes.some((p) => p !== '/' && pathname.startsWith(p))
 
-    // 2. Not Logged In
+    // ── 1. Unauthenticated ──────────────────────────────────────────
     if (!user) {
-        if (isProtectedRoute && !isPublicRoute) {
-            const url = request.nextUrl.clone()
-
-            // Handle Admin specific login page
-            if (isAdminRoute) {
-                url.pathname = '/admin/login'
-            } else {
-                url.pathname = '/auth/signin'
-                url.searchParams.set('redirectTo', pathname + request.nextUrl.search)
-            }
-
-            return NextResponse.redirect(url)
+        // Always let public pages and auth pages through
+        if (isPublicRoute || isAuthPage) {
+            return supabaseResponse
         }
-        return supabaseResponse
+        // Protected route — redirect to the right login page
+        const url = request.nextUrl.clone()
+        if (isAdminRoute) {
+            url.pathname = '/admin/login'
+        } else {
+            url.pathname = '/auth/signin'
+            url.searchParams.set('redirectTo', pathname + request.nextUrl.search)
+        }
+        return NextResponse.redirect(url)
     }
 
-    // 3. Logged In - Handle Auth pages (redirect away from login/signup)
-    if (user && isAuthRoute) {
+    // ── 2. Authenticated — bounce away from login/signup pages ──────
+    if (isAuthPage) {
         return NextResponse.redirect(new URL('/', request.url))
     }
 
-    // 4. Role-based Access Control
-    if (user && (isAdminRoute || isFarmerRoute)) {
-        // Fetch role from profiles table
+    // ── 3. Role-based Access Control ────────────────────────────────
+    if (isAdminRoute || isFarmerRoute) {
         const { data: profile } = await supabase
             .from('profiles')
             .select('role')
@@ -136,12 +95,11 @@ export async function updateSession(request: NextRequest) {
 
         const role = profile?.role
 
-        // Admin Route Protection
         if (isAdminRoute && role !== 'admin') {
             return NextResponse.redirect(new URL('/', request.url))
         }
 
-        // Farmer Route Protection (Admins can also access farmer routes)
+        // Admins can also access farmer routes
         if (isFarmerRoute && role !== 'farmer' && role !== 'admin') {
             return NextResponse.redirect(new URL('/', request.url))
         }
