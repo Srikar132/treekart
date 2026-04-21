@@ -4,11 +4,14 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { requireAdmin } from "@/lib/auth";
+
 interface EditBlogPageProps {
   params: Promise<{ id: string }>;
 }
 
 export default async function EditBlogPage({ params }: EditBlogPageProps) {
+  await requireAdmin();
   const { id } = await params;
   const blog = await getBlogById(id);
 

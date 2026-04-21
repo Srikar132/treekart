@@ -4,11 +4,14 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { requireAdmin } from "@/lib/auth";
+
 interface EditTreePageProps {
   params: Promise<{ id: string }>;
 }
 
 export default async function EditTreePage({ params }: EditTreePageProps) {
+  await requireAdmin();
   const { id } = await params;
   const tree = await getTreeById(id);
 

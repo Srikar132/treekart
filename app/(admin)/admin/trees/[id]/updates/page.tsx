@@ -6,11 +6,14 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { adminDeleteTreeUpdate } from "@/actions/admin.actions";
 
+import { requireAdmin } from "@/lib/auth";
+
 interface TreeUpdatesPageProps {
   params: Promise<{ id: string }>;
 }
 
 export default async function TreeUpdatesPage({ params }: TreeUpdatesPageProps) {
+  await requireAdmin();
   const { id } = await params;
   const tree = await getTreeById(id);
   const updates = await getTreeUpdates(id);

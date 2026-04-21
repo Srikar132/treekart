@@ -4,11 +4,14 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { requireAdmin } from "@/lib/auth";
+
 interface EditProductPageProps {
   params: Promise<{ id: string }>;
 }
 
 export default async function EditProductPage({ params }: EditProductPageProps) {
+  await requireAdmin();
   const { id } = await params;
   const product = await getProductById(id);
 

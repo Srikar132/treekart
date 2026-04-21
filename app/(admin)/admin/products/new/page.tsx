@@ -1,8 +1,10 @@
 import { ProductForm } from "@/components/admin/products/product-form";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { requireAdmin } from "@/lib/auth";
 
-export default function NewProductPage() {
+export default async function NewProductPage() {
+  await requireAdmin();
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}

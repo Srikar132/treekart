@@ -1,8 +1,10 @@
 import { TreeForm } from "@/components/admin/trees/tree-form";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { requireAdmin } from "@/lib/auth";
 
-export default function NewTreePage() {
+export default async function NewTreePage() {
+  await requireAdmin();
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
