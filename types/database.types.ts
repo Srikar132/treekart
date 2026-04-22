@@ -652,3 +652,93 @@ export const Constants = {
     },
   },
 } as const
+
+
+
+
+
+// types to export directly
+// ========================================
+// TABLE ROW TYPES
+// ========================================
+
+export type MangoProduct = Database['public']['Tables']['mango_products']['Row']
+export type Blog = Database['public']['Tables']['blogs']['Row']
+export type CustomPlanLead = Database['public']['Tables']['custom_plan_leads']['Row']
+export type HeroSlide = Database['public']['Tables']['hero_slides']['Row']
+export type Testimonial = Database['public']['Tables']['testimonials']['Row']
+export type Farmer = Database['public']['Tables']['farmers']['Row']
+export type Order = Database['public']['Tables']['orders']['Row']
+export type Profile = Database['public']['Tables']['profiles']['Row']
+export type Rental = Database['public']['Tables']['rentals']['Row']
+export type TreeUpdate = Database['public']['Tables']['tree_updates']['Row']
+export type Tree = Database['public']['Tables']['trees']['Row']
+
+// ========================================
+// TABLE INSERT TYPES
+// ========================================
+
+export type MangoProductInsert = Database['public']['Tables']['mango_products']['Insert']
+export type BlogInsert = Database['public']['Tables']['blogs']['Insert']
+export type CustomPlanLeadInsert = Database['public']['Tables']['custom_plan_leads']['Insert']
+export type HeroSlideInsert = Database['public']['Tables']['hero_slides']['Insert']
+export type TestimonialInsert = Database['public']['Tables']['testimonials']['Insert']
+export type FarmerInsert = Database['public']['Tables']['farmers']['Insert']
+export type OrderInsert = Database['public']['Tables']['orders']['Insert']
+export type ProfileInsert = Database['public']['Tables']['profiles']['Insert']
+export type RentalInsert = Database['public']['Tables']['rentals']['Insert']
+export type TreeUpdateInsert = Database['public']['Tables']['tree_updates']['Insert']
+export type TreeInsert = Database['public']['Tables']['trees']['Insert']
+
+// ========================================
+// TABLE UPDATE TYPES
+// ========================================
+
+export type MangoProductUpdate = Database['public']['Tables']['mango_products']['Update']
+export type BlogUpdate = Database['public']['Tables']['blogs']['Update']
+export type CustomPlanLeadUpdate = Database['public']['Tables']['custom_plan_leads']['Update']
+export type HeroSlideUpdate = Database['public']['Tables']['hero_slides']['Update']
+export type TestimonialUpdate = Database['public']['Tables']['testimonials']['Update']
+export type FarmerUpdate = Database['public']['Tables']['farmers']['Update']
+export type OrderUpdate = Database['public']['Tables']['orders']['Update']
+export type ProfileUpdate = Database['public']['Tables']['profiles']['Update']
+export type RentalUpdate = Database['public']['Tables']['rentals']['Update']
+export type TreeUpdateUpdate = Database['public']['Tables']['tree_updates']['Update']
+export type TreeUpdate_Update = Database['public']['Tables']['trees']['Update']
+
+// ========================================
+// ENUM TYPES
+// ========================================
+
+export type ProductBadge = Database['public']['Enums']['product_badge']
+export type ProductStatus = Database['public']['Enums']['product_status']
+export type FarmerStatus = Database['public']['Enums']['farmer_status']
+export type LeadStatus = Database['public']['Enums']['lead_status']
+export type OrderStatus = Database['public']['Enums']['order_status']
+export type PlanType = Database['public']['Enums']['plan_type']
+export type RentalStatus = Database['public']['Enums']['rental_status']
+export type TreeSource = Database['public']['Enums']['tree_source']
+export type TreeStatus = Database['public']['Enums']['tree_status']
+export type UserRole = Database['public']['Enums']['user_role']
+
+// ========================================
+// UTILITY TYPES
+// ========================================
+
+// Generic table type helper
+export type TableName = keyof Database['public']['Tables']
+
+// Get all table row types
+export type AllTableRows = {
+  [K in TableName]: Database['public']['Tables'][K]['Row']
+}
+
+// Get all table insert types
+export type AllTableInserts = {
+  [K in TableName]: Database['public']['Tables'][K]['Insert']
+}
+
+// Get all table update types
+export type AllTableUpdates = {
+  [K in TableName]: Database['public']['Tables'][K]['Update']
+}

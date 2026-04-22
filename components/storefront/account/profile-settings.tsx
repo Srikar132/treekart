@@ -30,7 +30,7 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
         fullName: formData.fullName,
         phone: formData.phone,
       });
-      toast.success("Profile Updated successfully.");
+      toast.success("Profile updated successfully.");
     } catch (error: any) {
       toast.error(error.message || "An unexpected error occurred.");
     } finally {
@@ -39,66 +39,68 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
   }
 
   return (
-    <div className="max-w-2xl space-y-12">
+    <div className="max-w-2xl space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="space-y-4">
-        <h2 className="text-xs font-black uppercase tracking-[0.3em] text-foreground">Security & Profile</h2>
-        <p className="text-xs text-muted-foreground uppercase tracking-widest leading-relaxed">
-          Manage your personal information and contact preferences. These details are used for order fulfillment and tree updates.
+        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Security & Profile</h2>
+        <p className="text-sm text-slate-500 font-medium leading-relaxed">
+          Manage your personal information and contact preferences. These details are used for order fulfillment and digital orchard updates.
         </p>
       </div>
 
-      <form onSubmit={handleUpdate} className="space-y-8">
-        <div className="grid grid-cols-1 gap-8">
+      <form onSubmit={handleUpdate} className="space-y-12">
+        <div className="grid grid-cols-1 gap-10">
           {/* Full Name */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground px-1 flex items-center gap-2">
-              <User size={12} className="text-primary" />
+          <div className="space-y-3">
+            <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 px-1 flex items-center gap-2">
+              <User size={14} className="text-primary" />
               Full Name
             </label>
             <Input
               value={formData.fullName}
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              placeholder="YOUR FULL NAME"
-              className="h-14 rounded-none border-border/60 bg-white px-6 text-xs font-bold tracking-widest uppercase placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
+              placeholder="Enter your full name"
+              className="h-16 rounded-2xl border-slate-100 bg-slate-50 px-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus-visible:ring-primary/20 focus-visible:bg-white transition-all shadow-sm"
             />
           </div>
 
           {/* Phone Number */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground px-1 flex items-center gap-2">
-              <Phone size={12} className="text-primary" />
+          <div className="space-y-3">
+            <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 px-1 flex items-center gap-2">
+              <Phone size={14} className="text-primary" />
               Contact Number
             </label>
             <Input
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="+91 00000 00000"
-              className="h-14 rounded-none border-border/60 bg-white px-6 text-xs font-bold tracking-widest uppercase placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
+              placeholder="Enter your mobile number"
+              className="h-16 rounded-2xl border-slate-100 bg-slate-50 px-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus-visible:ring-primary/20 focus-visible:bg-white transition-all shadow-sm"
             />
           </div>
 
           {/* Email — Read Only */}
-          <div className="space-y-2 opacity-60">
-            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground px-1 flex items-center gap-2">
-              <Mail size={12} className="text-muted-foreground" />
+          <div className="space-y-3 opacity-60">
+            <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 px-1 flex items-center gap-2">
+              <Mail size={14} className="text-slate-400" />
               Registered Email (Private)
             </label>
             <Input
               value={formData.email}
               readOnly
-              className="h-14 rounded-none border-border/60 bg-secondary/50 px-6 text-xs font-bold tracking-widest uppercase cursor-not-allowed"
+              className="h-16 rounded-2xl border-slate-100 bg-slate-100 px-6 text-sm font-bold text-slate-400 cursor-not-allowed"
             />
           </div>
         </div>
 
-        <Separator className="bg-border/40" />
+        <Separator className="bg-slate-100" />
 
-        <div className="space-y-6">
-          <div className="flex items-start gap-4 p-6 bg-secondary/20 border border-border/40">
-            <ShieldCheck size={20} className="text-primary shrink-0" />
+        <div className="space-y-8">
+          <div className="p-8 rounded-[2rem] bg-slate-50 border border-slate-100 flex gap-6">
+            <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center shadow-sm border border-slate-100 shrink-0">
+              <ShieldCheck size={24} className="text-primary" />
+            </div>
             <div className="space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-foreground">Data Encryption</p>
-              <p className="text-[9px] text-muted-foreground leading-relaxed uppercase tracking-wider">
+              <p className="text-sm font-black text-slate-900 uppercase tracking-tight">Data Encryption</p>
+              <p className="text-xs font-medium text-slate-500 leading-relaxed">
                 Your data is protected by industry-standard AES-256 encryption. We never share your personal details with third-party marketers.
               </p>
             </div>
@@ -107,9 +109,9 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
           <AnimatedButton
             type="submit"
             disabled={loading}
-            label={loading ? "Synchronizing..." : "Update Details"}
-            icon={loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-            className="w-full h-16 bg-primary text-white font-black uppercase tracking-[0.3em] text-xs shadow-xl shadow-primary/10 border-transparent"
+            label={loading ? "Synchronizing..." : "Update Profile"}
+            icon={loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+            className="w-full h-16 bg-primary text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-xl shadow-primary/20 border-transparent transition-transform hover:-translate-y-1"
             fillClassName="bg-white"
             hoverTextClassName="hover:text-primary"
           />

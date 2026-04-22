@@ -23,8 +23,8 @@ export default async function EditBlogPage({ params }: EditBlogPageProps) {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div className="space-y-4">
-        <Link 
-          href="/admin/blogs" 
+        <Link
+          href="/admin/blogs"
           className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors"
         >
           <ChevronLeft size={14} />

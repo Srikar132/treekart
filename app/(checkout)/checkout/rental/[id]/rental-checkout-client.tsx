@@ -66,17 +66,19 @@ interface RentalCheckoutClientProps {
     gps_lng: number;
   };
   user: {
+    id: string;
     full_name: string;
     phone: string;
     email: string;
   };
+  initialStep?: CheckoutStep;
 }
 
-export default function RentalCheckoutClient({ tree, user }: RentalCheckoutClientProps) {
+export default function RentalCheckoutClient({ tree, user, initialStep = "details" }: RentalCheckoutClientProps) {
   const router = useRouter();
   const { openRazorpay, loaded: razorpayLoaded } = useRazorpay();
 
-  const [step, setStep] = useState<CheckoutStep>("details");
+  const [step, setStep] = useState<CheckoutStep>(initialStep);
   const { address, setAddress: updateStoreAddress, _hasHydrated } = useDeliveryAddress();
   const [addressErrors, setAddressErrors] = useState<Partial<Record<keyof DeliveryAddress, string>>>();
 

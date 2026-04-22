@@ -126,11 +126,12 @@ export async function getAvailableTrees(options?: GetTreesOptions) {
         totalPages: count ? Math.ceil(count / limit) : 0,
     };
 }
-
+// ── getTreeById ────────────────────────────────────────────────────
+// Returns tree + farmer only. No rental data embedded.
 export async function getTreeById(treeId: string) {
-    const supabase = await getSupabasePublic();
+    const supabase = await getSupabaseServer();
 
-    const { data, error } = await supabase
+    const { data: tree, error } = await supabase
         .from("trees")
         .select(`
       *,
@@ -139,38 +140,56 @@ export async function getTreeById(treeId: string) {
         farm_name,
         location,
         is_organic
-      ),
-      rentals (
-        id,
-        status,
-        user_id,
-        profiles (
-          full_name,
-          avatar_url
-        )
       )
     `)
         .eq("id", treeId)
         .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    return tree ?? null;
 }
 
+// ── getActiveRental ────────────────────────────────────────────────
+// Only call this when tree.status === "rented".
+// Returns the single active rental with the renter's profile.
+export async function getActiveRental(treeId: string) {
+    const supabase = await getSupabaseServer();
 
-export async function getTreeUpdates(treeId: string) {
+    const { data, error } = await supabase
+        .from("rentals")
+        .select(`
+      id,
+      status,
+      user_id,
+      season,
+      profiles (
+        full_name,
+        avatar_url
+      )
+    `)
+        .eq("tree_id", treeId)
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle();
+
+    if (error) throw new Error(error.message);
+    return data; // null if somehow no active rental despite status
+}
+
+// ── getTreeUpdates ─────────────────────────────────────────────────
+// Scoped to a rental, not a tree. Old rentals' updates won't bleed.
+export async function getTreeUpdates(rentalId: string) {
     const supabase = await getSupabasePublic();
 
     const { data, error } = await supabase
         .from("tree_updates")
         .select("*")
-        .eq("tree_id", treeId)
+        .eq("rental_id", rentalId)
         .order("posted_at", { ascending: false });
 
     if (error) throw new Error(error.message);
-    return data;
+    return data ?? [];
 }
-
 
 
 // TREE RENTALS -- CHECKOUT
@@ -279,6 +298,11 @@ export async function verifyAndFulfilRental(payload: {
     const user = await requireUser();
     const supabase = await getSupabaseServer();
 
+    // DEBUG: Verify session identity
+    // const { data: { user: authUser } } = await supabase.auth.getUser();
+    // console.log("Log: Supabase sees Auth ID:", authUser?.id);
+    // console.log("Log: Code is sending User ID:", user.id);
+
     // Verify HMAC signature
     const body = `${payload.rzpOrderId}|${payload.rzpPaymentId}`;
     const expectedSig = crypto
@@ -287,7 +311,6 @@ export async function verifyAndFulfilRental(payload: {
         .digest("hex");
 
     if (expectedSig !== payload.rzpSignature) {
-        // Release tree reservation on failure
         await releaseTreeReservation(payload.treeId);
         throw new Error("Payment verification failed");
     }
@@ -299,35 +322,50 @@ export async function verifyAndFulfilRental(payload: {
             ? `${now.getFullYear()}-${(now.getFullYear() + 1).toString().slice(2)}`
             : `${now.getFullYear() - 1}-${now.getFullYear().toString().slice(2)}`;
 
-    // Create rental record
+    // Fetch tree details for the final record
+    const { data: tree } = await supabase
+        .from("trees")
+        .select("price")
+        .eq("id", payload.treeId)
+        .single();
+
+    if (!tree) throw new Error("Tree details not found for finalization");
+
+    // IMPORTANT: rentals.user_id must exactly equal auth.uid() (UUID)
     const { data: rental, error: rentalError } = await supabase
         .from("rentals")
         .insert({
-            user_id: user.id,
+            user_id: user.id, // must be UUID
             tree_id: payload.treeId,
             season,
             status: "active",
             payment_id: payload.rzpPaymentId,
-            delivery_address: payload.deliveryAddress as any,
+            amount_paid: tree.price, // keep as-is; type should match column type
+            delivery_address: payload.deliveryAddress, // remove `as any`
             visit_requested: payload.visitRequested,
         })
         .select()
         .single();
 
-    if (rentalError) throw new Error("Failed to create rental: " + rentalError.message);
+    if (rentalError) {
+        console.log(rentalError);
+        throw new Error("Failed to create rental: " + rentalError.message);
+    }
 
-    // Lock tree as rented
-    await supabase
+    const { error: treeUpdateError } = await supabase
         .from("trees")
         .update({ status: "rented" })
         .eq("id", payload.treeId);
+
+    if (treeUpdateError) {
+        console.error("CRITICAL: Failed to update tree status to rented:", treeUpdateError);
+    }
 
     revalidatePath("/account");
     revalidatePath("/rent");
 
     return { success: true, rentalId: rental.id };
 }
-
 type TreeInsert = Database["public"]["Tables"]["trees"]["Insert"];
 type TreeUpdate = Database["public"]["Tables"]["trees"]["Update"];
 

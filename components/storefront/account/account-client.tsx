@@ -11,13 +11,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   DialogTrigger,
   DialogClose
 } from "@/components/ui/dialog";
@@ -29,6 +29,7 @@ import { DashboardOverview } from "@/components/storefront/account/dashboard-ove
 import { RentalsList } from "@/components/storefront/account/rentals-list";
 import { OrdersList } from "@/components/storefront/account/orders-list";
 import { ProfileSettings } from "@/components/storefront/account/profile-settings";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Tab = "dashboard" | "rentals" | "orders" | "profile";
 
@@ -41,15 +42,15 @@ interface AccountClientProps {
 export function AccountClient({ user, rentals, orders }: AccountClientProps) {
   const router = useRouter();
   const supabase = createClient();
-  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("dashboard");
 
   async function handleLogout() {
     setIsLoggingOut(true);
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
+
       toast.success("Logged out successfully");
       router.push("/");
       router.refresh();
@@ -68,114 +69,104 @@ export function AccountClient({ user, rentals, orders }: AccountClientProps) {
   ];
 
   return (
-    <div className="py-12 md:py-20">
+    <div className="w-full">
       {/* Header */}
-      <div className="mb-12 space-y-2">
-        <h1 className="text-4xl md:text-6xl font-black text-foreground uppercase tracking-tighter leading-none">
-          Member<br />Portal
+      <div className="mb-10 md:mb-16 space-y-4 px-2 md:px-0">
+        <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter leading-tight">
+          Member <span className="text-primary italic">Portal</span>
         </h1>
-        <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-muted-foreground">
-          Welcome back, {user.full_name?.split(' ')[0] || 'User'}
-        </p>
+        <div className="flex items-center gap-3">
+          <div className="h-1 w-8 rounded-full bg-primary" />
+          <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
+            Welcome back, {user.full_name?.split(' ')[0] || 'User'} • Your Orchard is waiting
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-        {/* Sidebar Navigation */}
-        <aside className="lg:col-span-3">
-          <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 no-scrollbar">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-12">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-100 pb-4">
+          <TabsList variant="line" className="h-auto p-0 gap-8 justify-start overflow-x-auto no-scrollbar">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = activeTab === item.id;
-
               return (
-                <button
+                <TabsTrigger
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={cn(
-                    "flex items-center gap-4 px-6 py-4 text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap lg:whitespace-normal group border border-transparent",
-                    isActive
-                      ? "bg-primary text-white border-primary"
-                      : "hover:bg-secondary/50 text-muted-foreground hover:text-foreground"
-                  )}
+                  value={item.id}
+                  className="data-active:text-primary rounded-none h-14 px-0 flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 transition-all hover:text-slate-900 after:bg-primary"
                 >
-                  <Icon size={16} strokeWidth={isActive ? 2.5 : 1.5} className="shrink-0" />
-                  <span className="flex-1 text-left">{item.label}</span>
+                  <Icon size={16} />
+                  <span>{item.label}</span>
                   {item.count !== undefined && (
-                    <span className={cn(
-                      "text-[9px] px-1.5 py-0.5 font-bold",
-                      isActive ? "bg-white/20" : "bg-secondary"
-                    )}>
+                    <span className="ml-1 text-[8px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">
                       {item.count}
                     </span>
                   )}
-                  <ChevronRight
-                    size={12}
-                    className={cn(
-                      "hidden lg:block transition-transform duration-300",
-                      isActive ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
-                    )}
-                  />
-                </button>
+                </TabsTrigger>
               );
             })}
+          </TabsList>
 
-            <Separator className="my-4 hidden lg:block bg-border/40" />
-
-            <Dialog>
-              <DialogTrigger
-                render={
-                  <button className="flex items-center gap-4 px-6 py-4 text-xs font-black uppercase tracking-widest text-destructive hover:bg-destructive/5 transition-all whitespace-nowrap lg:whitespace-normal">
-                    <LogOut size={16} />
-                    <span>Logout</span>
-                  </button>
-                }
-              />
-              <DialogContent className="rounded-none border-border max-w-[400px] p-8 bg-white ring-0">
-                <DialogHeader className="space-y-4">
-                  <div className="w-12 h-12 bg-destructive/10 flex items-center justify-center">
-                    <LogOut className="text-destructive" size={24} />
-                  </div>
-                  <DialogTitle className="text-2xl font-black uppercase tracking-tight text-foreground">
+          <Dialog>
+            <DialogTrigger
+              render={
+                <button className="h-10 px-6 rounded-xl border border-slate-100 text-[10px] font-black uppercase tracking-widest text-destructive hover:bg-destructive/5 transition-all flex items-center gap-2 w-fit">
+                  <LogOut size={14} />
+                  <span>Logout Session</span>
+                </button>
+              }
+            />
+            <DialogContent className="border-slate-100 max-w-[440px] p-10 bg-white ring-0 shadow-2xl">
+              <DialogHeader className="space-y-6">
+                <div className="w-16 h-16 bg-destructive/10 rounded-[1.5rem] flex items-center justify-center">
+                  <LogOut className="text-destructive" size={28} />
+                </div>
+                <div className="space-y-2">
+                  <DialogTitle className="text-3xl font-black text-slate-900 tracking-tight">
                     Confirm Logout
                   </DialogTitle>
-                  <DialogDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground leading-relaxed">
-                    Are you sure you want to terminate your session? You will need to sign in again to track your heritage trees.
+                  <DialogDescription className="text-sm font-medium text-slate-500 leading-relaxed">
+                    Are you sure you want to end your session? You'll need to sign in again to access your orchard dashboard and updates.
                   </DialogDescription>
-                </DialogHeader>
-                <DialogFooter className="mt-8 flex-col sm:flex-row gap-3 border-0 bg-transparent p-0">
-                  <DialogClose 
-                    render={
-                      <Button 
-                        variant="outline" 
-                        className="flex-1 h-12 rounded-none border-border text-[10px] font-bold uppercase tracking-widest hover:bg-secondary transition-all"
-                      >
-                        Cancel
-                      </Button>
-                    }
-                  />
-                  <Button 
-                    onClick={handleLogout}
-                    disabled={isLoggingOut}
-                    className="flex-1 h-12 rounded-none bg-destructive text-white text-[10px] font-bold uppercase tracking-widest hover:bg-destructive/90 transition-all"
-                  >
-                    {isLoggingOut ? "Processing..." : "Yes, Logout"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </nav>
-        </aside>
+                </div>
+              </DialogHeader>
+              <DialogFooter className="mt-10 flex-col sm:flex-row gap-4 border-0 bg-transparent p-0">
+                <DialogClose
+                  render={
+                    <Button
+                      variant="outline"
+                      className="flex-1 h-14 rounded-2xl border-slate-200 text-sm font-bold hover:bg-slate-50 transition-all"
+                    >
+                      Cancel
+                    </Button>
+                  }
+                />
+                <Button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="flex-1 h-14 rounded-2xl bg-destructive text-white text-sm font-bold hover:bg-destructive/90 transition-all shadow-lg shadow-destructive/20"
+                >
+                  {isLoggingOut ? "Processing..." : "Yes, Logout"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
 
-        {/* Content Area */}
-        <main className="lg:col-span-9">
-          <div className="bg-white border border-border/60 p-6 md:p-10 shadow-sm min-h-[600px]">
-            {activeTab === "dashboard" && <DashboardOverview user={user} rentals={rentals} orders={orders} onTabChange={setActiveTab} />}
-            {activeTab === "rentals" && <RentalsList rentals={rentals} />}
-            {activeTab === "orders" && <OrdersList orders={orders} />}
-            {activeTab === "profile" && <ProfileSettings user={user} />}
-          </div>
-        </main>
-      </div>
+        <div className="relative animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <TabsContent value="dashboard" className="m-0 border-0 p-0 shadow-none">
+            <DashboardOverview user={user} rentals={rentals} orders={orders} onTabChange={(tab: any) => setActiveTab(tab)} />
+          </TabsContent>
+          <TabsContent value="rentals" className="m-0 border-0 p-0 shadow-none">
+            <RentalsList rentals={rentals} />
+          </TabsContent>
+          <TabsContent value="orders" className="m-0 border-0 p-0 shadow-none">
+            <OrdersList orders={orders} />
+          </TabsContent>
+          <TabsContent value="profile" className="m-0 border-0 p-0 shadow-none">
+            <ProfileSettings user={user} />
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 }

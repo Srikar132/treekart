@@ -13,44 +13,44 @@ interface RentalsListProps {
 export function RentalsList({ rentals }: RentalsListProps) {
   if (rentals.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 space-y-6 text-center">
-        <div className="w-20 h-20 bg-secondary/20 flex items-center justify-center">
-          <TreePine size={32} className="text-muted-foreground/40" />
+      <div className="flex flex-col items-center justify-center py-32 space-y-8 text-center animate-in fade-in zoom-in duration-700">
+        <div className="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center shadow-inner">
+          <TreePine size={40} className="text-slate-200" />
         </div>
-        <div className="space-y-2">
-          <h3 className="text-xl font-black text-foreground uppercase tracking-tight">No Rentals Active</h3>
-          <p className="text-xs text-muted-foreground uppercase tracking-widest max-w-xs mx-auto">
-            You haven't rented any heritage trees yet. Explore our orchards to start your journey.
+        <div className="space-y-3">
+          <h3 className="text-2xl font-black text-slate-900 tracking-tight">No active rentals</h3>
+          <p className="text-sm text-slate-500 font-medium max-w-xs mx-auto leading-relaxed">
+            You haven't rented any heritage trees yet. Explore our orchards to start your journey into sustainable farming.
           </p>
         </div>
-        <Link 
-          href="/rent" 
-          className="h-12 px-8 bg-primary text-white text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-primary/90 transition-all"
+        <Link
+          href="/rent"
+          className="h-14 px-10 bg-primary text-white text-xs font-black uppercase tracking-widest flex items-center gap-2 rounded-2xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
         >
-          Browse Orchards <ArrowRight size={14} />
+          Browse Orchards <ArrowRight size={16} />
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xs font-black uppercase tracking-[0.3em] text-foreground">Active Tree Rentals</h2>
-        <Badge variant="outline" className="rounded-none text-[8px] font-bold uppercase tracking-widest px-3">
-          {rentals.length} TOTAL
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex items-center justify-between px-2">
+        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Tree Rentals</h2>
+        <Badge variant="secondary" className="rounded-full bg-slate-100 text-slate-500 border-0 text-[10px] font-black px-4 py-1">
+          {rentals.length} {rentals.length === 1 ? 'Tree' : 'Trees'}
         </Badge>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-4">
         {rentals.map((rental) => (
-          <div 
-            key={rental.id} 
-            className="group border border-border/60 bg-white overflow-hidden hover:border-primary/40 transition-all duration-500"
+          <div
+            key={rental.id}
+            className="group bg-white rounded-[2rem] border border-slate-100 p-4 sm:p-6 hover:border-primary/20 transition-all duration-300 hover:shadow-xl hover:shadow-slate-100"
           >
-            <div className="flex flex-col md:flex-row">
-              {/* Image Section */}
-              <div className="relative w-full md:w-48 h-48 md:h-auto bg-secondary overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              {/* Compact Image */}
+              <div className="relative w-full sm:w-32 h-48 sm:h-32 bg-slate-50 rounded-2xl overflow-hidden shrink-0">
                 {rental.trees?.photos?.[0] ? (
                   <Image
                     src={rental.trees.photos[0]}
@@ -60,79 +60,44 @@ export function RentalsList({ rentals }: RentalsListProps) {
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <TreePine size={32} className="text-muted-foreground/20" />
+                    <TreePine size={32} className="text-slate-100" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-500" />
+                <div className="absolute inset-0 bg-black/5" />
               </div>
 
-              {/* Info Section */}
-              <div className="flex-1 p-8 space-y-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-primary text-white border-0 rounded-none text-[8px] font-bold uppercase tracking-widest">
-                        {rental.trees?.plan_type}
-                      </Badge>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                        #{rental.id.slice(0, 8).toUpperCase()}
-                      </span>
-                    </div>
-                    <h3 className="text-2xl font-black text-foreground uppercase tracking-tight">
+              {/* Simple Info */}
+              <div className="flex-1 w-full space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-slate-900 tracking-tight">
                       {rental.trees?.variety} Heritage
                     </h3>
+                    <Badge className="bg-primary/10 text-primary border-0 rounded-full text-[8px] font-black uppercase tracking-widest px-2 py-0.5">
+                      {rental.trees?.plan_type}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    <div className="flex items-center gap-1.5">
+                      <MapPin size={12} className="text-primary" />
+                      {rental.trees?.farmers?.farm_name || 'Heritage Farm'}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Calendar size={12} className="text-primary" />
+                      ID: #{rental.id.slice(0, 8).toUpperCase()}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between sm:justify-end gap-6 pt-4 sm:pt-0 border-t sm:border-0 border-slate-50">
+                  <div className="text-right hidden md:block px-6">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Current Status</p>
+                    <p className="text-xs font-bold text-slate-900 uppercase">{rental.status}</p>
                   </div>
                   
-                  <div className="flex flex-col md:items-end gap-1">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Rental Status</p>
-                    <p className="text-sm font-black text-primary uppercase tracking-tight">
-                      {rental.status}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  <div className="space-y-1">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Orchard</p>
-                    <div className="flex items-center gap-2">
-                      <MapPin size={12} className="text-primary" />
-                      <span className="text-xs font-bold text-foreground uppercase truncate">
-                        {rental.trees?.farmers?.farm_name}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Est. Yield</p>
-                    <div className="flex items-center gap-2 text-foreground">
-                      <TreePine size={12} className="text-primary" />
-                      <span className="text-xs font-bold uppercase">
-                        {rental.trees?.yield_min_kg}-{rental.trees?.yield_max_kg} KG
-                      </span>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Next Update</p>
-                    <div className="flex items-center gap-2">
-                      <Calendar size={12} className="text-primary" />
-                      <span className="text-xs font-bold text-foreground uppercase">
-                        Every 10 Days
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-6">
-                  <div className="w-full sm:max-w-xs space-y-2">
-                    <div className="flex justify-between text-[8px] font-bold uppercase tracking-widest">
-                      <span className="text-muted-foreground">Season Progress</span>
-                      <span className="text-foreground">45%</span>
-                    </div>
-                    <Progress value={45} className="h-1 rounded-none bg-secondary" />
-                  </div>
-
-                  <Link 
-                    href={`/account/rentals/${rental.id}`}
-                    className="w-full sm:w-auto h-12 px-10 bg-white border border-border text-[10px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-secondary/50 transition-all"
+                  <Link
+                    href={`/trees/${rental.tree_id}`}
+                    className="flex-1 sm:flex-none h-12 px-8 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 rounded-xl hover:bg-slate-800 transition-all shadow-md shadow-slate-200"
                   >
                     Track Progress <ArrowRight size={14} />
                   </Link>
@@ -144,11 +109,16 @@ export function RentalsList({ rentals }: RentalsListProps) {
       </div>
 
       {/* Info Notice */}
-      <div className="p-6 bg-secondary/10 border border-border/40 flex gap-4">
-        <Info size={16} className="text-primary shrink-0 mt-0.5" />
-        <p className="text-[10px] font-medium text-muted-foreground leading-relaxed uppercase tracking-wider">
-          Tree updates are posted every 10 days by our farm team. You will be notified via WhatsApp and Email as soon as a new report is available for your heritage tree.
-        </p>
+      <div className="p-8 rounded-[2rem] bg-blue-50/50 border border-blue-100/50 flex gap-6">
+        <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0 border border-blue-100">
+          <Info size={18} className="text-blue-500" />
+        </div>
+        <div className="space-y-1">
+          <p className="text-sm font-bold text-blue-900">Digital Orchard Updates</p>
+          <p className="text-xs font-medium text-blue-700/70 leading-relaxed">
+            Reports are posted every 10 days by our farm team. You will be notified via WhatsApp and Email as soon as a new visual report is available for your heritage tree.
+          </p>
+        </div>
       </div>
     </div>
   );

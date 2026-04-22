@@ -22,14 +22,12 @@ export default async function AccountPage() {
 
 
   return (
-    <main className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-6">
-        <AccountClient
-          user={user}
-          rentals={rentals}
-          orders={orders}
-        />
-      </div>
+    <main className="section container min-h-screen">
+      <AccountClient
+        user={user}
+        rentals={rentals}
+        orders={orders}
+      />
     </main>
   );
 }

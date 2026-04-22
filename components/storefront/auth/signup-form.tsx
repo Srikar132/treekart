@@ -1,63 +1,110 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Leaf, Loader2, Eye, EyeOff, TreePine } from "lucide-react";
+import { Leaf, Loader2, Eye, EyeOff, TreePine, CheckCircle2 } from "lucide-react";
 import { AnimatedButton } from "@/components/shared/animated-button";
-import { signInSchema, type ActionState, type SignInFields } from "@/lib/validations";
-import { useState } from "react";
+import { signUpSchema, type ActionState, type SignUpFields } from "@/lib/validations";
+import { toast } from "sonner";
 
-type SignInState = ActionState<SignInFields>;
+type SignUpState = ActionState<SignUpFields>;
 
 export function SignupForm({ redirectTo }: { redirectTo: string }) {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
 
-    async function signInAction(
-        _prev: SignInState,
+    async function signUpAction(
+        _prev: SignUpState,
         formData: FormData
-    ): Promise<SignInState> {
+    ): Promise<SignUpState> {
         const raw = {
+            fullName: formData.get("fullName") as string,
             email: formData.get("email") as string,
+            phone: formData.get("phone") as string,
             password: formData.get("password") as string,
+            confirmPassword: formData.get("confirmPassword") as string,
         };
 
-        const parsed = signInSchema.safeParse(raw);
+        const parsed = signUpSchema.safeParse(raw);
         if (!parsed.success) {
             return {
-                errors: parsed.error.flatten().fieldErrors as SignInState["errors"],
+                errors: parsed.error.flatten().fieldErrors as SignUpState["errors"],
                 values: raw,
             };
         }
 
         const supabase = createClient();
-        const { error } = await supabase.auth.signInWithPassword(parsed.data);
+        
+        // 1. Sign Up the user
+        const { data, error } = await supabase.auth.signUp({
+            email: parsed.data.email,
+            password: parsed.data.password,
+            options: {
+                data: {
+                    full_name: parsed.data.fullName,
+                    phone: parsed.data.phone,
+                },
+                emailRedirectTo: `${window.location.origin}/auth/callback?redirectTo=${redirectTo}`,
+            },
+        });
 
         if (error) {
             return {
-                errors: {
-                    _server:
-                        error.message === "Invalid login credentials"
-                            ? "Incorrect email or password. Please try again."
-                            : error.message,
-                },
+                errors: { _server: error.message },
                 values: raw,
             };
         }
 
-        router.push(redirectTo);
-        router.refresh();
-        return {};
+        // 2. Check if we need email confirmation or if we are signed in
+        if (data.session) {
+            // User is signed in (auto-confirmed or no email confirmation)
+            toast.success("Welcome to Treekart!");
+            router.push(redirectTo);
+            router.refresh();
+            return {};
+        } else {
+            // Confirmation email sent
+            setIsSuccess(true);
+            return {};
+        }
     }
 
-    const [state, action, pending] = useActionState<SignInState, FormData>(
-        signInAction,
+    const [state, action, pending] = useActionState<SignUpState, FormData>(
+        signUpAction,
         {}
     );
+
+    if (isSuccess) {
+        return (
+            <div className="flex min-h-[calc(100vh-200px)] items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+                <div className="w-full max-w-md space-y-12 text-center animate-in fade-in zoom-in duration-500">
+                    <div className="inline-flex items-center justify-center border border-primary/20 bg-primary/5 p-6 rounded-full">
+                        <CheckCircle2 size={48} className="text-primary" />
+                    </div>
+                    <div className="space-y-4">
+                        <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight">Verify Your Email</h2>
+                        <p className="text-sm text-slate-500 font-medium leading-relaxed uppercase tracking-widest">
+                            We've sent a verification link to <br/>
+                            <span className="font-black text-slate-900">{state.values?.email}</span>
+                        </p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">
+                            Please check your inbox to activate your account.
+                        </p>
+                    </div>
+                    <div className="pt-8">
+                        <Link href="/auth/signin" className="text-xs font-black uppercase tracking-widest text-primary hover:underline underline-offset-4 decoration-primary/30">
+                            Back to Sign In
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-[calc(100vh-200px)] items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
@@ -68,21 +115,38 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
                     </div>
                     <div className="space-y-2">
                         <h1 className="text-4xl font-bold tracking-tight text-foreground uppercase">
-                            Sign In
+                            Create Account
                         </h1>
                         <p className="text-sm text-muted-foreground uppercase tracking-widest">
-                            Welcome back to the grove
+                            Join the heritage preservation
                         </p>
                     </div>
                 </div>
 
                 <div className="border border-border bg-card p-8 md:p-10">
                     <form action={action} className="space-y-6">
+                        {/* Full Name */}
                         <div className="space-y-2">
-                            <Label
-                                htmlFor="email"
-                                className="text-xs font-bold uppercase tracking-widest text-foreground"
-                            >
+                            <Label htmlFor="fullName" className="text-xs font-bold uppercase tracking-widest text-foreground">
+                                Full Name
+                            </Label>
+                            <Input
+                                id="fullName"
+                                name="fullName"
+                                placeholder="SRIKAR REDDY"
+                                defaultValue={state.values?.fullName ?? ""}
+                                className={`h-12 border-border bg-background px-4 text-sm focus-visible:ring-primary rounded-none ${state.errors?.fullName ? "border-destructive" : ""}`}
+                            />
+                            {state.errors?.fullName && (
+                                <p className="text-[10px] font-bold text-destructive uppercase">
+                                    {state.errors.fullName}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Email */}
+                        <div className="space-y-2">
+                            <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-foreground">
                                 Email Address
                             </Label>
                             <Input
@@ -90,7 +154,6 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
                                 name="email"
                                 type="email"
                                 placeholder="YOUR@EMAIL.COM"
-                                autoComplete="email"
                                 defaultValue={state.values?.email ?? ""}
                                 className={`h-12 border-border bg-background px-4 text-sm focus-visible:ring-primary rounded-none ${state.errors?.email ? "border-destructive" : ""}`}
                             />
@@ -101,28 +164,36 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
                             )}
                         </div>
 
+                        {/* Phone */}
                         <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                                <Label
-                                    htmlFor="password"
-                                    className="text-xs font-bold uppercase tracking-widest text-foreground"
-                                >
-                                    Password
-                                </Label>
-                                <Link
-                                    href="/forgot-password"
-                                    className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground hover:text-primary transition-colors"
-                                >
-                                    Forgot?
-                                </Link>
-                            </div>
+                            <Label htmlFor="phone" className="text-xs font-bold uppercase tracking-widest text-foreground">
+                                Phone Number
+                            </Label>
+                            <Input
+                                id="phone"
+                                name="phone"
+                                placeholder="9876543210"
+                                defaultValue={state.values?.phone ?? ""}
+                                className={`h-12 border-border bg-background px-4 text-sm focus-visible:ring-primary rounded-none ${state.errors?.phone ? "border-destructive" : ""}`}
+                            />
+                            {state.errors?.phone && (
+                                <p className="text-[10px] font-bold text-destructive uppercase">
+                                    {state.errors.phone}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Password */}
+                        <div className="space-y-2">
+                            <Label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-foreground">
+                                Password
+                            </Label>
                             <div className="relative">
                                 <Input
                                     id="password"
                                     name="password"
                                     type={showPassword ? "text" : "password"}
                                     placeholder="••••••••"
-                                    autoComplete="current-password"
                                     className={`h-12 border-border bg-background pr-12 text-sm focus-visible:ring-primary rounded-none ${state.errors?.password ? "border-destructive" : ""}`}
                                 />
                                 <button
@@ -140,6 +211,25 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
                             )}
                         </div>
 
+                        {/* Confirm Password */}
+                        <div className="space-y-2">
+                            <Label htmlFor="confirmPassword" className="text-xs font-bold uppercase tracking-widest text-foreground">
+                                Confirm Password
+                            </Label>
+                            <Input
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="••••••••"
+                                className={`h-12 border-border bg-background px-4 text-sm focus-visible:ring-primary rounded-none ${state.errors?.confirmPassword ? "border-destructive" : ""}`}
+                            />
+                            {state.errors?.confirmPassword && (
+                                <p className="text-[10px] font-bold text-destructive uppercase">
+                                    {state.errors.confirmPassword}
+                                </p>
+                            )}
+                        </div>
+
                         {state.errors?._server && (
                             <div className="border border-destructive/50 bg-destructive/5 px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-destructive">
                                 {state.errors._server}
@@ -147,7 +237,7 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
                         )}
 
                         <AnimatedButton
-                            label={pending ? "Authenticating..." : "Sign In"}
+                            label={pending ? "Creating Account..." : "Sign Up"}
                             disabled={pending}
                             icon={pending ? <Loader2 size={16} className="animate-spin" /> : null}
                             className="w-full h-12 bg-primary text-primary-foreground border-transparent"
@@ -158,12 +248,12 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
 
                     <div className="mt-8 pt-8 border-t border-border">
                         <p className="text-center text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                            New to Treekart?{" "}
+                            Already have an account?{" "}
                             <Link
-                                href={`/auth/signup?redirectTo=${encodeURIComponent(redirectTo)}`}
+                                href={`/auth/signin?redirectTo=${encodeURIComponent(redirectTo)}`}
                                 className="text-primary hover:text-grove-light transition-colors ml-2 border-b border-primary/30 hover:border-primary"
                             >
-                                Create Account
+                                Sign In
                             </Link>
                         </p>
                     </div>
