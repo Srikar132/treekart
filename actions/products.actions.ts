@@ -114,17 +114,35 @@ type ProductUpdate = Database["public"]["Tables"]["mango_products"]["Update"];
 
 // ── ADMIN ──────────────────────────────────────────────────────────
 
-export async function getAllProductsForAdmin() {
+export async function getAdminProducts(params: {
+    page: number;
+    pageSize: number;
+    sort: string;
+    order: "asc" | "desc";
+    q?: string;
+    status?: string;
+    badge?: string;
+}) {
     await requireAdmin();
     const supabase = await getSupabaseServer();
 
-    const { data, error } = await supabase
-        .from("mango_products")
-        .select("*")
-        .order("created_at", { ascending: false });
+    let query = supabase.from("mango_products").select("*", { count: "exact" });
+
+    if (params.q) {
+        query = query.or(`name.ilike.%${params.q}%,variety.ilike.%${params.q}%`);
+    }
+    if (params.status) query = query.eq("status", params.status as ProductStatus);
+    if (params.badge) query = query.eq("badge", params.badge as ProductBadge);
+
+    const from = (params.page - 1) * params.pageSize;
+    const to = from + params.pageSize - 1;
+
+    const { data, count, error } = await query
+        .order(params.sort, { ascending: params.order === "asc" })
+        .range(from, to);
 
     if (error) throw new Error(error.message);
-    return data;
+    return { data: data ?? [], count: count ?? 0 };
 }
 
 export async function createProduct(input: ProductInsert) {

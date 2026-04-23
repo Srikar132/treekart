@@ -6,11 +6,9 @@ import {
   TreePine,
   ShoppingBag,
   UserCircle,
-  LogOut,
-  ChevronRight
+  LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -29,7 +27,13 @@ import { DashboardOverview } from "@/components/storefront/account/dashboard-ove
 import { RentalsList } from "@/components/storefront/account/rentals-list";
 import { OrdersList } from "@/components/storefront/account/orders-list";
 import { ProfileSettings } from "@/components/storefront/account/profile-settings";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Tab = "dashboard" | "rentals" | "orders" | "profile";
 
@@ -43,7 +47,7 @@ export function AccountClient({ user, rentals, orders }: AccountClientProps) {
   const router = useRouter();
   const supabase = createClient();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("dashboard");
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
 
   async function handleLogout() {
     setIsLoggingOut(true);
@@ -68,105 +72,131 @@ export function AccountClient({ user, rentals, orders }: AccountClientProps) {
     { id: "profile" as Tab, label: "Profile Settings", icon: UserCircle },
   ];
 
+  const currentTab = navItems.find(item => item.id === activeTab) || navItems[0];
+  const CurrentIcon = currentTab.icon;
+
   return (
-    <div className="w-full">
-      {/* Header */}
-      <div className="mb-10 md:mb-16 space-y-4 px-2 md:px-0">
-        <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter leading-tight">
-          Member <span className="text-primary italic">Portal</span>
-        </h1>
-        <div className="flex items-center gap-3">
-          <div className="h-1 w-8 rounded-full bg-primary" />
-          <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
-            Welcome back, {user.full_name?.split(' ')[0] || 'User'} • Your Orchard is waiting
-          </p>
+    <div className="w-full max-w-7xl mx-auto overflow-x-hidden pb-20 px-4 md:px-6">
+      {/* Header Area */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12 md:mb-20">
+        <div className="space-y-4">
+          <h1 className="text-4xl md:text-7xl font-black text-slate-900 tracking-tighter leading-none break-words uppercase">
+            Member <span className="text-primary italic font-serif lowercase">Portal</span>
+          </h1>
+          <div className="flex items-center gap-3">
+            <div className="h-1 w-8 rounded-full bg-primary shrink-0" />
+            <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.2em] truncate">
+              Welcome back, {user.full_name?.split(' ')[0] || 'User'} • Your Orchard is waiting
+            </p>
+          </div>
         </div>
-      </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-12">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-100 pb-4">
-          <TabsList variant="line" className="h-auto p-0 gap-8 justify-start overflow-x-auto no-scrollbar">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <TabsTrigger
-                  key={item.id}
-                  value={item.id}
-                  className="data-active:text-primary rounded-none h-14 px-0 flex items-center gap-2.5 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 transition-all hover:text-slate-900 after:bg-primary"
-                >
-                  <Icon size={16} />
-                  <span>{item.label}</span>
-                  {item.count !== undefined && (
-                    <span className="ml-1 text-[8px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">
-                      {item.count}
-                    </span>
-                  )}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+        {/* Unified Navigation - Select Only */}
+        <div className="flex items-center gap-4 w-full md:w-fit">
+          <Select value={activeTab} onValueChange={(val) => val && setActiveTab(val as Tab)}>
+            <SelectTrigger className="w-full md:w-[280px] h-14 rounded-2xl border-2 border-slate-100 bg-white px-6 focus:ring-primary/20 transition-all shadow-sm">
+              <div className="flex items-center gap-3">
+                <CurrentIcon size={20} className="text-primary" />
+                <span className="text-xs md:text-sm font-black uppercase tracking-widest text-slate-900">
+                  {currentTab.label}
+                </span>
+              </div>
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border-slate-100 shadow-2xl p-2 bg-white min-w-[280px]">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <SelectItem 
+                    key={item.id} 
+                    value={item.id}
+                    className="rounded-xl py-4 focus:bg-primary/5 focus:text-primary data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon size={18} />
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black uppercase tracking-wider">
+                          {item.label}
+                        </span>
+                        {item.count !== undefined && (
+                          <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400 font-bold">
+                            {item.count}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
 
+          {/* Logout Button */}
           <Dialog>
             <DialogTrigger
               render={
-                <button className="h-10 px-6 rounded-xl border border-slate-100 text-[10px] font-black uppercase tracking-widest text-destructive hover:bg-destructive/5 transition-all flex items-center gap-2 w-fit">
-                  <LogOut size={14} />
-                  <span>Logout Session</span>
+                <button className="h-14 w-14 shrink-0 rounded-2xl border-2 border-slate-100 text-slate-400 hover:text-destructive hover:bg-destructive/5 hover:border-destructive/20 transition-all flex items-center justify-center shadow-sm">
+                  <LogOut size={20} />
                 </button>
               }
             />
-            <DialogContent className="border-slate-100 max-w-[440px] p-10 bg-white ring-0 shadow-2xl">
+            <DialogContent className="border-slate-100 max-w-[calc(100vw-2rem)] sm:max-w-[400px] p-8 bg-white ring-0 shadow-2xl rounded-[2.5rem] mx-4">
               <DialogHeader className="space-y-6">
                 <div className="w-16 h-16 bg-destructive/10 rounded-[1.5rem] flex items-center justify-center">
                   <LogOut className="text-destructive" size={28} />
                 </div>
                 <div className="space-y-2">
-                  <DialogTitle className="text-3xl font-black text-slate-900 tracking-tight">
+                  <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">
                     Confirm Logout
                   </DialogTitle>
                   <DialogDescription className="text-sm font-medium text-slate-500 leading-relaxed">
-                    Are you sure you want to end your session? You'll need to sign in again to access your orchard dashboard and updates.
+                    Are you sure you want to end your session?
                   </DialogDescription>
                 </div>
               </DialogHeader>
-              <DialogFooter className="mt-10 flex-col sm:flex-row gap-4 border-0 bg-transparent p-0">
+              <DialogFooter className="mt-8 flex flex-col gap-3">
+                <Button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="w-full h-14 rounded-2xl bg-destructive text-white text-xs font-black uppercase tracking-widest hover:bg-destructive/90 transition-all shadow-lg shadow-destructive/20"
+                >
+                  {isLoggingOut ? "Processing..." : "Yes, Logout"}
+                </Button>
                 <DialogClose
                   render={
                     <Button
-                      variant="outline"
-                      className="flex-1 h-14 rounded-2xl border-slate-200 text-sm font-bold hover:bg-slate-50 transition-all"
+                      variant="ghost"
+                      className="w-full h-14 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-400"
                     >
                       Cancel
                     </Button>
                   }
                 />
-                <Button
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}
-                  className="flex-1 h-14 rounded-2xl bg-destructive text-white text-sm font-bold hover:bg-destructive/90 transition-all shadow-lg shadow-destructive/20"
-                >
-                  {isLoggingOut ? "Processing..." : "Yes, Logout"}
-                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
+      </div>
 
-        <div className="relative animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <TabsContent value="dashboard" className="m-0 border-0 p-0 shadow-none">
-            <DashboardOverview user={user} rentals={rentals} orders={orders} onTabChange={(tab: any) => setActiveTab(tab)} />
-          </TabsContent>
-          <TabsContent value="rentals" className="m-0 border-0 p-0 shadow-none">
-            <RentalsList rentals={rentals} />
-          </TabsContent>
-          <TabsContent value="orders" className="m-0 border-0 p-0 shadow-none">
-            <OrdersList orders={orders} />
-          </TabsContent>
-          <TabsContent value="profile" className="m-0 border-0 p-0 shadow-none">
-            <ProfileSettings user={user} />
-          </TabsContent>
-        </div>
-      </Tabs>
+      {/* Content Area - Conditional Rendering */}
+      <div className="relative animate-in fade-in slide-in-from-bottom-4 duration-700 min-h-[400px]">
+        {activeTab === "dashboard" && (
+          <DashboardOverview 
+            user={user} 
+            rentals={rentals} 
+            orders={orders} 
+            onTabChange={(tab: any) => setActiveTab(tab)} 
+          />
+        )}
+        {activeTab === "rentals" && (
+          <RentalsList rentals={rentals} />
+        )}
+        {activeTab === "orders" && (
+          <OrdersList orders={orders} />
+        )}
+        {activeTab === "profile" && (
+          <ProfileSettings user={user} />
+        )}
+      </div>
     </div>
   );
 }

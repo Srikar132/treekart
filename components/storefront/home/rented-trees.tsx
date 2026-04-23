@@ -1,61 +1,48 @@
-import { getAvailableTrees } from "@/actions/tree.actions";
 import { TreeCard, type TreeProduct } from "@/components/storefront/cards/tree-card";
 import { AnimatedButton } from "@/components/shared/animated-button";
 
-export async function RentedTrees() {
-    try {
-        const data = await getAvailableTrees({
-            limit: 4,
-            filters: { status: ["rented"] }
-        });
-        const trees = data?.trees || [];
+interface RentedTreesProps {
+    initialTrees: any[];
+}
 
-        if (trees.length === 0) {
-            return null;
-        }
-
-        return (
-            <section className="section bg-secondary/10">
-                <div className="container">
-                    <div className="section-header text-center mb-12">
-                        <h2 className="text-4xl md:text-5xl font-black tracking-tight text-foreground">Thriving Communities</h2>
-                        <p className="mt-4 p-base text-muted-foreground">These trees have already found their families for this season.</p>
-                    </div>
-
-                    <div className="flex flex-wrap justify-center gap-6 lg:gap-8 mb-12">
-                        {trees.map((tree) => {
-                            const product: TreeProduct = {
-                                id: tree.id,
-                                title: `${tree.variety} Mango Tree`,
-                                price: tree.price ?? 0,
-                                images: Array.isArray(tree.photos) ? (tree.photos as string[]) : [],
-                                isSale: false,
-                            };
-                            return (
-                                <div
-                                    key={tree.id}
-                                    className="w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(25%-2rem)] max-w-[320px]"
-                                >
-                                    <TreeCard product={product} />
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    <div className="flex justify-center">
-                        <AnimatedButton
-                            href="/rent?status=rented"
-                            label="View All Rented Trees"
-                            className="w-auto border-foreground bg-white text-foreground"
-                            fillClassName="bg-primary"
-                            hoverTextClassName="hover:text-primary-foreground"
-                        />
-                    </div>
-                </div>
-            </section>
-        );
-    } catch (error) {
-        console.error("Error fetching rented trees:", error);
-        return null; // Don't show the section if it fails
+export function RentedTrees({ initialTrees }: RentedTreesProps) {
+    if (initialTrees.length === 0) {
+        return null;
     }
+
+    return (
+        <section className="section bg-slate-50/50">
+            <div className="container">
+                <div className="text-center mb-16">
+                    <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter uppercase mb-4">Thriving Communities</h2>
+                    <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.3em]">These trees have already found their families</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+                    {initialTrees.map((tree) => {
+                        const product: TreeProduct = {
+                            id: tree.id,
+                            title: `${tree.variety} Mango Tree`,
+                            price: tree.price ?? 0,
+                            images: Array.isArray(tree.photos) ? (tree.photos as string[]) : [],
+                            isSale: false,
+                        };
+                        return (
+                            <TreeCard key={tree.id} product={product} />
+                        );
+                    })}
+                </div>
+
+                <div className="flex justify-center">
+                    <AnimatedButton
+                        href="/rent"
+                        label="Explore Full Inventory"
+                        className="h-14 px-10 border-slate-200 text-slate-400"
+                        fillClassName="bg-slate-900"
+                        hoverTextClassName="hover:text-white"
+                    />
+                </div>
+            </div>
+        </section>
+    );
 }

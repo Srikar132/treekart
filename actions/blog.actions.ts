@@ -41,6 +41,19 @@ export async function getBlogById(id: string) {
   return data;
 }
 
+export async function getBlogBySlug(slug: string) {
+  const supabase = await getSupabaseServer();
+
+  const { data, error } = await supabase
+    .from("blogs")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+
+  if (error) return null;
+  return data;
+}
+
 export async function adminGetAllBlogs() {
   await requireAdmin();
   const supabase = await getSupabaseServer();

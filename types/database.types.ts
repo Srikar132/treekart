@@ -27,7 +27,7 @@ export type Database = {
           status: Database["public"]["Enums"]["product_status"] | null
           updated_at: string | null
           variety: string
-          weight_kg: number | null
+          weight_kg: number
         }
         Insert: {
           badge?: Database["public"]["Enums"]["product_badge"] | null
@@ -139,31 +139,37 @@ export type Database = {
       hero_slides: {
         Row: {
           id: string
+          eyebrow: string
           title: string
-          subtitle: string | null
+          sub_heading: string
+          description: string
           image_url: string
-          cta_text: string | null
-          cta_link: string | null
+          button_label: string
+          button_link: string
           order_index: number
           created_at: string
         }
         Insert: {
           id?: string
+          eyebrow: string
           title: string
-          subtitle?: string | null
+          sub_heading: string
+          description: string
           image_url: string
-          cta_text?: string | null
-          cta_link?: string | null
+          button_label: string
+          button_link: string
           order_index?: number
           created_at?: string
         }
         Update: {
           id?: string
+          eyebrow?: string
           title?: string
-          subtitle?: string | null
+          sub_heading?: string
+          description?: string
           image_url?: string
-          cta_text?: string | null
-          cta_link?: string | null
+          button_label?: string
+          button_link?: string
           order_index?: number
           created_at?: string
         }
@@ -251,15 +257,15 @@ export type Database = {
       }
       orders: {
         Row: {
-          created_at: string | null
-          delivery_address: Json | null
+          created_at: string
+          delivery_address: Json
           id: string
-          items: Json | null
-          payment_id: string | null
-          status: Database["public"]["Enums"]["order_status"] | null
-          total_amount: number | null
-          tracking_id: string | null
-          user_id: string | null
+          items: Json
+          payment_id: string
+          status: Database["public"]["Enums"]["order_status"]
+          total_amount: number
+          tracking_id: string
+          user_id: string
         }
         Insert: {
           created_at?: string | null
@@ -327,13 +333,13 @@ export type Database = {
       }
       rentals: {
         Row: {
-          amount_paid: number | null
+          amount_paid: number
           delivery_address: Json | null
           id: string
           payment_id: string | null
           rented_at: string | null
           season: string | null
-          status: Database["public"]["Enums"]["rental_status"] | null
+          status: Database["public"]["Enums"]["rental_status"]
           tree_id: string | null
           user_id: string | null
           visit_requested: boolean | null
@@ -384,7 +390,6 @@ export type Database = {
           description: string | null
           id: string
           mux_asset_id: string | null
-          photos: Json | null
           posted_at: string | null
           rental_id: string | null
           title: string | null
@@ -395,7 +400,6 @@ export type Database = {
           description?: string | null
           id?: string
           mux_asset_id?: string | null
-          photos?: Json | null
           posted_at?: string | null
           rental_id?: string | null
           title?: string | null
@@ -406,7 +410,6 @@ export type Database = {
           description?: string | null
           id?: string
           mux_asset_id?: string | null
-          photos?: Json | null
           posted_at?: string | null
           rental_id?: string | null
           title?: string | null
@@ -432,22 +435,22 @@ export type Database = {
       }
       trees: {
         Row: {
-          age_years: number | null
-          created_at: string | null
-          farmer_id: string | null
-          gps_lat: number | null
-          gps_lng: number | null
+          age_years: number
+          created_at: string
+          farmer_id: string
+          gps_lat: number
+          gps_lng: number
           id: string
-          is_verified: boolean | null
-          photos: Json | null
-          plan_type: Database["public"]["Enums"]["plan_type"] | null
-          price: number | null
+          is_verified: boolean
+          photos: Json
+          plan_type: Database["public"]["Enums"]["plan_type"]
+          price: number
           description: string | null
-          source: Database["public"]["Enums"]["tree_source"] | null
-          status: Database["public"]["Enums"]["tree_status"] | null
-          variety: string | null
-          yield_max_kg: number | null
-          yield_min_kg: number | null
+          source: Database["public"]["Enums"]["tree_source"]
+          status: Database["public"]["Enums"]["tree_status"]
+          variety: string
+          yield_max_kg: number
+          yield_min_kg: number
         }
         Insert: {
           age_years?: number | null

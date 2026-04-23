@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
 import { getBlogs } from "@/actions/blog.actions";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "The Journal — TreeKart",
@@ -51,28 +52,46 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               <Link 
                 href={`/blog/${post.slug}`} 
                 key={post.id}
-                className="group grid grid-cols-1 md:grid-cols-12 gap-6 py-12 border-b border-border/60 hover:bg-secondary/5 transition-colors px-4 -mx-4"
+                className="group grid grid-cols-1 md:grid-cols-12 gap-8 py-12 border-b border-border/60 hover:bg-secondary/5 transition-all duration-500 px-4 -mx-4 items-center"
               >
+                {/* Image column */}
+                <div className="md:col-span-2">
+                  <div className="aspect-[4/3] relative overflow-hidden rounded-2xl bg-secondary/20 border border-border/40 group-hover:shadow-2xl group-hover:shadow-primary/10 transition-all duration-500">
+                    {post.cover_image ? (
+                      <Image
+                        src={post.cover_image}
+                        alt={post.title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
+                        <BookOpen size={24} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {/* Meta column */}
-                <div className="md:col-span-3 space-y-1">
-                  <p className="text-[10px] font-bold tracking-widest text-muted-foreground">
-                    {new Date(post.published_at).toLocaleDateString('en-US', {
-                      month: 'long',
+                <div className="md:col-span-2 space-y-1">
+                  <p className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
+                    {new Date(post.published_at).toLocaleDateString('en-IN', {
+                      month: 'short',
                       day: 'numeric',
                       year: 'numeric'
                     })}
                   </p>
-                  <p className="text-[9px] font-bold tracking-[0.2em] text-primary">
+                  <p className="text-[9px] font-black tracking-[0.2em] text-primary uppercase">
                     {post.category || 'Orchard Updates'}
                   </p>
                 </div>
 
                 {/* Title & Excerpt column */}
-                <div className="md:col-span-7 space-y-4">
+                <div className="md:col-span-6 space-y-3">
                   <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight group-hover:text-primary transition-colors leading-none">
                     {post.title}
                   </h2>
-                  <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl line-clamp-2">
+                  <p className="text-xs font-medium text-muted-foreground leading-relaxed max-w-xl line-clamp-2">
                     {post.excerpt}
                   </p>
                 </div>

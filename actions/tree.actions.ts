@@ -126,6 +126,8 @@ export async function getAvailableTrees(options?: GetTreesOptions) {
         totalPages: count ? Math.ceil(count / limit) : 0,
     };
 }
+
+
 // ── getTreeById ────────────────────────────────────────────────────
 // Returns tree + farmer only. No rental data embedded.
 export async function getTreeById(treeId: string) {
@@ -193,7 +195,6 @@ export async function getTreeUpdates(rentalId: string) {
 
 
 // TREE RENTALS -- CHECKOUT
-
 export async function reserveTree(treeId: string) {
     const user = await requireUser();
     const supabase = await getSupabaseServer();
@@ -369,24 +370,13 @@ export async function verifyAndFulfilRental(payload: {
 type TreeInsert = Database["public"]["Tables"]["trees"]["Insert"];
 type TreeUpdate = Database["public"]["Tables"]["trees"]["Update"];
 
-// ── ADMIN ──────────────────────────────────────────────────────────
+// ── ADMIN - TREE MUTATIONS ──────────────────────────────────────────────────────────
 
-export async function getAllTreesForAdmin() {
-    await requireAdmin();
-    const supabase = await getSupabaseServer();
-
-    const { data, error } = await supabase
-        .from("trees")
-        .select(`
-          *,
-          farmers (farm_name)
-        `)
-        .order("created_at", { ascending: false });
-
-    if (error) throw new Error(error.message);
-    return data;
-}
-
+/**
+ * 
+ * @param 
+ * @returns 
+ */
 export async function createTree(input: TreeInsert) {
     await requireAdmin();
     const supabase = await getSupabaseServer();
@@ -424,18 +414,3 @@ export async function updateTree(id: string, input: TreeUpdate) {
     return data;
 }
 
-export async function deleteTree(id: string) {
-    await requireAdmin();
-    const supabase = await getSupabaseServer();
-
-    const { error } = await supabase
-        .from("trees")
-        .delete()
-        .eq("id", id);
-
-    if (error) throw new Error(error.message);
-
-    revalidatePath("/admin/trees");
-    revalidatePath("/rent");
-    return { success: true };
-}
