@@ -9,8 +9,10 @@ import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
   Save, X, Loader2, Navigation,
-  BadgePercent, Calendar, Info,
+  BadgePercent, Calendar, Info, Image as ImageIcon,
 } from "lucide-react"
+import { CldUploadWidget } from "next-cloudinary"
+// import { cn } from "@/lib/utils"
 
 import { treeSchema, type TreeFormValues } from "@/lib/validations"
 import { createTree, updateTree } from "@/actions/tree.actions"
@@ -44,15 +46,16 @@ export function TreeForm({ initialData }: TreeFormProps) {
       farmer_id: initialData?.farmer_id || null,
       variety: initialData?.variety ?? "",
       description: initialData?.description ?? "",
-      gps_lat: initialData?.gps_lat ?? undefined,
-      gps_lng: initialData?.gps_lng ?? undefined,
-      price: initialData?.price ?? undefined,
-      age_years: initialData?.age_years ?? undefined,
-      yield_min_kg: initialData?.yield_min_kg ?? undefined,
-      yield_max_kg: initialData?.yield_max_kg ?? undefined,
+      gps_lat: initialData?.gps_lat ?? null,
+      gps_lng: initialData?.gps_lng ?? null,
+      price: initialData?.price ?? 0,
+      age_years: initialData?.age_years ?? 0,
+      yield_min_kg: initialData?.yield_min_kg ?? 0,
+      yield_max_kg: initialData?.yield_max_kg ?? 0,
       plan_type: initialData?.plan_type ?? "standard",
       source: initialData?.source ?? "own_farm",
       status: initialData?.status ?? "available",
+      photos: (initialData?.photos as string[]) || [],
     },
   })
 
@@ -112,8 +115,8 @@ export function TreeForm({ initialData }: TreeFormProps) {
                     <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                       Farmer / Orchard Owner
                     </FormLabel>
-                    <Select 
-                      onValueChange={(val) => field.onChange(val === "none" ? null : val)} 
+                    <Select
+                      onValueChange={(val) => field.onChange(val === "none" ? null : val)}
                       value={field.value || "none"}
                     >
                       <FormControl>
@@ -215,6 +218,67 @@ export function TreeForm({ initialData }: TreeFormProps) {
                 )} />
 
               </div>
+            </div>
+
+            {/* Tree Imagery */}
+            <div className="data-card">
+              <div className="flex items-center justify-between mb-8">
+                <SectionHeader icon={<ImageIcon size={18} />} color="bg-blue-100 text-blue-600" title="Tree Imagery" />
+
+                <CldUploadWidget
+                  uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                  onSuccess={(result: any) => {
+                    const currentPhotos = form.getValues("photos") || [];
+                    if (currentPhotos.length < 4) {
+                      form.setValue("photos", [...currentPhotos, result.info.secure_url], { shouldDirty: true })
+                    } else {
+                      toast.error("Maximum 4 photos allowed")
+                    }
+                  }}
+                >
+                  {({ open }) => (
+                    <Button
+                      type="button"
+                      onClick={() => open()}
+                      disabled={form.watch("photos")?.length >= 4}
+                      variant="outline"
+                      className="h-10 border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                    >
+                      Upload Photos ({form.watch("photos")?.length || 0}/4)
+                    </Button>
+                  )}
+                </CldUploadWidget>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {form.watch("photos")?.map((url: string, index: number) => (
+                  <div key={url} className="group relative aspect-square bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+                    <img src={url} alt={`Tree Photo ${index + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const current = form.getValues("photos") || [];
+                        form.setValue("photos", current.filter((_, i) => i !== index), { shouldDirty: true })
+                      }}
+                      className="absolute top-2 right-2 h-8 w-8 bg-white/90 backdrop-blur-sm flex items-center justify-center rounded-full text-destructive shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+
+                {(!form.watch("photos") || form.watch("photos").length === 0) && (
+                  <div className="col-span-full py-12 border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center text-slate-300">
+                    <ImageIcon size={40} strokeWidth={1} className="mb-2" />
+                    <p className="text-[10px] font-black uppercase tracking-widest">No Photos Uploaded</p>
+                  </div>
+                )}
+              </div>
+              <FormField control={form.control} name="photos" render={() => (
+                <FormItem className="mt-2">
+                  <FormMessage className="text-[10px] font-bold" />
+                </FormItem>
+              )} />
             </div>
 
           </div>
