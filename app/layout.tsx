@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 };
 
 import { QueryProvider } from "@/components/providers/query-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import Script from "next/script";
 import { Toaster } from "sonner";
 
@@ -31,13 +32,16 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${dmSans.variable} ${dmMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <QueryProvider>
-          <TooltipProvider delay={100}>
-            {children}
-          </TooltipProvider>
-        </QueryProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <QueryProvider>
+            <TooltipProvider delay={100}>
+              {children}
+            </TooltipProvider>
+          </QueryProvider>
+        </ThemeProvider>
         <Toaster />
 
         <Script

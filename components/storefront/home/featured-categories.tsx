@@ -59,7 +59,8 @@ export function FeaturedCategories() {
                                     src={category.image}
                                     alt={category.title}
                                     fill
-                                    quality={100}
+                                    quality={90}
+                                    sizes="(max-width: 768px) 100vw, 50vw"
                                     className="object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-in-out"
                                 />
                             </div>

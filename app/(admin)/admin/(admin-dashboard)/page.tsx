@@ -9,13 +9,33 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { Order, Rental, Profile, Tree } from "@/types/database.types";
+
+interface AdminStats {
+  users: number;
+  trees: number;
+  orders: number;
+  revenue: number;
+}
+
+type RentalWithDetails = Rental & {
+  profiles: Pick<Profile, 'full_name'> | null;
+  trees: Pick<Tree, 'variety'> | null;
+};
+
+type OrderWithProfile = Order & {
+  profiles: Pick<Profile, 'full_name'> | null;
+};
 
 export default async function AdminDashboard() {
   const [stats, activity] = await Promise.all([
     getAdminStats(),
     getRecentActivity()
   ]);
-  const { recentOrders, recentRentals } = activity;
+  const { recentOrders, recentRentals } = activity as { 
+    recentOrders: OrderWithProfile[]; 
+    recentRentals: RentalWithDetails[]; 
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -23,7 +43,7 @@ export default async function AdminDashboard() {
       <Header />
 
       {/* Metrics Grid */}
-      <StatsGrid stats={stats} />
+      <StatsGrid stats={stats as AdminStats} />
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -57,7 +77,7 @@ function Header() {
   );
 }
 
-function StatsGrid({ stats }: { stats: any }) {
+function StatsGrid({ stats }: { stats: AdminStats }) {
   const metrics = [
     { label: "Total Users", value: stats.users, icon: Users, color: "bg-blue-500", trend: "+12%" },
     { label: "Tree Inventory", value: stats.trees, icon: TreePine, color: "bg-green-500", trend: "+3%" },
@@ -88,7 +108,7 @@ function StatsGrid({ stats }: { stats: any }) {
   );
 }
 
-function RecentRentals({ rentals }: { rentals: any[] }) {
+function RecentRentals({ rentals }: { rentals: RentalWithDetails[] }) {
   return (
     <div className="lg:col-span-7 data-card">
       <div className="flex items-center justify-between mb-8">
@@ -128,7 +148,9 @@ function RecentRentals({ rentals }: { rentals: any[] }) {
                   </Badge>
                 </td>
                 <td className="py-4 px-2 text-right">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">{new Date(rental.rented_at).toLocaleDateString()}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">
+                    {rental.rented_at ? new Date(rental.rented_at).toLocaleDateString() : 'N/A'}
+                  </p>
                 </td>
               </tr>
             ))}
@@ -139,7 +161,7 @@ function RecentRentals({ rentals }: { rentals: any[] }) {
   );
 }
 
-function RecentOrders({ orders }: { orders: any[] }) {
+function RecentOrders({ orders }: { orders: OrderWithProfile[] }) {
   return (
     <div className="lg:col-span-5 data-card">
       <div className="flex items-center justify-between mb-8">

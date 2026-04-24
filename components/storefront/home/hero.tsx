@@ -77,6 +77,8 @@ export function HeroSection({ slides: initialSlides }: HeroSectionProps) {
 
     const slide = slides[currentIndex];
 
+
+
     return (
         <section className="relative h-[85vh] md:h-[90vh] w-full overflow-hidden bg-black select-none">
             {/* Background Images */}
@@ -102,7 +104,21 @@ export function HeroSection({ slides: initialSlides }: HeroSectionProps) {
             </AnimatePresence>
 
             {/* Content Overlay */}
-            <div className="relative z-20 h-full container mx-auto px-6 flex flex-col items-center justify-center text-center">
+            <motion.div
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.2}
+                onDragEnd={(e, { offset, velocity }) => {
+                    const swipe = Math.abs(offset.x) * velocity.x;
+                    const swipeThreshold = 10000;
+                    if (swipe < -swipeThreshold) {
+                        paginate(1);
+                    } else if (swipe > swipeThreshold) {
+                        paginate(-1);
+                    }
+                }}
+                className="relative z-20 h-full container mx-auto px-6 flex flex-col items-center justify-center text-center cursor-grab active:cursor-grabbing"
+            >
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={page}
@@ -159,7 +175,7 @@ export function HeroSection({ slides: initialSlides }: HeroSectionProps) {
                         </motion.div>
                     </motion.div>
                 </AnimatePresence>
-            </div>
+            </motion.div>
 
             {/* Side Navigation Arrows */}
             <button
