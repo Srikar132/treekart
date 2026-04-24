@@ -1,0 +1,178 @@
+"use server";
+
+import { getSupabaseServer } from "@/lib/auth";
+import { signInSchema, signUpSchema, forgotPasswordSchema, resetPasswordSchema, type ActionState, type SignInFields, type SignUpFields, type ForgotPasswordFields, type ResetPasswordFields } from "@/lib/validations";
+import { revalidatePath } from "next/cache";
+
+type SignInState = ActionState<SignInFields>;
+type SignUpState = ActionState<SignUpFields> & { success?: boolean };
+
+export async function loginUser(
+    _prev: SignInState,
+    formData: FormData
+): Promise<SignInState> {
+    const raw = {
+        email: formData.get("email") as string,
+        password: formData.get("password") as string,
+    };
+
+    const parsed = signInSchema.safeParse(raw);
+    if (!parsed.success) {
+        return {
+            errors: parsed.error.flatten().fieldErrors as SignInState["errors"],
+            values: raw,
+        };
+    }
+
+    const supabase = await getSupabaseServer();
+    const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
+
+    if (error) {
+        return {
+            errors: {
+                _server:
+                    error.message === "Invalid login credentials"
+                        ? "Incorrect email or password. Please try again."
+                        : error.message,
+            },
+            values: raw,
+        };
+    }
+
+
+    revalidatePath("/", "layout");
+    return { success: true } as any; // SigninForm handles redirect based on successful return or use router.push in client
+}
+
+/**
+ * Server Action: Sign Up
+ */
+export async function registerUser(
+    _prev: SignUpState,
+    formData: FormData
+): Promise<SignUpState> {
+    const raw = {
+        fullName: formData.get("fullName") as string,
+        email: formData.get("email") as string,
+        phone: formData.get("phone") as string,
+        password: formData.get("password") as string,
+        confirmPassword: formData.get("confirmPassword") as string,
+    };
+
+    const parsed = signUpSchema.safeParse(raw);
+    if (!parsed.success) {
+        return {
+            errors: parsed.error.flatten().fieldErrors as SignUpState["errors"],
+            values: raw,
+        };
+    }
+
+    const supabase = await getSupabaseServer();
+
+    const { data, error } = await supabase.auth.signUp({
+        email: parsed.data.email,
+        password: parsed.data.password,
+        options: {
+            data: {
+                full_name: parsed.data.fullName,
+                phone: parsed.data.phone,
+            },
+        },
+    });
+
+    if (error) {
+        return {
+            errors: { _server: error.message },
+            values: raw,
+        };
+    }
+
+
+
+    if (data.session) {
+        // Auto-confirmed or already signed in
+        revalidatePath("/", "layout");
+        return { success: true, values: raw };
+    } else {
+        // Confirmation email sent
+        return { success: true, values: raw };
+    }
+}
+/**
+ * Server Action: Forgot Password
+ */
+export async function requestPasswordReset(
+    _prev: ActionState<ForgotPasswordFields>,
+    formData: FormData
+): Promise<ActionState<ForgotPasswordFields>> {
+    const raw = {
+        email: formData.get("email") as string,
+    };
+
+    const parsed = forgotPasswordSchema.safeParse(raw);
+    if (!parsed.success) {
+        return {
+            errors: parsed.error.flatten().fieldErrors as any,
+            values: raw,
+        };
+    }
+
+    const supabase = await getSupabaseServer();
+    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/reset-password`,
+    });
+
+    if (error) {
+        return {
+            errors: { _server: error.message },
+            values: raw,
+        };
+    }
+
+    return { success: true, values: raw };
+}
+
+
+/**
+ * Server Action: Reset Password
+ */
+export async function updatePassword(
+    _prev: ActionState<ResetPasswordFields>,
+    formData: FormData
+): Promise<ActionState<ResetPasswordFields>> {
+    const raw = {
+        password: formData.get("password") as string,
+        confirmPassword: formData.get("confirmPassword") as string,
+    };
+
+    const parsed = resetPasswordSchema.safeParse(raw);
+    if (!parsed.success) {
+        return {
+            errors: parsed.error.flatten().fieldErrors as any,
+            values: raw,
+        };
+    }
+
+    const supabase = await getSupabaseServer();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+        return {
+            errors: { _server: "Your reset session has expired or is invalid. Please request a new link." },
+            values: raw,
+        };
+    }
+
+    const { error } = await supabase.auth.updateUser({
+        password: parsed.data.password,
+    });
+
+    if (error) {
+        return {
+            errors: { _server: error.message },
+            values: raw,
+        };
+    }
+
+    return { success: true };
+}

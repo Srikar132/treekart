@@ -49,14 +49,14 @@ export function DataTableToolbar({ searchPlaceholder = "Search...", filters = []
             {/* Search */}
             <div className="relative flex-1 group">
                 <Search
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"
                     size={16}
                 />
                 <Input
                     defaultValue={params.q}
                     onChange={(e) => debouncedSearch(e.target.value)}
                     placeholder={searchPlaceholder}
-                    className="pl-10 h-12 bg-white border-slate-200 focus-visible:ring-primary/20 rounded-xl text-xs font-medium"
+                    className="pl-10 h-12 bg-card border-border focus-visible:ring-primary/20 rounded-xl text-xs font-medium"
                 />
             </div>
 
@@ -67,11 +67,11 @@ export function DataTableToolbar({ searchPlaceholder = "Search...", filters = []
                     value={(params as any)[filter.key] || ""}
                     onValueChange={(v) => setParams({ [filter.key]: v || null, page: "1" } as any)}
                 >
-                    <SelectTrigger className="h-12 min-w-[176px] rounded-xl border-slate-200 text-xs font-bold uppercase tracking-widest bg-white">
+                    <SelectTrigger className="h-12 min-w-[176px] rounded-xl border-border text-xs font-bold uppercase tracking-widest bg-card">
                         <SelectValue placeholder={filter.placeholder} />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-slate-200 shadow-xl">
-                        <SelectItem value="" className="text-[10px] font-black uppercase tracking-widest text-slate-400">{filter.placeholder}</SelectItem>
+                    <SelectContent className="rounded-xl border-border shadow-xl">
+                        <SelectItem value="" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{filter.placeholder}</SelectItem>
                         {filter.options.map((opt) => (
                             <SelectItem key={opt.value} value={opt.value} className="text-xs font-bold uppercase tracking-tight">{opt.label}</SelectItem>
                         ))}
@@ -84,7 +84,7 @@ export function DataTableToolbar({ searchPlaceholder = "Search...", filters = []
                 <Button
                     variant="ghost"
                     onClick={() => setParams({ q: null, page: null, status: null, plan_type: null, season: null, badge: null, role: null })}
-                    className="h-12 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-700 transition-colors"
+                    className="h-12 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
                 >
                     <X size={14} className="mr-1" /> Clear
                 </Button>

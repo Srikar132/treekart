@@ -23,8 +23,8 @@ export default async function AdminBlogsPage({ searchParams }: Props) {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Journal Management</h1>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Craft narratives for your orchard stories</p>
+          <h1 className="text-2xl font-black text-foreground uppercase tracking-tight">Journal Management</h1>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Craft narratives for your orchard stories</p>
         </div>
         <Button
           nativeButton={false}

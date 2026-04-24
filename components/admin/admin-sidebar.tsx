@@ -138,14 +138,14 @@ export function AdminSidebar() {
                     </button>
                 }
             />
-            <DialogContent className="max-w-[400px] rounded-2xl border-slate-100 shadow-2xl">
+            <DialogContent className="max-w-[400px] rounded-2xl border-border shadow-2xl">
                 <DialogHeader className="space-y-4">
                     <div className="h-12 w-12 bg-destructive/10 flex items-center justify-center rounded-xl text-destructive mb-2">
                         <LogOut size={24} />
                     </div>
                     <div className="space-y-1">
                         <DialogTitle className="text-xl font-black uppercase tracking-tight">End Session</DialogTitle>
-                        <DialogDescription className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                        <DialogDescription className="text-xs font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">
                             Are you sure you want to exit the management portal?
                         </DialogDescription>
                     </div>
@@ -153,7 +153,7 @@ export function AdminSidebar() {
                 <DialogFooter className="flex gap-3 mt-6">
                     <DialogClose 
                         render={
-                            <Button variant="outline" className="flex-1 rounded-xl h-12 text-[10px] font-black uppercase tracking-widest border-slate-200">
+                            <Button variant="outline" className="flex-1 rounded-xl h-12 text-[10px] font-black uppercase tracking-widest border-border">
                                 Cancel
                             </Button>
                         }

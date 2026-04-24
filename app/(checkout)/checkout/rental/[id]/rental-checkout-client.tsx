@@ -178,7 +178,7 @@ export default function RentalCheckoutClient({ tree, user, initialStep = "detail
 
   // ── Main Checkout ───────────────────────────────────────────────
   return (
-    <div className="py-12 lg:py-16">
+    <div className="">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
 
         {/* LEFT — Details Form */}

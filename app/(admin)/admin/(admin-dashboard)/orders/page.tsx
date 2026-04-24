@@ -19,8 +19,8 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Fulfillment Center</h1>
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+        <h1 className="text-2xl font-black text-foreground uppercase tracking-tight">Fulfillment Center</h1>
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
             Process and track mango shop orders
         </p>
       </div>

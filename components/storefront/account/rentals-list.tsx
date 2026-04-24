@@ -4,10 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { TreePine, ArrowRight, MapPin, Calendar, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+
+import { Database } from "@/types/database.types";
+
+type Rental = Database["public"]["Tables"]["rentals"]["Row"] & {
+  trees: Database["public"]["Tables"]["trees"]["Row"] & {
+    farmers: { farm_name: string | null } | null;
+  } | null;
+};
 
 interface RentalsListProps {
-  rentals: any[];
+  rentals: Rental[];
 }
 
 export function RentalsList({ rentals }: RentalsListProps) {
@@ -20,7 +27,7 @@ export function RentalsList({ rentals }: RentalsListProps) {
         <div className="space-y-3">
           <h3 className="text-2xl font-black text-slate-900 tracking-tight">No active rentals</h3>
           <p className="text-sm text-slate-500 font-medium max-w-xs mx-auto leading-relaxed">
-            You haven't rented any heritage trees yet. Explore our orchards to start your journey into sustainable farming.
+            You haven&apos;t rented any heritage trees yet. Explore our orchards to start your journey into sustainable farming.
           </p>
         </div>
         <Link
@@ -51,18 +58,25 @@ export function RentalsList({ rentals }: RentalsListProps) {
             <div className="flex flex-col sm:flex-row items-center gap-6">
               {/* Compact Image */}
               <div className="relative w-full sm:w-32 h-48 sm:h-32 bg-slate-50 rounded-2xl overflow-hidden shrink-0">
-                {rental.trees?.photos?.[0] ? (
-                  <Image
-                    src={rental.trees.photos[0]}
-                    alt={rental.trees.variety}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <TreePine size={32} className="text-slate-100" />
-                  </div>
-                )}
+                {(() => {
+                  const photos = rental.trees?.photos as string[] | null;
+                  const firstPhoto = photos?.[0];
+                  if (firstPhoto) {
+                    return (
+                      <Image
+                        src={firstPhoto}
+                        alt={rental.trees?.variety || "Tree"}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                    );
+                  }
+                  return (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <TreePine size={32} className="text-slate-100" />
+                    </div>
+                  );
+                })()}
                 <div className="absolute inset-0 bg-black/5" />
               </div>
 
@@ -94,7 +108,7 @@ export function RentalsList({ rentals }: RentalsListProps) {
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Current Status</p>
                     <p className="text-xs font-bold text-slate-900 uppercase">{rental.status}</p>
                   </div>
-                  
+
                   <Link
                     href={`/trees/${rental.tree_id}`}
                     className="flex-1 sm:flex-none h-12 px-8 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 rounded-xl hover:bg-slate-800 transition-all shadow-md shadow-slate-200"

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Copy, Check, Share2 } from "lucide-react";
-import { FaFacebookF, FaPinterestP, FaInstagram, FaWhatsapp } from "react-icons/fa";
+import { FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
 import {

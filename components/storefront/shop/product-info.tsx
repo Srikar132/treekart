@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingBag, CheckCircle, Info, Scale, Tag, Sparkles, Share2 } from "lucide-react";
+import { CheckCircle, Info, Scale, Tag, Sparkles, Share2 } from "lucide-react";
 import { useMangoCart } from "@/store/use-mango-cart";
 import { useState } from "react";
 import { AnimatedButton } from "@/components/shared/animated-button";
@@ -10,19 +10,10 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { ShareDialog } from "@/components/shared/share-dialog";
 
+import { MangoProduct } from "@/types/database.types";
+
 interface ProductInfoProps {
-  product: {
-    id: string;
-    name: string;
-    variety: string;
-    price: number;
-    original_price: number | null;
-    description: string | null;
-    weight_kg: number | null;
-    badge: string | null;
-    status: string | null;
-    image_url: string | null;
-  };
+  product: MangoProduct;
 }
 
 export function ProductInfo({ product }: ProductInfoProps) {
@@ -46,7 +37,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       price: product.price,
       pricePerKg: product.price,
       imageUrl: product.image_url || "/placeholder-mango.png",
-      badge: product.badge as any,
+      badge: product.badge,
       weightKg: product.weight_kg,
       qty: quantity,
     });
@@ -171,53 +162,87 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </motion.div>
 
       <motion.div variants={item} className="mt-auto pt-8 border-t">
-        {product.status === 'out_of_stock' ? (
-          <div className="bg-muted border rounded-xl p-6 text-center">
-            <p className="font-bold text-muted-foreground">Temporarily Out of Stock</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              {/* Quantity Selector */}
-              <div className="flex items-center h-16 px-4 rounded-xl border border-border bg-secondary/20 font-bold min-w-[140px] justify-between">
-                <button
-                  onClick={decrement}
-                  className="w-8 h-8 flex items-center justify-center hover:text-primary transition-colors"
-                >
-                  -
-                </button>
-                <span className="text-lg w-8 text-center">{quantity}</span>
-                <button
-                  onClick={increment}
-                  className="w-8 h-8 flex items-center justify-center hover:text-primary transition-colors"
-                >
-                  +
-                </button>
-              </div>
+        <div className="space-y-4">
+          {product.status === 'out_of_stock' && (
+            <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-center gap-3 mb-2">
+              <Info size={20} className="text-red-500 shrink-0" />
+              <p className="text-sm font-medium text-red-700">
+                This variety is currently out of stock. We&apos;ll be back with fresh harvests soon!
+              </p>
+            </div>
+          )}
 
-              {/* Add to Cart */}
-              <AnimatedButton
-                label={isAdding ? "Adding..." : "Add to Cart"}
-                onClick={handleAddToCart}
-                disabled={isAdding}
-                className="flex-1 h-16 text-lg font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all  bg-primary text-white border-transparent tracking-normal uppercase"
-                fillClassName="bg-white"
-                hoverTextClassName="hover:text-primary"
-              />
+          {product.status === 'pre_order' && (
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center gap-3 mb-2">
+              <Sparkles size={20} className="text-blue-500 shrink-0" />
+              <p className="text-sm font-medium text-blue-700">
+                Exclusive Pre-order: Secured fresh from our upcoming harvest.
+              </p>
+            </div>
+          )}
+
+          <div className="flex items-center gap-4">
+            {/* Quantity Selector */}
+            <div className={cn(
+              "flex items-center h-16 px-4 rounded-xl border border-border bg-secondary/20 font-bold min-w-[140px] justify-between",
+              product.status === 'out_of_stock' && "opacity-50 pointer-events-none"
+            )}>
+              <button
+                onClick={decrement}
+                disabled={product.status === 'out_of_stock'}
+                className="w-8 h-8 flex items-center justify-center hover:text-primary transition-colors disabled:cursor-not-allowed"
+              >
+                -
+              </button>
+              <span className="text-lg w-8 text-center">{quantity}</span>
+              <button
+                onClick={increment}
+                disabled={product.status === 'out_of_stock'}
+                className="w-8 h-8 flex items-center justify-center hover:text-primary transition-colors disabled:cursor-not-allowed"
+              >
+                +
+              </button>
             </div>
 
-            {/* Buy It Now */}
+            {/* Add to Cart */}
             <AnimatedButton
-              label="Buy It Now"
-              fillClassName="bg-primary"
-              hoverTextClassName="hover:text-primary-foreground"
-              onClick={handleBuyNow}
-              className="w-full h-16 text-lg font-bold  bg-white text-black border-2 border-black hover:bg-gray-50 transition-all uppercase tracking-wider shadow-sm"
-            >
-              Buy It Now
-            </AnimatedButton>
+              label={
+                product.status === 'out_of_stock'
+                  ? "Out of Stock"
+                  : isAdding
+                    ? "Adding..."
+                    : product.status === 'pre_order'
+                      ? "Pre-order Item"
+                      : "Add to Cart"
+              }
+              onClick={handleAddToCart}
+              disabled={isAdding || product.status === 'out_of_stock'}
+              className={cn(
+                "flex-1 h-16 text-lg font-bold shadow-lg transition-all border-transparent tracking-normal uppercase",
+                product.status === 'out_of_stock'
+                  ? "bg-muted text-muted-foreground cursor-not-allowed shadow-none"
+                  : "bg-primary text-white shadow-primary/20 hover:shadow-primary/40"
+              )}
+              fillClassName="bg-white"
+              hoverTextClassName="hover:text-primary"
+            />
           </div>
-        )}
+
+          {/* Buy It Now */}
+          <AnimatedButton
+            label={product.status === 'pre_order' ? "Pre-order Now" : "Buy It Now"}
+            fillClassName="bg-primary"
+            hoverTextClassName="hover:text-primary-foreground"
+            onClick={handleBuyNow}
+            disabled={product.status === 'out_of_stock'}
+            className={cn(
+              "w-full h-16 text-lg font-bold transition-all uppercase tracking-wider shadow-sm",
+              product.status === 'out_of_stock'
+                ? "bg-muted text-muted-foreground cursor-not-allowed border-transparent"
+                : "bg-white text-black border-2 border-black hover:bg-gray-50"
+            )}
+          />
+        </div>
       </motion.div>
     </motion.div>
   );

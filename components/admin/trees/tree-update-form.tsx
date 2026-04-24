@@ -65,13 +65,13 @@ export function TreeUpdateForm({ treeId, rentalId }: TreeUpdateFormProps) {
     return (
         <div className="data-card border-primary/10 shadow-sm overflow-hidden p-0">
             {/* Form Header */}
-            <div className="bg-slate-50/80 px-6 py-5 border-b border-slate-100 flex items-center gap-3">
-                <div className="h-8 w-8 bg-white rounded-lg border border-slate-200 flex items-center justify-center text-primary shadow-sm">
+            <div className="bg-muted px-6 py-5 border-b border-border flex items-center gap-3">
+                <div className="h-8 w-8 bg-card rounded-lg border border-border flex items-center justify-center text-primary shadow-sm">
                     <Info size={18} />
                 </div>
                 <div>
-                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">New Progress Log</h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Post a growth update for this lease</p>
+                    <h3 className="text-sm font-black text-foreground uppercase tracking-tight">New Progress Log</h3>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Post a growth update for this lease</p>
                 </div>
             </div>
 
@@ -80,16 +80,16 @@ export function TreeUpdateForm({ treeId, rentalId }: TreeUpdateFormProps) {
                     {/* Title */}
                     <FormField control={form.control} name="title" render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                                 Update Heading
                             </FormLabel>
                             <FormControl>
                                 <div className="relative">
-                                    <Type size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" />
+                                    <Type size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
                                     <Input
                                         {...field}
                                         placeholder="e.g. Seasonal Bloom Observed"
-                                        className="h-12 pl-10 bg-slate-50/50 border-slate-100 rounded-xl focus-visible:bg-white focus-visible:ring-primary/10 text-xs font-bold"
+                                        className="h-12 pl-10 bg-muted/50 border-border rounded-xl focus-visible:bg-card focus-visible:ring-primary/10 text-xs font-bold"
                                     />
                                 </div>
                             </FormControl>
@@ -100,16 +100,16 @@ export function TreeUpdateForm({ treeId, rentalId }: TreeUpdateFormProps) {
                     {/* Description */}
                     <FormField control={form.control} name="description" render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                                 Narrative Details
                             </FormLabel>
                             <FormControl>
                                 <div className="relative">
-                                    <AlignLeft size={16} className="absolute left-3 top-4 text-slate-300" />
+                                    <AlignLeft size={16} className="absolute left-3 top-4 text-muted-foreground/50" />
                                     <Textarea
                                         {...field}
                                         placeholder="Describe the current state of the heritage tree..."
-                                        className="min-h-[140px] pl-10 pt-3.5 bg-slate-50/50 border-slate-100 rounded-xl focus-visible:bg-white focus-visible:ring-primary/10 text-xs font-medium leading-relaxed"
+                                        className="min-h-[140px] pl-10 pt-3.5 bg-muted/50 border-border rounded-xl focus-visible:bg-card focus-visible:ring-primary/10 text-xs font-medium leading-relaxed"
                                     />
                                 </div>
                             </FormControl>
@@ -120,16 +120,16 @@ export function TreeUpdateForm({ treeId, rentalId }: TreeUpdateFormProps) {
                     {/* Video URL */}
                     <FormField control={form.control} name="video_url" render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                                 Video Log (Optional)
                             </FormLabel>
                             <FormControl>
                                 <div className="relative">
-                                    <Video size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" />
+                                    <Video size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
                                     <Input
                                         {...field}
                                         placeholder="Cloudinary/YouTube URL"
-                                        className="h-12 pl-10 bg-slate-50/50 border-slate-100 rounded-xl focus-visible:bg-white focus-visible:ring-primary/10 text-xs font-bold"
+                                        className="h-12 pl-10 bg-muted/50 border-border rounded-xl focus-visible:bg-card focus-visible:ring-primary/10 text-xs font-bold"
                                     />
                                 </div>
                             </FormControl>

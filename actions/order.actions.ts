@@ -103,6 +103,28 @@ export async function createMangoOrder(
   const razorpay = getRazorpay();
 
   const { grandTotalPaise, grandTotal } = computeTotals(items);
+  
+  // Verify product availability
+  const productIds = items.map(i => i.id);
+  const { data: dbProducts, error: productError } = await supabase
+    .from("mango_products")
+    .select("id, status, name")
+    .in("id", productIds);
+
+  if (productError) {
+    throw new Error(`Failed to verify products: ${productError.message}`);
+  }
+
+  for (const item of items) {
+    const dbProduct = dbProducts?.find(p => p.id === item.id);
+    if (!dbProduct) {
+      throw new Error(`Product "${item.name}" no longer exists`);
+    }
+    if (dbProduct.status === "out_of_stock") {
+      throw new Error(`Product "${dbProduct.name}" is currently out of stock`);
+    }
+  }
+
   const orderItems = buildOrderItems(items);
   const receiptId = `mango_${user.id.slice(0, 8)}_${Date.now()}`;
 

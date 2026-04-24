@@ -49,7 +49,7 @@ export function CommandPalette() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="hidden md:flex relative items-center gap-2 w-96 px-3 h-10 bg-secondary/50 border border-transparent hover:border-primary/20 hover:bg-white dark:hover:bg-slate-800/50 transition-all rounded-lg text-xs text-muted-foreground group"
+        className="hidden md:flex relative items-center gap-2 w-96 px-3 h-10 bg-muted/50 border border-transparent hover:border-primary/20 hover:bg-card transition-all rounded-lg text-xs text-muted-foreground group"
       >
         <Search size={16} className="group-hover:text-primary transition-colors" />
         <span className="flex-1 text-left">Search or jump to...</span>
@@ -66,10 +66,6 @@ export function CommandPalette() {
             <CommandItem onSelect={() => runCommand(() => router.push("/admin"))}>
               <LayoutDashboard className="mr-2 h-4 w-4" />
               <span>Dashboard</span>
-            </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => router.push("/admin/settings"))}>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
             </CommandItem>
           </CommandGroup>
           <CommandSeparator />

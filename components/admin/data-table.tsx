@@ -74,7 +74,7 @@ export function DataTable<TData>({
                 <table className="w-full text-left">
                     <thead>
                         {table.getHeaderGroups().map((hg) => (
-                            <tr key={hg.id} className="admin-table-header border-b border-slate-100">
+                            <tr key={hg.id} className="admin-table-header border-b border-border">
                                 {hg.headers.map((header) => (
                                     <th key={header.id} className="py-5 px-6">
                                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -83,16 +83,16 @@ export function DataTable<TData>({
                             </tr>
                         ))}
                     </thead>
-                    <tbody className="divide-y divide-slate-50">
+                    <tbody className="divide-y divide-border/50">
                         {table.getRowModel().rows.length === 0 ? (
                             <tr>
                                 <td colSpan={columns.length} className="py-20 text-center">
-                                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No records found</p>
+                                    <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">No records found</p>
                                 </td>
                             </tr>
                         ) : (
                             table.getRowModel().rows.map((row) => (
-                                <tr key={row.id} className="group hover:bg-slate-50/50 transition-colors">
+                                <tr key={row.id} className="group hover:bg-accent/50 transition-colors">
                                     {row.getVisibleCells().map((cell) => (
                                         <td key={cell.id} className="py-5 px-6">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -106,8 +106,8 @@ export function DataTable<TData>({
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            <div className="flex items-center justify-between px-6 py-4 border-t border-border">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                     {rowCount} total · page {page} of {pageCount}
                 </p>
                 <div className="flex items-center gap-1">

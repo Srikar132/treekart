@@ -61,7 +61,7 @@ export function TestimonialForm({ initialData, onSuccess }: TestimonialFormProps
                     <div className="flex gap-6 items-start">
                         {/* Avatar Upload */}
                     <div className="space-y-4 shrink-0">
-                         <div className="h-20 w-20 bg-slate-50 rounded-full overflow-hidden border border-slate-200 relative group">
+                         <div className="h-20 w-20 bg-muted rounded-full overflow-hidden border border-border relative group">
                             {avatarUrl ? (
                                 <>
                                     <img src={avatarUrl} alt="Preview" className="w-full h-full object-cover" />
@@ -82,7 +82,7 @@ export function TestimonialForm({ initialData, onSuccess }: TestimonialFormProps
                                         <button 
                                             type="button" 
                                             onClick={() => open()}
-                                            className="w-full h-full flex flex-col items-center justify-center text-slate-300 hover:text-primary transition-colors"
+                                            className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/30 hover:text-primary transition-colors"
                                         >
                                             <Plus size={20} />
                                         </button>
@@ -90,16 +90,16 @@ export function TestimonialForm({ initialData, onSuccess }: TestimonialFormProps
                                 </CldUploadWidget>
                             )}
                         </div>
-                        <p className="text-[8px] font-black uppercase text-center text-slate-400">Avatar</p>
+                        <p className="text-[8px] font-black uppercase text-center text-muted-foreground">Avatar</p>
                     </div>
 
                     {/* Basic Info */}
                     <div className="flex-1 space-y-4">
                         <FormField control={form.control} name="name" render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Author Name</FormLabel>
+                                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Author Name</FormLabel>
                                 <FormControl>
-                                    <Input {...field} placeholder="e.g. Rahul Sharma" className="bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold" />
+                                    <Input {...field} placeholder="e.g. Rahul Sharma" className="bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold" />
                                 </FormControl>
                                 <FormMessage className="text-[10px] font-bold" />
                             </FormItem>
@@ -107,9 +107,9 @@ export function TestimonialForm({ initialData, onSuccess }: TestimonialFormProps
 
                         <FormField control={form.control} name="role" render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Designation / Role</FormLabel>
+                                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Designation / Role</FormLabel>
                                 <FormControl>
-                                    <Input {...field} placeholder="e.g. Loyal Subscriber" className="bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-medium" />
+                                    <Input {...field} placeholder="e.g. Loyal Subscriber" className="bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-medium" />
                                 </FormControl>
                                 <FormMessage className="text-[10px] font-bold" />
                             </FormItem>
@@ -120,9 +120,9 @@ export function TestimonialForm({ initialData, onSuccess }: TestimonialFormProps
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="rating" render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Satisfaction Rating</FormLabel>
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Satisfaction Rating</FormLabel>
                             <FormControl>
-                                <div className="flex items-center gap-2 h-12 bg-slate-50 rounded-xl px-4">
+                                <div className="flex items-center gap-2 h-12 bg-muted rounded-xl px-4">
                                     {[1, 2, 3, 4, 5].map((s) => (
                                         <button
                                             key={s}
@@ -130,7 +130,7 @@ export function TestimonialForm({ initialData, onSuccess }: TestimonialFormProps
                                             onClick={() => field.onChange(s)}
                                             className={cn(
                                                 "transition-colors",
-                                                s <= field.value ? "text-orange-500" : "text-slate-200 hover:text-slate-300"
+                                                s <= field.value ? "text-orange-500" : "text-muted-foreground/20 hover:text-muted-foreground/40"
                                             )}
                                         >
                                             <Star size={16} fill={s <= field.value ? "currentColor" : "none"} />
@@ -145,16 +145,16 @@ export function TestimonialForm({ initialData, onSuccess }: TestimonialFormProps
 
                 <FormField control={form.control} name="content" render={({ field }) => (
                     <FormItem>
-                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Review Narrative</FormLabel>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Review Narrative</FormLabel>
                         <FormControl>
-                            <Textarea {...field} placeholder="Share the member's experience with the orchard..." className="min-h-[100px] bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-medium leading-relaxed" />
+                            <Textarea {...field} placeholder="Share the member's experience with the orchard..." className="min-h-[100px] bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-medium leading-relaxed" />
                         </FormControl>
                         <FormMessage className="text-[10px] font-bold" />
                     </FormItem>
                 )} />
             </div>
 
-                <div className="pt-4 border-t border-slate-100">
+                <div className="pt-4 border-t border-border">
                     <Button 
                         type="submit" 
                         disabled={isPending}

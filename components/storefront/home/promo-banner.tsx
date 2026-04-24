@@ -33,7 +33,7 @@ export function PromoBanner() {
                     </h2>
 
                     <p className="p-base mb-8 md:mb-10 text-muted-foreground">
-                        When you've got nature's best, you've got everything. Treat yourself to the freshest, 100% organic mangoes straight from our farms.
+                        When you&apos;ve got nature&apos;s best, you&apos;ve got everything. Treat yourself to the freshest, 100% organic mangoes straight from our farms.
                     </p>
 
                     <motion.div

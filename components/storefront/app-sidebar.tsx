@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Store, Package, FileText, FolderOpen, User, Heart } from "lucide-react";
+import { Home, Store, Package, FileText, User, X } from "lucide-react";
 import {
     Sidebar,
     SidebarContent,
     SidebarGroup,
     SidebarGroupContent,
-    SidebarGroupLabel,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
@@ -15,7 +14,6 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
 
 const menuItems = [
     {

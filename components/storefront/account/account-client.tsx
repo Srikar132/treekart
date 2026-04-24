@@ -8,7 +8,6 @@ import {
   UserCircle,
   LogOut
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -106,8 +105,8 @@ export function AccountClient({ user, rentals, orders }: AccountClientProps) {
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <SelectItem 
-                    key={item.id} 
+                  <SelectItem
+                    key={item.id}
                     value={item.id}
                     className="rounded-xl py-4 focus:bg-primary/5 focus:text-primary data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
                   >
@@ -180,11 +179,11 @@ export function AccountClient({ user, rentals, orders }: AccountClientProps) {
       {/* Content Area - Conditional Rendering */}
       <div className="relative animate-in fade-in slide-in-from-bottom-4 duration-700 min-h-[400px]">
         {activeTab === "dashboard" && (
-          <DashboardOverview 
-            user={user} 
-            rentals={rentals} 
-            orders={orders} 
-            onTabChange={(tab: any) => setActiveTab(tab)} 
+          <DashboardOverview
+            user={user}
+            rentals={rentals}
+            orders={orders}
+            onTabChange={(tab: any) => setActiveTab(tab)}
           />
         )}
         {activeTab === "rentals" && (

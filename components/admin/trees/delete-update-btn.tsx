@@ -33,7 +33,7 @@ export function DeleteUpdateBtn({ updateId, rentalId }: DeleteUpdateBtnProps) {
             size="icon"
             onClick={handleDelete}
             disabled={isPending}
-            className="h-8 w-8 text-slate-300 hover:text-destructive hover:bg-destructive/5 rounded-lg transition-colors"
+            className="h-8 w-8 text-muted-foreground/30 hover:text-destructive hover:bg-destructive/5 rounded-lg transition-colors"
         >
             {isPending ? (
                 <Loader2 size={14} className="animate-spin text-destructive" />

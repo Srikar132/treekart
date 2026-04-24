@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Phone, Mail, MapPin, CreditCard } from "lucide-react";
 import { BsInstagram, BsTwitter, BsFacebook } from "react-icons/bs";
 import { motion, type Variants } from "framer-motion";
+import settings from "@/constants/settings";
 
 const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -74,17 +75,27 @@ export function Footer() {
                             <li className="flex items-start gap-3">
                                 <Phone className="w-4 h-4 shrink-0 text-primary mt-1" />
                                 <div className="flex flex-col space-y-1">
-                                    <Link href="tel:+919912217619" className="hover:text-primary transition-colors">+91 99122 17619</Link>
-                                    <Link href="tel:+919848062600" className="hover:text-primary transition-colors">+91 98480 62600</Link>
+                                    {settings.PHONE.split("/").map((phone) => {
+                                        const cleanPhone = phone.trim();
+                                        return (
+                                            <Link
+                                                key={cleanPhone}
+                                                href={`tel:${cleanPhone.replace(/\s+/g, "")}`}
+                                                className="hover:text-primary transition-colors"
+                                            >
+                                                {cleanPhone}
+                                            </Link>
+                                        );
+                                    })}
                                 </div>
                             </li>
                             <li className="flex items-center gap-3">
                                 <Mail className="w-4 h-4 shrink-0 text-primary" />
-                                <Link href="mailto:info@treekart.in">info@treekart.in</Link>
+                                <Link href={`mailto:${settings.EMAIL}`}>{settings.EMAIL}</Link>
                             </li>
                             <li className="flex items-start gap-3">
                                 <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
-                                <span>Rajamundry, Andhra Pradesh, India</span>
+                                <span>{settings.ADDRESS}</span>
                             </li>
                         </ul>
                         <div className="flex gap-3">

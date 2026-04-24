@@ -28,7 +28,7 @@ export const productColumns: ColumnDef<MangoProduct>[] = [
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                className="hover:bg-transparent p-0 text-[10px] font-black uppercase tracking-widest text-slate-400"
+                className="hover:bg-transparent p-0 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
             >
                 Product <ArrowUpDown className="ml-2 h-3 w-3" />
             </Button>
@@ -37,18 +37,18 @@ export const productColumns: ColumnDef<MangoProduct>[] = [
             const product = row.original
             return (
                 <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
+                    <div className="h-12 w-12 rounded-xl bg-muted overflow-hidden shrink-0 border border-border">
                         {product.image_url ? (
                             <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-slate-400">
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground/50">
                                 <Package size={16} />
                             </div>
                         )}
                     </div>
                     <div className="min-w-0">
-                        <p className="text-[10px] font-black text-slate-400 uppercase truncate">#{product.id.slice(0, 8)}</p>
-                        <p className="text-sm font-bold text-slate-900 truncate max-w-[200px]">{product.name}</p>
+                        <p className="text-[10px] font-black text-muted-foreground uppercase truncate">#{product.id.slice(0, 8)}</p>
+                        <p className="text-sm font-bold text-foreground truncate max-w-[200px]">{product.name}</p>
                     </div>
                 </div>
             )
@@ -57,7 +57,7 @@ export const productColumns: ColumnDef<MangoProduct>[] = [
     {
         accessorKey: "weight_kg",
         header: "Weight",
-        cell: ({ row }) => <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight">{row.getValue("weight_kg")} KG</span>
+        cell: ({ row }) => <span className="text-[10px] font-black text-foreground uppercase tracking-tight">{row.getValue("weight_kg")} KG</span>
     },
     {
         accessorKey: "price",
@@ -66,9 +66,9 @@ export const productColumns: ColumnDef<MangoProduct>[] = [
             const product = row.original
             return (
                 <div>
-                    <p className="text-sm font-black text-slate-900 uppercase">₹{product.price.toLocaleString()}</p>
+                    <p className="text-sm font-black text-foreground uppercase">₹{product.price.toLocaleString()}</p>
                     {product.original_price && (
-                        <p className="text-[9px] font-bold text-slate-400 uppercase line-through decoration-destructive/30">₹{product.original_price.toLocaleString()}</p>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase line-through decoration-destructive/30">₹{product.original_price.toLocaleString()}</p>
                     )}
                 </div>
             )
@@ -79,7 +79,7 @@ export const productColumns: ColumnDef<MangoProduct>[] = [
         header: "Badge",
         cell: ({ row }) => {
             const badge = row.getValue("badge") as string
-            if (!badge || badge === "None") return <span className="text-[10px] text-slate-300">—</span>
+            if (!badge || badge === "None") return <span className="text-[10px] text-muted-foreground/30">—</span>
             return (
                 <Badge className={cn(
                     "rounded-md text-[8px] font-black uppercase tracking-widest border-0 shadow-none",
@@ -106,7 +106,7 @@ export const productColumns: ColumnDef<MangoProduct>[] = [
                         status === "pre_order" ? "bg-purple-500" : 
                         "bg-destructive"
                     )} />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                         {status === "available" ? "In Stock" : 
                          status === "pre_order" ? "Pre-Order" : 
                          "Out of Stock"}
@@ -140,13 +140,13 @@ function ProductActions({ product }: { product: MangoProduct }) {
         <div className="text-right">
             <DropdownMenu>
                 <DropdownMenuTrigger 
-                    className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "rounded-lg hover:bg-slate-100 text-slate-400")}
+                    className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "rounded-lg hover:bg-muted text-muted-foreground")}
                 >
                     <MoreHorizontal size={18} />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 rounded-xl border-slate-200 shadow-xl">
+                <DropdownMenuContent align="end" className="w-48 rounded-xl border-border shadow-xl">
                     <DropdownMenuGroup>
-                        <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Management</DropdownMenuLabel>
+                        <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Management</DropdownMenuLabel>
                         <DropdownMenuItem 
                             render={
                                 <Link href={`/store`} target="_blank" className="flex items-center gap-2 cursor-pointer w-full">

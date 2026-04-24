@@ -1,4 +1,6 @@
 import { Metadata } from "next";
+import settings from "@/constants/settings";
+import Link from "next/link";
 import {
   Accordion,
   AccordionContent,
@@ -121,12 +123,19 @@ export default function FAQPage() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="h-14 px-10 bg-primary text-white text-[10px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-all">
-              Email Us
-            </button>
-            <button className="h-14 px-10 border border-primary text-primary text-[10px] font-bold uppercase tracking-widest hover:bg-primary/5 transition-all">
-              WhatsApp Support
-            </button>
+            <Link href={`mailto:${settings.EMAIL}`}>
+              <button className="h-14 px-10 bg-primary text-white text-[10px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-all w-full sm:w-auto">
+                Email Us
+              </button>
+            </Link>
+            <Link 
+              href={`https://wa.me/${settings.PHONE.split("/")[0].replace(/\D/g, "")}`} 
+              target="_blank"
+            >
+              <button className="h-14 px-10 border border-primary text-primary text-[10px] font-bold uppercase tracking-widest hover:bg-primary/5 transition-all w-full sm:w-auto">
+                WhatsApp Support
+              </button>
+            </Link>
           </div>
         </div>
       </div>

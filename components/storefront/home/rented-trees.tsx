@@ -1,8 +1,10 @@
 import { TreeCard, type TreeProduct } from "@/components/storefront/cards/tree-card";
 import { AnimatedButton } from "@/components/shared/animated-button";
 
+import { Tree } from "@/types/database.types";
+
 interface RentedTreesProps {
-    initialTrees: any[];
+    initialTrees: Tree[];
 }
 
 export function RentedTrees({ initialTrees }: RentedTreesProps) {

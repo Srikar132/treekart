@@ -22,6 +22,8 @@ const PUBLIC_PREFIXES = [
 const AUTH_PAGES = [
     '/auth/signin',
     '/auth/signup',
+    '/auth/forgot-password',
+    '/auth/reset-password',
     '/admin/login',
 ]
 
@@ -102,12 +104,49 @@ export async function updateSession(request: NextRequest) {
                 },
             },
         }
-    )
+    );
 
     // IMPORTANT: Do NOT put any logic between createServerClient and getUser().
     const { data: { user } } = await supabase.auth.getUser()
 
+    // ── PHASE 0 — Arcjet Protection ───────────────────────────────────────────
     const { pathname } = request.nextUrl
+
+    // Skip Arcjet for the blocked page itself and other static assets
+    const isExcluded = pathname === "/blocked" ||
+        pathname.startsWith("/_next") ||
+        pathname.includes(".")
+
+    if (!isExcluded) {
+        const { aj, authenticatedAj } = await import('@/lib/arcjet')
+
+        // Determine if we should use the authenticated rate limiter
+        const isProtectedRoute = isAdminRoute(pathname) ||
+            isFarmerRoute(pathname) ||
+            isCustomerOnlyRoute(pathname)
+
+        let decision;
+
+        if (isProtectedRoute && user) {
+            // Protected routes use the user's ID for rate limiting
+            decision = await authenticatedAj.protect(request, {
+                userId: user.id,
+                requested: 1,
+            })
+        } else {
+            // Public/Auth routes use the IP-based limiter
+            decision = await aj.protect(request, {
+                requested: 1,
+            })
+        }
+
+        if (decision.isDenied()) {
+            const url = request.nextUrl.clone()
+            url.pathname = "/blocked"
+            url.searchParams.set("reason", decision.reason.type ?? "UNKNOWN")
+            return NextResponse.redirect(url)
+        }
+    }
 
     // ── PHASE 1 — Unauthenticated ──────────────────────────────────────────────
     if (!user) {
@@ -127,8 +166,13 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url)
     }
 
-    // ── PHASE 2 — Authenticated — fetch role once ──────────────────────────────
-    const { data: profile } = await supabase
+    // ── PHASE 2 — Auth Page Bounce ────────────────────────────────────────────
+    // If they are logged in and hit an auth page, we usually bounce them.
+    // BUT we need to fetch the profile first to know where to bounce them.
+    // However, if they are already on an auth page, we should ALLOW it if their 
+    // profile is missing (e.g. deleted user trying to sign in again).
+
+    const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
@@ -136,11 +180,33 @@ export async function updateSession(request: NextRequest) {
 
     const role = profile?.role as 'admin' | 'farmer' | 'customer' | undefined
 
-    // ── PHASE 3 — Bounce logged-in users off auth pages ───────────────────────
     if (isAuthPage(pathname)) {
+        // Special case: reset-password page MUST be accessible even when logged in
+        // (because the recovery link creates a session)
+        if (pathname.startsWith('/auth/reset-password')) {
+            return supabaseResponse
+        }
+
+        if (!profile || profileError) {
+            // User is deleted or has no profile — ALLOW them to stay on auth pages
+            // so they can sign out or sign in as someone else.
+            return supabaseResponse
+        }
+
+        // Valid user on auth page — bounce to their dashboard
         if (role === 'admin') return redirectTo(request, '/admin')
         if (role === 'farmer') return redirectTo(request, '/farmer')
-        return redirectTo(request, '/')          // customer / unknown → home
+        return redirectTo(request, '/')
+    }
+
+    // ── PHASE 3 — Profile Integrity Check ─────────────────────────────────────
+    // For all other routes (except public ones), if they have an Auth session 
+    // but NO profile, they are likely a deleted user. Force them to sign in.
+    if (!isPublicRoute(pathname) && (!profile || profileError)) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/auth/signin'
+        url.searchParams.set('redirectTo', pathname + request.nextUrl.search)
+        return NextResponse.redirect(url)
     }
 
     // ── PHASE 4 — ADMIN rules ──────────────────────────────────────────────────

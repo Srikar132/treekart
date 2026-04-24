@@ -32,7 +32,7 @@ export function HeroSlideCard({ slide }: HeroSlideCardProps) {
 
     return (
         <div className="data-card group relative">
-            <div className="aspect-[21/9] bg-slate-100 rounded-xl overflow-hidden mb-4 relative">
+            <div className="aspect-[21/9] bg-muted rounded-xl overflow-hidden mb-4 relative">
                 <img src={slide.image_url} alt={slide.eyebrow} className="w-full h-full object-cover" />
                 <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Dialog open={open} onOpenChange={setOpen}>
@@ -43,7 +43,7 @@ export function HeroSlideCard({ slide }: HeroSlideCardProps) {
                                 </Button>
                             }
                         />
-                        <DialogContent className="max-w-4xl rounded-2xl border-slate-200">
+                        <DialogContent className="max-w-4xl rounded-2xl border-border">
                             <DialogHeader>
                                 <DialogTitle className="text-sm font-black uppercase tracking-tight">Refine Hero Story</DialogTitle>
                             </DialogHeader>
@@ -69,16 +69,16 @@ export function HeroSlideCard({ slide }: HeroSlideCardProps) {
             <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
                     <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em] leading-none mb-1">{slide.eyebrow}</p>
-                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight leading-tight">
+                    <h4 className="text-sm font-black text-foreground uppercase tracking-tight leading-tight">
                         {slide.headline?.join(' ')}
                     </h4>
-                    <p className="text-[10px] font-medium text-slate-400 line-clamp-1">{slide.sub}</p>
+                    <p className="text-[10px] font-medium text-muted-foreground line-clamp-1">{slide.sub}</p>
                     <div className="flex items-center gap-2 pt-1">
-                        <ExternalLink size={10} className="text-slate-300" />
-                        <span className="text-[9px] font-bold text-slate-400 uppercase">{slide.button_link}</span>
+                        <ExternalLink size={10} className="text-muted-foreground/30" />
+                        <span className="text-[9px] font-bold text-muted-foreground uppercase">{slide.button_link}</span>
                     </div>
                 </div>
-                <div className="cursor-ns-resize text-slate-300 hover:text-slate-900 transition-colors pt-1">
+                <div className="cursor-ns-resize text-muted-foreground/30 hover:text-foreground transition-colors pt-1">
                     <MoveVertical size={18} />
                 </div>
             </div>

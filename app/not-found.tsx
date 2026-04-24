@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Leaf, MoveRight, Search, Home, ShoppingBag, TreePine } from "lucide-react";
+import { MoveRight, Home, ShoppingBag } from "lucide-react";
 import { AnimatedButton } from "@/components/shared/animated-button";
 
 export default function NotFound() {
@@ -50,7 +50,7 @@ export default function NotFound() {
               Lost in the <span className="text-primary italic">Orchard?</span>
             </h1>
             <p className="text-[11px] md:text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] max-w-xs mx-auto leading-relaxed">
-              This branch doesn't exist yet, or it might have been harvested already.
+              This branch doesn&apos;t exist yet, or it might have been harvested already.
             </p>
           </div>
         </motion.div>

@@ -44,7 +44,7 @@ export function OrderStatusUpdater({ orderId, currentStatus, trackingId: initial
       {/* Visual Stepper */}
       <div className="relative flex justify-between">
         {/* Connection Line */}
-        <div className="absolute top-5 left-0 w-full h-[2px] bg-slate-100 -z-10" />
+        <div className="absolute top-5 left-0 w-full h-[2px] bg-muted -z-10" />
         <div 
           className="absolute top-5 left-0 h-[2px] bg-primary -z-10 transition-all duration-700" 
           style={{ width: `${(currentStepIndex / (steps.length - 1)) * 100}%` }}
@@ -66,15 +66,15 @@ export function OrderStatusUpdater({ orderId, currentStatus, trackingId: initial
               )}
             >
               <div className={cn(
-                "h-10 w-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm transition-all duration-500",
-                isActive ? "bg-primary text-white scale-110" : "bg-slate-100 text-slate-400"
+                "h-10 w-10 rounded-full flex items-center justify-center border-4 border-card shadow-sm transition-all duration-500",
+                isActive ? "bg-primary text-white scale-110" : "bg-muted text-muted-foreground"
               )}>
                 <Icon size={18} />
               </div>
               <div className="text-center">
                 <p className={cn(
                   "text-[10px] font-black uppercase tracking-widest",
-                  isActive ? "text-slate-900" : "text-slate-400"
+                  isActive ? "text-foreground" : "text-muted-foreground"
                 )}>
                   {step.label}
                 </p>
@@ -92,14 +92,14 @@ export function OrderStatusUpdater({ orderId, currentStatus, trackingId: initial
       {/* Inputs */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
         <div className="space-y-3">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tracking Information</label>
+          <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Tracking Information</label>
           <div className="relative group">
-            <Truck className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={16} />
+            <Truck className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 group-focus-within:text-primary transition-colors" size={16} />
             <Input 
               value={trackingId}
               onChange={(e) => setTrackingId(e.target.value)}
               placeholder="Enter logistics tracking ID..."
-              className="h-12 pl-12 bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold"
+              className="h-12 pl-12 bg-muted/50 border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold"
             />
           </div>
         </div>
@@ -118,5 +118,5 @@ export function OrderStatusUpdater({ orderId, currentStatus, trackingId: initial
 }
 
 function Separator() {
-  return <div className="h-px bg-slate-100 w-full" />
+  return <div className="h-px bg-border w-full" />
 }

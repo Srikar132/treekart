@@ -32,9 +32,9 @@ export default async function AdminDashboard() {
     getAdminStats(),
     getRecentActivity()
   ]);
-  const { recentOrders, recentRentals } = activity as { 
-    recentOrders: OrderWithProfile[]; 
-    recentRentals: RentalWithDetails[]; 
+  const { recentOrders, recentRentals } = activity as {
+    recentOrders: OrderWithProfile[];
+    recentRentals: RentalWithDetails[];
   };
 
   return (
@@ -61,16 +61,16 @@ function Header() {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">System Overview</h1>
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Real-time performance metrics</p>
+        <h1 className="text-2xl font-black uppercase tracking-tight text-foreground">System Overview</h1>
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Real-time performance metrics</p>
       </div>
       <div className="flex items-center gap-3">
         <div className="text-right hidden md:block">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Last Sync</p>
-          <p className="text-xs font-bold text-slate-900">Just Now</p>
+          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">Last Sync</p>
+          <p className="text-xs font-bold text-foreground">Just Now</p>
         </div>
-        <div className="h-10 w-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center shadow-sm">
-          <Clock size={18} className="text-slate-400" />
+        <div className="h-10 w-10 bg-card border border-border rounded-xl flex items-center justify-center shadow-sm">
+          <Clock size={18} className="text-muted-foreground" />
         </div>
       </div>
     </div>
@@ -99,8 +99,8 @@ function StatsGrid({ stats }: { stats: AdminStats }) {
             </div>
           </div>
           <div>
-            <p className="text-2xl font-black text-slate-900">{m.value}</p>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{m.label}</p>
+            <p className="text-2xl font-black text-foreground">{m.value}</p>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{m.label}</p>
           </div>
         </div>
       ))}
@@ -113,10 +113,10 @@ function RecentRentals({ rentals }: { rentals: RentalWithDetails[] }) {
     <div className="lg:col-span-7 data-card">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 bg-green-100 flex items-center justify-center rounded-lg text-green-600">
+          <div className="h-8 w-8 bg-green-100 dark:bg-green-900/30 flex items-center justify-center rounded-lg text-green-600 dark:text-green-400">
             <TreePine size={18} />
           </div>
-          <h3 className="text-sm font-black text-slate-900 uppercase">Recent Tree Rents</h3>
+          <h3 className="text-sm font-black text-foreground uppercase">Recent Tree Rents</h3>
         </div>
         <Link href="/admin/rentals" className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest flex items-center gap-1">
           View All <ArrowUpRight size={12} />
@@ -133,14 +133,14 @@ function RecentRentals({ rentals }: { rentals: RentalWithDetails[] }) {
               <th className="pb-4 px-2 text-right">Date</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border">
             {rentals.map((rental) => (
-              <tr key={rental.id} className="group hover:bg-slate-50/50 transition-colors">
+              <tr key={rental.id} className="group hover:bg-muted/50 transition-colors">
                 <td className="py-4 px-2">
-                  <p className="text-xs font-bold text-slate-900 uppercase truncate max-w-[120px]">{rental.profiles?.full_name}</p>
+                  <p className="text-xs font-bold text-foreground uppercase truncate max-w-[120px]">{rental.profiles?.full_name}</p>
                 </td>
                 <td className="py-4 px-2">
-                  <p className="text-xs font-bold text-slate-600 uppercase tracking-tight">{rental.trees?.variety}</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-tight">{rental.trees?.variety}</p>
                 </td>
                 <td className="py-4 px-2">
                   <Badge className="bg-green-100 text-green-700 hover:bg-green-100 rounded-md text-[8px] font-black uppercase tracking-widest border-0">
@@ -148,7 +148,7 @@ function RecentRentals({ rentals }: { rentals: RentalWithDetails[] }) {
                   </Badge>
                 </td>
                 <td className="py-4 px-2 text-right">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase">
                     {rental.rented_at ? new Date(rental.rented_at).toLocaleDateString() : 'N/A'}
                   </p>
                 </td>
@@ -166,10 +166,10 @@ function RecentOrders({ orders }: { orders: OrderWithProfile[] }) {
     <div className="lg:col-span-5 data-card">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 bg-orange-100 flex items-center justify-center rounded-lg text-orange-600">
+          <div className="h-8 w-8 bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center rounded-lg text-orange-600 dark:text-orange-400">
             <ShoppingBag size={18} />
           </div>
-          <h3 className="text-sm font-black text-slate-900 uppercase">Latest Orders</h3>
+          <h3 className="text-sm font-black text-foreground uppercase">Latest Orders</h3>
         </div>
         <Link href="/admin/orders" className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest flex items-center gap-1">
           Manage <ArrowUpRight size={12} />
@@ -178,22 +178,22 @@ function RecentOrders({ orders }: { orders: OrderWithProfile[] }) {
 
       <div className="space-y-4">
         {orders.map((order) => (
-          <Link 
-            key={order.id} 
-            href={`/admin/orders?search=${order.id.slice(0, 8)}`} 
-            className="flex items-center justify-between p-3 rounded-xl border border-slate-50 hover:border-primary/20 hover:bg-primary/5 transition-all bg-slate-50/30 group cursor-pointer block"
+          <Link
+            key={order.id}
+            href={`/admin/orders?search=${order.id.slice(0, 8)}`}
+            className="flex items-center justify-between p-3 rounded-xl border border-border hover:border-primary/20 hover:bg-primary/5 transition-all bg-muted/30 group cursor-pointer block"
           >
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-white rounded-lg flex items-center justify-center shadow-sm text-slate-400 group-hover:text-primary transition-colors">
+              <div className="h-10 w-10 bg-card border border-border rounded-lg flex items-center justify-center shadow-sm text-muted-foreground group-hover:text-primary transition-colors">
                 <ShoppingBag size={18} />
               </div>
               <div>
-                <p className="text-xs font-black text-slate-900 uppercase">#{order.id.slice(0, 8)}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{order.profiles?.full_name}</p>
+                <p className="text-xs font-black text-foreground uppercase">#{order.id.slice(0, 8)}</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{order.profiles?.full_name}</p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-xs font-black text-slate-900">₹{order.total_amount}</p>
+              <p className="text-xs font-black text-foreground">₹{order.total_amount}</p>
               <p className="text-[9px] font-bold text-green-600 uppercase tracking-widest">{order.status}</p>
             </div>
           </Link>

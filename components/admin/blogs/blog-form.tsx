@@ -93,12 +93,12 @@ export function BlogForm({ initialData }: BlogFormProps) {
               <div className="space-y-6">
                 <FormField control={form.control} name="title" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Article Title</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Article Title</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         placeholder="e.g. The Science of Alphonso Ripening"
-                        className="h-14 bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-lg font-black"
+                        className="h-14 bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-lg font-black"
                       />
                     </FormControl>
                     <FormMessage className="text-[10px] font-bold" />
@@ -108,15 +108,15 @@ export function BlogForm({ initialData }: BlogFormProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField control={form.control} name="slug" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">SEO Slug</FormLabel>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">SEO Slug</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                          <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/30" size={16} />
                           <Input
                             {...field}
                             placeholder="e.g. alphonso-ripening-science"
                             disabled
-                            className="h-12 pl-10 bg-slate-100 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold cursor-not-allowed"
+                            className="h-12 pl-10 bg-muted/50 border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold cursor-not-allowed"
                           />
                         </div>
                       </FormControl>
@@ -126,14 +126,14 @@ export function BlogForm({ initialData }: BlogFormProps) {
 
                   <FormField control={form.control} name="category" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Category</FormLabel>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Category</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/30" size={16} />
                           <Input
                             {...field}
                             placeholder="e.g. Orchard Updates"
-                            className="h-12 pl-10 bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold"
+                            className="h-12 pl-10 bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold"
                           />
                         </div>
                       </FormControl>
@@ -144,12 +144,12 @@ export function BlogForm({ initialData }: BlogFormProps) {
 
                 <FormField control={form.control} name="excerpt" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Executive Summary (Excerpt)</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Executive Summary (Excerpt)</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
                         placeholder="A short summary for the blog list view..."
-                        className="min-h-[80px] bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-medium"
+                        className="min-h-[80px] bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-medium"
                       />
                     </FormControl>
                     <FormMessage className="text-[10px] font-bold" />
@@ -158,12 +158,12 @@ export function BlogForm({ initialData }: BlogFormProps) {
 
                 <FormField control={form.control} name="content" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Full Article (Markdown)</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Full Article (Markdown)</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
                         placeholder="Write your story here..."
-                        className="min-h-[400px] bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-sm font-medium leading-relaxed font-mono"
+                        className="min-h-[400px] bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-sm font-medium leading-relaxed font-mono"
                       />
                     </FormControl>
                     <FormMessage className="text-[10px] font-bold" />
@@ -187,7 +187,7 @@ export function BlogForm({ initialData }: BlogFormProps) {
                       type="button"
                       onClick={() => open()}
                       variant="outline"
-                      className="h-10 border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                      className="h-10 border-dashed border-border rounded-xl text-[10px] font-black uppercase tracking-widest"
                     >
                       Set Cover
                     </Button>
@@ -195,20 +195,20 @@ export function BlogForm({ initialData }: BlogFormProps) {
                 </CldUploadWidget>
               </div>
 
-              <div className="aspect-video w-full bg-slate-50 rounded-2xl overflow-hidden border border-slate-200">
+              <div className="aspect-video w-full bg-muted rounded-2xl overflow-hidden border border-border">
                 {coverImage ? (
                   <div className="group relative w-full h-full">
                     <img src={coverImage} alt="Cover Preview" className="w-full h-full object-cover" />
                     <button
                       type="button"
                       onClick={() => setCoverImage("")}
-                      className="absolute top-2 right-2 h-8 w-8 bg-white/90 backdrop-blur-sm flex items-center justify-center rounded-full text-destructive shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 h-8 w-8 bg-card/90 backdrop-blur-sm flex items-center justify-center rounded-full text-destructive shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X size={16} />
                     </button>
                   </div>
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
+                  <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/30">
                     <Plus size={24} className="mb-2" />
                     <span className="text-[9px] font-black uppercase tracking-widest">No Cover Image</span>
                   </div>
@@ -222,14 +222,14 @@ export function BlogForm({ initialData }: BlogFormProps) {
               <div className="space-y-6">
                 <FormField control={form.control} name="author" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Author Identity</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Author Identity</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/30" size={16} />
                         <Input
                           {...field}
                           placeholder="Author name"
-                          className="h-12 pl-10 bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold"
+                          className="h-12 pl-10 bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold"
                         />
                       </div>
                     </FormControl>
@@ -239,14 +239,14 @@ export function BlogForm({ initialData }: BlogFormProps) {
 
                 <FormField control={form.control} name="published_at" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Publication Date</FormLabel>
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Publication Date</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/30" size={16} />
                         <Input
                           {...field}
                           type="datetime-local"
-                          className="h-12 pl-10 bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold"
+                          className="h-12 pl-10 bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold"
                         />
                       </div>
                     </FormControl>
@@ -283,7 +283,7 @@ function SectionHeader({ icon, color, title, className }: { icon: React.ReactNod
       <div className={cn("h-8 w-8 flex items-center justify-center rounded-lg", color)}>
         {icon}
       </div>
-      <h3 className="text-sm font-black text-slate-900 uppercase">{title}</h3>
+      <h3 className="text-sm font-black text-foreground uppercase">{title}</h3>
     </div>
   );
 }

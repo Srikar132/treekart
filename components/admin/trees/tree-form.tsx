@@ -1,9 +1,10 @@
 // components/admin/tree-form.tsx
 "use client"
 
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { useTransition } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -59,6 +60,8 @@ export function TreeForm({ initialData }: TreeFormProps) {
     },
   })
 
+  const photos = useWatch({ control: form.control, name: "photos" }) || []
+
   const { data: farmers = [], isLoading: loadingFarmers } = useQuery({
     queryKey: ["admin", "farmers"],
     queryFn: () => adminGetAllFarmers(),
@@ -112,7 +115,7 @@ export function TreeForm({ initialData }: TreeFormProps) {
                 {/* Farmer */}
                 <FormField control={form.control} name="farmer_id" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Farmer / Orchard Owner
                     </FormLabel>
                     <Select
@@ -120,11 +123,11 @@ export function TreeForm({ initialData }: TreeFormProps) {
                       value={field.value || "none"}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-12 bg-slate-50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
+                        <SelectTrigger className="h-12 bg-muted/50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
                           <SelectValue placeholder={loadingFarmers ? "Loading..." : "Select Farmer"} />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="rounded-xl border-slate-200">
+                      <SelectContent className="rounded-xl border-border">
                         <SelectItem value="none" className="text-xs font-bold uppercase tracking-widest py-3">
                           None / TreeKart Owned
                         </SelectItem>
@@ -142,14 +145,14 @@ export function TreeForm({ initialData }: TreeFormProps) {
                 {/* Variety */}
                 <FormField control={form.control} name="variety" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Tree Variety
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         placeholder="e.g. Alphonso Gold"
-                        className="h-12 bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold"
+                        className="h-12 bg-muted/50 border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold"
                       />
                     </FormControl>
                     <FormMessage className="text-[10px] font-bold" />
@@ -159,18 +162,18 @@ export function TreeForm({ initialData }: TreeFormProps) {
                 {/* GPS Lat */}
                 <FormField control={form.control} name="gps_lat" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       GPS Latitude
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                        <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
                         <Input
                           {...field}
                           value={field.value ?? ""}
                           type="number" step="any"
                           placeholder="e.g. 17.5934"
-                          className="h-12 pl-10 bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold"
+                          className="h-12 pl-10 bg-muted/50 border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold"
                         />
                       </div>
                     </FormControl>
@@ -181,18 +184,18 @@ export function TreeForm({ initialData }: TreeFormProps) {
                 {/* GPS Lng */}
                 <FormField control={form.control} name="gps_lng" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       GPS Longitude
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                        <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
                         <Input
                           {...field}
                           value={field.value ?? ""}
                           type="number" step="any"
                           placeholder="e.g. 73.3421"
-                          className="h-12 pl-10 bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold"
+                          className="h-12 pl-10 bg-muted/50 border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold"
                         />
                       </div>
                     </FormControl>
@@ -203,14 +206,14 @@ export function TreeForm({ initialData }: TreeFormProps) {
                 {/* Description */}
                 <FormField control={form.control} name="description" render={({ field }) => (
                   <FormItem className="md:col-span-2">
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Brief Narrative
                     </FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
                         placeholder="The story and unique characteristics of this heritage tree..."
-                        className="min-h-[120px] bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-medium leading-relaxed"
+                        className="min-h-[120px] bg-muted/50 border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-medium leading-relaxed"
                       />
                     </FormControl>
                     <FormMessage className="text-[10px] font-bold" />
@@ -240,20 +243,20 @@ export function TreeForm({ initialData }: TreeFormProps) {
                     <Button
                       type="button"
                       onClick={() => open()}
-                      disabled={form.watch("photos")?.length >= 4}
+                      disabled={photos.length >= 4}
                       variant="outline"
-                      className="h-10 border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                      className="h-10 border-dashed border-border rounded-xl text-[10px] font-black uppercase tracking-widest"
                     >
-                      Upload Photos ({form.watch("photos")?.length || 0}/4)
+                      Upload Photos ({photos.length}/4)
                     </Button>
                   )}
                 </CldUploadWidget>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {form.watch("photos")?.map((url: string, index: number) => (
-                  <div key={url} className="group relative aspect-square bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-                    <img src={url} alt={`Tree Photo ${index + 1}`} className="w-full h-full object-cover" />
+                {photos.map((url: string, index: number) => (
+                  <div key={url} className="group relative aspect-square bg-muted rounded-2xl overflow-hidden border border-border shadow-sm">
+                    <Image src={url} alt={`Tree Photo ${index + 1}`} fill className="object-cover" />
                     <button
                       type="button"
                       onClick={() => {
@@ -267,8 +270,8 @@ export function TreeForm({ initialData }: TreeFormProps) {
                   </div>
                 ))}
 
-                {(!form.watch("photos") || form.watch("photos").length === 0) && (
-                  <div className="col-span-full py-12 border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center text-slate-300">
+                {photos.length === 0 && (
+                  <div className="col-span-full py-12 border-2 border-dashed border-border/50 rounded-2xl flex flex-col items-center justify-center text-muted-foreground/30">
                     <ImageIcon size={40} strokeWidth={1} className="mb-2" />
                     <p className="text-[10px] font-black uppercase tracking-widest">No Photos Uploaded</p>
                   </div>
@@ -293,18 +296,18 @@ export function TreeForm({ initialData }: TreeFormProps) {
               <div className="space-y-6">
                 <FormField control={form.control} name="price" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Seasonal Rent (INR)
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">₹</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">₹</span>
                         <Input
                           {...field}
                           value={field.value ?? ""}
                           type="number"
                           placeholder="9,999"
-                          className="h-14 pl-10 bg-white border-transparent rounded-xl focus-visible:ring-primary/20 text-lg font-black"
+                          className="h-14 pl-10 bg-card border-transparent rounded-xl focus-visible:ring-primary/20 text-lg font-black"
                         />
                       </div>
                     </FormControl>
@@ -315,7 +318,7 @@ export function TreeForm({ initialData }: TreeFormProps) {
                 <div className="grid grid-cols-2 gap-4">
                   <FormField control={form.control} name="yield_min_kg" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                         Yield Min (kg)
                       </FormLabel>
                       <FormControl>
@@ -323,7 +326,7 @@ export function TreeForm({ initialData }: TreeFormProps) {
                           {...field}
                           value={field.value ?? ""}
                           type="number" placeholder="25"
-                          className="h-12 bg-white border-transparent rounded-xl focus-visible:ring-primary/20 text-xs font-bold text-center"
+                          className="h-12 bg-card border-transparent rounded-xl focus-visible:ring-primary/20 text-xs font-bold text-center"
                         />
                       </FormControl>
                       <FormMessage className="text-[10px] font-bold" />
@@ -332,7 +335,7 @@ export function TreeForm({ initialData }: TreeFormProps) {
 
                   <FormField control={form.control} name="yield_max_kg" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                         Yield Max (kg)
                       </FormLabel>
                       <FormControl>
@@ -340,7 +343,7 @@ export function TreeForm({ initialData }: TreeFormProps) {
                           {...field}
                           value={field.value ?? ""}
                           type="number" placeholder="40"
-                          className="h-12 bg-white border-transparent rounded-xl focus-visible:ring-primary/20 text-xs font-bold text-center"
+                          className="h-12 bg-card border-transparent rounded-xl focus-visible:ring-primary/20 text-xs font-bold text-center"
                         />
                       </FormControl>
                       <FormMessage className="text-[10px] font-bold" />
@@ -358,7 +361,7 @@ export function TreeForm({ initialData }: TreeFormProps) {
 
                 <FormField control={form.control} name="age_years" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Tree Age (Years)
                     </FormLabel>
                     <FormControl>
@@ -366,7 +369,7 @@ export function TreeForm({ initialData }: TreeFormProps) {
                         {...field}
                         value={field.value ?? ""}
                         type="number" placeholder="15"
-                        className="h-12 bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold"
+                        className="h-12 bg-muted/50 border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold"
                       />
                     </FormControl>
                     <FormMessage className="text-[10px] font-bold" />
@@ -376,16 +379,16 @@ export function TreeForm({ initialData }: TreeFormProps) {
                 {/* Source */}
                 <FormField control={form.control} name="source" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Tree Source
                     </FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="h-12 bg-slate-50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
+                        <SelectTrigger className="h-12 bg-muted/50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
                           <SelectValue placeholder="Select Source" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="rounded-xl border-slate-200">
+                      <SelectContent className="rounded-xl border-border">
                         <SelectItem value="own_farm" className="text-xs font-bold uppercase tracking-widest py-3">TreeKart Owned</SelectItem>
                         <SelectItem value="partner" className="text-xs font-bold uppercase tracking-widest py-3">Partner Orchard</SelectItem>
                       </SelectContent>
@@ -397,16 +400,16 @@ export function TreeForm({ initialData }: TreeFormProps) {
                 {/* Plan Type */}
                 <FormField control={form.control} name="plan_type" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Rental Plan
                     </FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="h-12 bg-slate-50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
+                        <SelectTrigger className="h-12 bg-muted/50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
                           <SelectValue placeholder="Select Plan" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="rounded-xl border-slate-200">
+                      <SelectContent className="rounded-xl border-border">
                         <SelectItem value="basic" className="text-xs font-bold uppercase tracking-widest py-3">Basic Yield</SelectItem>
                         <SelectItem value="standard" className="text-xs font-bold uppercase tracking-widest py-3">Standard Heritage</SelectItem>
                         <SelectItem value="max" className="text-xs font-bold uppercase tracking-widest py-3">Maximum Premium</SelectItem>
@@ -419,16 +422,16 @@ export function TreeForm({ initialData }: TreeFormProps) {
                 {/* Status */}
                 <FormField control={form.control} name="status" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Market Status
                     </FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="h-12 bg-slate-50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
+                        <SelectTrigger className="h-12 bg-muted/50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
                           <SelectValue placeholder="Select Status" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="rounded-xl border-slate-200">
+                      <SelectContent className="rounded-xl border-border">
                         <SelectItem value="available" className="text-xs font-bold uppercase tracking-widest py-3">Active Market</SelectItem>
                         <SelectItem value="rented" className="text-xs font-bold uppercase tracking-widest py-3">Currently Rented</SelectItem>
                         <SelectItem value="inactive" className="text-xs font-bold uppercase tracking-widest py-3">Maintenance</SelectItem>
@@ -468,7 +471,7 @@ function SectionHeader({ icon, color, title }: { icon: React.ReactNode; color: s
       <div className={`h-8 w-8 flex items-center justify-center rounded-lg ${color}`}>
         {icon}
       </div>
-      <h3 className="text-sm font-black text-slate-900 uppercase">{title}</h3>
+      <h3 className="text-sm font-black text-foreground uppercase">{title}</h3>
     </div>
   )
 }

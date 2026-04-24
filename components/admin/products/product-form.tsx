@@ -99,14 +99,14 @@ export function ProductForm({ initialData }: ProductFormProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={form.control} name="name" render={({ field }) => (
                   <FormItem className="md:col-span-2">
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Product Name
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         placeholder="e.g. Premium Alphonso (Box of 12)"
-                        className="h-12 bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold"
+                        className="h-12 bg-muted/50 border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold"
                       />
                     </FormControl>
                     <FormMessage className="text-[10px] font-bold" />
@@ -115,16 +115,16 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
                 <FormField control={form.control} name="variety" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Mango Variety
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                        <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
                         <Input
                           {...field}
                           placeholder="e.g. Alphonso"
-                          className="h-12 pl-10 bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold"
+                          className="h-12 pl-10 bg-muted/50 border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold"
                         />
                       </div>
                     </FormControl>
@@ -134,18 +134,18 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
                 <FormField control={form.control} name="weight_kg" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Net Weight (kg)
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Package className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                        <Package className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
                         <Input
                           {...field}
                           value={field.value ?? ""}
                           type="number" step="0.01"
                           placeholder="e.g. 3.5"
-                          className="h-12 pl-10 bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold"
+                          className="h-12 pl-10 bg-muted/50 border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold"
                         />
                       </div>
                     </FormControl>
@@ -155,14 +155,14 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
                 <FormField control={form.control} name="description" render={({ field }) => (
                   <FormItem className="md:col-span-2">
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Product Description
                     </FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
                         placeholder="Detailed description of the product, taste profile, and harvest details..."
-                        className="min-h-[140px] bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-medium leading-relaxed"
+                        className="min-h-[140px] bg-muted/50 border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-medium leading-relaxed"
                       />
                     </FormControl>
                     <FormMessage className="text-[10px] font-bold" />
@@ -187,7 +187,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                       type="button"
                       onClick={() => open()}
                       variant="outline"
-                      className="h-10 border-dashed border-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                      className="h-10 border-dashed border-border rounded-xl text-[10px] font-black uppercase tracking-widest"
                     >
                       Upload New Image
                     </Button>
@@ -197,7 +197,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
               <div className="max-w-[300px]">
                 {imageUrl ? (
-                  <div className="group relative aspect-square bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+                  <div className="group relative aspect-square bg-muted rounded-2xl overflow-hidden border border-border shadow-sm">
                     <img src={imageUrl} alt="Product Preview" className="w-full h-full object-cover" />
                     <button
                       type="button"
@@ -208,7 +208,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     </button>
                   </div>
                 ) : (
-                  <div className="aspect-square border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center text-slate-300">
+                  <div className="aspect-square border-2 border-dashed border-border/50 rounded-2xl flex flex-col items-center justify-center text-muted-foreground/30">
                     <ImageIcon size={40} strokeWidth={1} className="mb-2" />
                     <p className="text-[10px] font-black uppercase tracking-widest">No Image Set</p>
                   </div>
@@ -233,18 +233,18 @@ export function ProductForm({ initialData }: ProductFormProps) {
               <div className="space-y-6">
                 <FormField control={form.control} name="price" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Selling Price (INR)
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">₹</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">₹</span>
                         <Input
                           {...field}
                           value={field.value ?? ""}
                           type="number"
                           placeholder="1,499"
-                          className="h-14 pl-10 bg-white border-transparent rounded-xl focus-visible:ring-primary/20 text-lg font-black"
+                          className="h-14 pl-10 bg-card border-transparent rounded-xl focus-visible:ring-primary/20 text-lg font-black"
                         />
                       </div>
                     </FormControl>
@@ -254,18 +254,18 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
                 <FormField control={form.control} name="original_price" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       MRP / Original Price (Optional)
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">₹</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 font-bold text-sm">₹</span>
                         <Input
                           {...field}
                           value={field.value ?? ""}
                           type="number"
                           placeholder="1,999"
-                          className="h-12 pl-10 bg-white border-transparent rounded-xl focus-visible:ring-primary/20 text-xs font-bold text-slate-400"
+                          className="h-12 pl-10 bg-card border-transparent rounded-xl focus-visible:ring-primary/20 text-xs font-bold text-muted-foreground/50"
                         />
                       </div>
                     </FormControl>
@@ -282,16 +282,16 @@ export function ProductForm({ initialData }: ProductFormProps) {
               <div className="space-y-6">
                 <FormField control={form.control} name="status" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Inventory Status
                     </FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="h-12 bg-slate-50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
+                        <SelectTrigger className="h-12 bg-muted/50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
                           <SelectValue placeholder="Select Status" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="rounded-xl border-slate-200">
+                      <SelectContent className="rounded-xl border-border">
                         <SelectItem value="available" className="text-xs font-bold uppercase tracking-widest py-3">In Stock</SelectItem>
                         <SelectItem value="out_of_stock" className="text-xs font-bold uppercase tracking-widest py-3">Out of Stock</SelectItem>
                         <SelectItem value="pre_order" className="text-xs font-bold uppercase tracking-widest py-3">Accepting Pre-Orders</SelectItem>
@@ -303,16 +303,16 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
                 <FormField control={form.control} name="badge" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Marketing Badge
                     </FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="h-12 bg-slate-50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
+                        <SelectTrigger className="h-12 bg-muted/50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
                           <SelectValue placeholder="Select Badge" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="rounded-xl border-slate-200">
+                      <SelectContent className="rounded-xl border-border">
                         <SelectItem value="None" className="text-xs font-bold uppercase tracking-widest py-3">No Badge</SelectItem>
                         <SelectItem value="New" className="text-xs font-bold uppercase tracking-widest py-3 text-blue-600">New Launch</SelectItem>
                         <SelectItem value="Sale" className="text-xs font-bold uppercase tracking-widest py-3 text-orange-600">Flash Sale</SelectItem>
@@ -351,7 +351,7 @@ function SectionHeader({ icon, color, title }: { icon: React.ReactNode; color: s
       <div className={cn("h-8 w-8 flex items-center justify-center rounded-lg", color)}>
         {icon}
       </div>
-      <h3 className="text-sm font-black text-slate-900 uppercase">{title}</h3>
+      <h3 className="text-sm font-black text-foreground uppercase">{title}</h3>
     </div>
   )
 }

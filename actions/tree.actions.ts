@@ -389,8 +389,11 @@ export async function createTree(input: TreeInsert) {
 
     if (error) throw new Error(error.message);
 
-    revalidatePath("/admin/trees");
-    revalidatePath("/rent");
+    // Revalidate paths to ensure the storefront is updated
+    revalidatePath("/", "layout");
+    revalidatePath("/rent", "layout");
+    revalidatePath("/admin/trees", "layout");
+    
     return data;
 }
 
@@ -407,10 +410,13 @@ export async function updateTree(id: string, input: TreeUpdate) {
 
     if (error) throw new Error(error.message);
 
-    revalidatePath("/admin/trees");
-    revalidatePath(`/admin/trees/${id}`);
-    revalidatePath("/rent");
-    revalidatePath(`/rent/${id}`);
+    // Revalidate paths to ensure both admin and storefront reflect changes
+    revalidatePath("/", "layout");
+    revalidatePath("/rent", "layout");
+    revalidatePath(`/rent/${id}`, "page");
+    revalidatePath("/admin/trees", "layout");
+    revalidatePath(`/admin/trees/${id}`, "page");
+
     return data;
 }
 

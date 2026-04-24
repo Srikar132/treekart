@@ -77,7 +77,7 @@ export function WhyChooseUs() {
                         Why Choose Us
                     </motion.h2>
                     <motion.p variants={itemVariants} className="p-base">
-                        The fact of the matter is that you really know something's organic when it's grown naturally!
+                        The fact of the matter is that you really know something&apos;s organic when it&apos;s grown naturally!
                         We nurture our mango trees in a 100% organic growing environment. Better than any certification
                         or seal, the pure taste and vibrant health of our trees let you know the fruit is naturally healthy.
                     </motion.p>

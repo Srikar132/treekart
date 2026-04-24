@@ -11,14 +11,14 @@ export default async function NewProductPage() {
       <div className="space-y-4">
         <Link 
           href="/admin/products" 
-          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors"
+          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
         >
           <ChevronLeft size={14} />
           Back to Shop Inventory
         </Link>
         <div>
-          <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Add New Product</h1>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Register a new mango box or organic product to the shop</p>
+          <h1 className="text-2xl font-black text-foreground uppercase tracking-tight">Add New Product</h1>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Register a new mango box or organic product to the shop</p>
         </div>
       </div>
 

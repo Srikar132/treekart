@@ -3,7 +3,7 @@
 import { TreeCard, type TreeProduct } from "@/components/storefront/cards/tree-card";
 import { NoResults } from "@/components/ui/no-results";
 import type { Database } from "@/types/database.types";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import { getAvailableTrees, type GetTreesOptions } from "@/actions/tree.actions";
 import { useEffect } from "react";
@@ -32,6 +32,7 @@ type Props = {
 
 export function TreeGrid({ initialData, options }: Props) {
   const { ref, inView } = useInView();
+  const queryClient = useQueryClient();
 
   const {
     data,
@@ -42,13 +43,25 @@ export function TreeGrid({ initialData, options }: Props) {
     queryKey: ["trees", options.filters, options.sort],
     queryFn: ({ pageParam = 1 }) => getAvailableTrees({ ...options, page: pageParam as number }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => 
+    getNextPageParam: (lastPage) =>
       lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
     initialData: {
       pages: [initialData],
       pageParams: [1],
     },
+    staleTime: 0,
+    refetchOnMount: "always",
   });
+
+  // Sync React Query cache with fresh initialData from Server Component
+  useEffect(() => {
+    if (initialData) {
+      queryClient.setQueryData(["trees", options.filters, options.sort], {
+        pages: [initialData],
+        pageParams: [1],
+      });
+    }
+  }, [initialData, queryClient, options.filters, options.sort]);
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {

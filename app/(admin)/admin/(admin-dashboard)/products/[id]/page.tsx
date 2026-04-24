@@ -25,14 +25,14 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
       <div className="space-y-4">
         <Link
           href="/admin/products"
-          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors"
+          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
         >
           <ChevronLeft size={14} />
           Back to Shop Inventory
         </Link>
         <div>
-          <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Edit Product</h1>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Updating details for product #{product.id.slice(0, 8)}</p>
+          <h1 className="text-2xl font-black text-foreground uppercase tracking-tight">Edit Product</h1>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Updating details for product #{product.id.slice(0, 8)}</p>
         </div>
       </div>
 

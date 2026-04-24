@@ -20,7 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { startTransition } from "react";
-import { adminDeleteRental, adminUpdateRentalStatus } from "@/actions/admin.actions";
+import { adminUpdateRentalStatus } from "@/actions/admin.actions";
 import { toast } from "sonner";
 import { RentalStatus } from "@/types/database.types";
 
@@ -32,14 +32,14 @@ export const rentalColumns: ColumnDef<any>[] = [
             const profile = row.original.profiles;
             return (
                 <div className="flex flex-col">
-                    <p className="text-xs font-black text-slate-900 uppercase tracking-tight">
+                    <p className="text-xs font-black text-foreground uppercase tracking-tight">
                         {profile?.full_name || "Unknown Member"}
                     </p>
                     <div className="flex items-center gap-3 mt-1">
-                        <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
                             <Mail size={10} /> {profile?.email || "N/A"}
                         </div>
-                        <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
                             <Phone size={10} /> {profile?.phone || "N/A"}
                         </div>
                     </div>
@@ -58,10 +58,10 @@ export const rentalColumns: ColumnDef<any>[] = [
                         <TreePine size={18} />
                     </div>
                     <div>
-                        <p className="text-xs font-black text-slate-900 uppercase tracking-tight">
+                        <p className="text-xs font-black text-foreground uppercase tracking-tight">
                             {tree?.variety || "Unknown Variety"}
                         </p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                             {tree?.farmers?.location || "Location Unknown"}
                         </p>
                     </div>
@@ -74,8 +74,8 @@ export const rentalColumns: ColumnDef<any>[] = [
         header: "Season",
         cell: ({ row }) => (
             <div className="flex flex-col">
-                <p className="text-xs font-black text-slate-900">{row.getValue("season")}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                <p className="text-xs font-black text-foreground">{row.getValue("season")}</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
                     Annual Lease
                 </p>
             </div>
@@ -98,7 +98,7 @@ export const rentalColumns: ColumnDef<any>[] = [
                         variant="outline"
                         className={cn(
                             "rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest border",
-                            colors[status as keyof typeof colors] || "bg-slate-50 text-slate-600"
+                            colors[status as keyof typeof colors] || "bg-muted text-muted-foreground border-border"
                         )}
                     >
                         {status}
@@ -142,14 +142,14 @@ export const rentalColumns: ColumnDef<any>[] = [
                         <DropdownMenuTrigger
                             className={cn(
                                 buttonVariants({ variant: "ghost", size: "icon" }),
-                                "h-8 w-8 rounded-lg hover:bg-slate-100 text-slate-400"
+                                "h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground"
                             )}
                         >
                             <MoreHorizontal size={18} />
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 rounded-xl border-slate-200 shadow-xl">
+                        <DropdownMenuContent align="end" className="w-56 rounded-xl border-border shadow-xl">
                             <DropdownMenuGroup>
-                                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 py-3">
+                                <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-2 py-3">
                                     Lease Operations
                                 </div>
                                 {/* <DropdownMenuItem
@@ -171,7 +171,7 @@ export const rentalColumns: ColumnDef<any>[] = [
                                 )}
 
                                 {rental.status === "active" && (
-                                    <DropdownMenuItem 
+                                    <DropdownMenuItem
                                         className="rounded-lg cursor-pointer flex items-center gap-2"
                                         render={(props) => (
                                             <Link {...props} href={`/admin/rentals/${rental.id}/updates`}>

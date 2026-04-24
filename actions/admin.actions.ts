@@ -135,6 +135,7 @@ export async function adminUpdateTreeStatus(id: string, status: TreeStatus) {
   const { error } = await supabase.from("trees").update({ status }).eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/trees");
+  revalidatePath(`/rent`);
 }
 
 
@@ -261,7 +262,7 @@ export async function adminDeleteTreeUpdate(id: string, rentalId?: string) {
 // =============================================
 
 
-
+// written inside product.actions.ts
 
 
 
@@ -406,7 +407,7 @@ export async function getAdminBlogs(params: {
   if (params.q) {
     query = query.ilike("title", `%${params.q}%`);
   }
-  
+
   if (params.category) query = query.eq("category", params.category);
 
   const from = (params.page - 1) * params.pageSize;
@@ -552,7 +553,7 @@ export async function getAdminUsers(params: {
   if (params.q) {
     query = query.or(`full_name.ilike.%${params.q}%,phone.ilike.%${params.q}%`);
   }
-  
+
   if (params.role) query = query.eq("role", params.role as UserRole);
 
   const from = (params.page - 1) * params.pageSize;

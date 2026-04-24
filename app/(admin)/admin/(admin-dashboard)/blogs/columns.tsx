@@ -28,18 +28,18 @@ export const blogColumns: ColumnDef<any>[] = [
             const blog = row.original
             return (
                 <div className="flex items-center gap-4">
-                    <div className="h-12 w-20 rounded-lg bg-slate-100 overflow-hidden shrink-0 border border-slate-200 shadow-sm">
+                    <div className="h-12 w-20 rounded-lg bg-muted overflow-hidden shrink-0 border border-border shadow-sm">
                         {blog.cover_image ? (
                             <img src={blog.cover_image} alt={blog.title} className="w-full h-full object-cover" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-slate-400">
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                                 <BookOpen size={16} />
                             </div>
                         )}
                     </div>
                     <div>
-                        <p className="text-sm font-bold text-slate-900 truncate max-w-[240px]">{blog.title}</p>
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <p className="text-sm font-bold text-foreground truncate max-w-[240px]">{blog.title}</p>
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                             <Calendar size={10} />
                             {new Date(blog.published_at || blog.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </div>
@@ -52,7 +52,7 @@ export const blogColumns: ColumnDef<any>[] = [
         accessorKey: "category",
         header: "Category",
         cell: ({ row }) => (
-            <Badge variant="outline" className="rounded-md text-[8px] font-black uppercase tracking-widest border-slate-200 px-2 py-0.5">
+            <Badge variant="outline" className="rounded-md text-[8px] font-black uppercase tracking-widest border-border px-2 py-0.5">
                 {row.getValue("category")}
             </Badge>
         )
@@ -61,7 +61,7 @@ export const blogColumns: ColumnDef<any>[] = [
         accessorKey: "author",
         header: "Author",
         cell: ({ row }) => (
-            <div className="flex items-center gap-2 text-slate-600">
+            <div className="flex items-center gap-2 text-muted-foreground">
                 <User size={12} />
                 <p className="text-xs font-bold uppercase tracking-tight">{row.getValue("author")}</p>
             </div>
@@ -73,7 +73,7 @@ export const blogColumns: ColumnDef<any>[] = [
         cell: () => (
             <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Published</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Published</span>
             </div>
         )
     },
@@ -103,13 +103,13 @@ function BlogActions({ blog }: { blog: any }) {
         <div className="text-right">
             <DropdownMenu>
                 <DropdownMenuTrigger
-                    className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "rounded-lg hover:bg-slate-100 text-slate-400")}
+                    className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "rounded-lg hover:bg-muted text-muted-foreground")}
                 >
                     <MoreHorizontal size={18} />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 rounded-xl border-slate-200 shadow-xl">
+                <DropdownMenuContent align="end" className="w-48 rounded-xl border-border shadow-xl">
                     <DropdownMenuGroup>
-                        <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 py-3">Editorial</DropdownMenuLabel>
+                        <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-2 py-3">Editorial</DropdownMenuLabel>
                         <DropdownMenuItem
                             className="rounded-lg cursor-pointer"
                             render={(props) => (

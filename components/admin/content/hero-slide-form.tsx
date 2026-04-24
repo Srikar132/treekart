@@ -78,9 +78,9 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
                             
                             <FormField control={form.control} name="eyebrow" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Eyebrow</FormLabel>
+                                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Eyebrow</FormLabel>
                                     <FormControl>
-                                        <Input {...field} placeholder="e.g. Farm-to-Doorstep" className="bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold" />
+                                        <Input {...field} placeholder="e.g. Farm-to-Doorstep" className="bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold" />
                                     </FormControl>
                                     <FormMessage className="text-[10px] font-bold" />
                                 </FormItem>
@@ -88,9 +88,9 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
 
                             <FormField control={form.control} name="title" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Title</FormLabel>
+                                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Title</FormLabel>
                                     <FormControl>
-                                        <Input {...field} placeholder="e.g. Own a Mango Tree" className="bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-black uppercase tracking-tight" />
+                                        <Input {...field} placeholder="e.g. Own a Mango Tree" className="bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-black uppercase tracking-tight" />
                                     </FormControl>
                                     <FormMessage className="text-[10px] font-bold" />
                                 </FormItem>
@@ -98,9 +98,9 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
 
                             <FormField control={form.control} name="sub_heading" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sub-heading</FormLabel>
+                                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Sub-heading</FormLabel>
                                     <FormControl>
-                                        <Input {...field} placeholder="e.g. Taste the Season" className="bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold text-primary uppercase tracking-tight" />
+                                        <Input {...field} placeholder="e.g. Taste the Season" className="bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold text-primary uppercase tracking-tight" />
                                     </FormControl>
                                     <FormMessage className="text-[10px] font-bold" />
                                 </FormItem>
@@ -108,9 +108,9 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
 
                             <FormField control={form.control} name="description" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Description</FormLabel>
+                                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Description</FormLabel>
                                     <FormControl>
-                                        <Textarea {...field} placeholder="Narrative description..." className="bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-medium min-h-[100px]" />
+                                        <Textarea {...field} placeholder="Narrative description..." className="bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-medium min-h-[100px]" />
                                     </FormControl>
                                     <FormMessage className="text-[10px] font-bold" />
                                 </FormItem>
@@ -119,18 +119,18 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
                             <div className="grid grid-cols-2 gap-4">
                                 <FormField control={form.control} name="button_label" render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">CTA Label</FormLabel>
+                                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">CTA Label</FormLabel>
                                         <FormControl>
-                                            <Input {...field} className="bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold" />
+                                            <Input {...field} className="bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold" />
                                         </FormControl>
                                         <FormMessage className="text-[10px] font-bold" />
                                     </FormItem>
                                 )} />
                                 <FormField control={form.control} name="button_link" render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">CTA Link</FormLabel>
+                                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">CTA Link</FormLabel>
                                         <FormControl>
-                                            <Input {...field} className="bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold" />
+                                            <Input {...field} className="bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold" />
                                         </FormControl>
                                         <FormMessage className="text-[10px] font-bold" />
                                     </FormItem>
@@ -139,11 +139,11 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
 
                             <FormField control={form.control} name="order_index" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sort Priority</FormLabel>
+                                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Sort Priority</FormLabel>
                                     <FormControl>
                                         <div className="relative">
-                                            <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
-                                            <Input type="number" {...field} className="pl-9 bg-slate-50 border-transparent rounded-xl focus-visible:bg-white focus-visible:ring-primary/20 text-xs font-bold" />
+                                            <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/30" size={14} />
+                                            <Input type="number" {...field} className="pl-9 bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold" />
                                         </div>
                                     </FormControl>
                                     <FormMessage className="text-[10px] font-bold" />
@@ -155,7 +155,7 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
                         <div className="space-y-6">
                             <SectionHeader icon={<ImageIcon size={16} />} title="Hero Media" />
                             
-                            <div className="aspect-[21/9] bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 relative group">
+                            <div className="aspect-[21/9] bg-muted rounded-2xl overflow-hidden border border-border relative group">
                                 {imageUrl ? (
                                     <>
                                         <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
@@ -165,7 +165,7 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
                                                 setImageUrl("")
                                                 form.setValue("image_url", "", { shouldValidate: true })
                                             }}
-                                            className="absolute top-2 right-2 h-8 w-8 bg-white/90 backdrop-blur-sm flex items-center justify-center rounded-full text-destructive shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                            className="absolute top-2 right-2 h-8 w-8 bg-card/90 backdrop-blur-sm flex items-center justify-center rounded-full text-destructive shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                                         >
                                             <X size={16} />
                                         </button>
@@ -183,7 +183,7 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
                                             <button 
                                                 type="button" 
                                                 onClick={() => open()}
-                                                className="w-full h-full flex flex-col items-center justify-center text-slate-300 hover:text-primary transition-colors"
+                                                className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/30 hover:text-primary transition-colors"
                                             >
                                                 <Plus size={24} className="mb-2" />
                                                 <span className="text-[9px] font-black uppercase tracking-widest">Upload Hero Image</span>
@@ -196,7 +196,7 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
                     </div>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100">
+                <div className="pt-4 border-t border-border">
                     <Button 
                         type="submit" 
                         disabled={isPending}
@@ -214,10 +214,10 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
 function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
     return (
         <div className="flex items-center gap-2 mb-4">
-            <div className="h-6 w-6 bg-slate-100 flex items-center justify-center rounded-lg text-slate-600">
+            <div className="h-6 w-6 bg-muted flex items-center justify-center rounded-lg text-muted-foreground">
                 {icon}
             </div>
-            <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{title}</h3>
+            <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest">{title}</h3>
         </div>
     )
 }

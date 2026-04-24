@@ -24,13 +24,13 @@ export type TreeRow = Pick<Tree,
 const STATUS_CONFIG: Record<TreeStatus, { label: string; dot: string }> = {
     available: { label: "Available", dot: "bg-green-500" },
     rented: { label: "Rented", dot: "bg-blue-500" },
-    inactive: { label: "Inactive", dot: "bg-slate-400" },
+    inactive: { label: "Inactive", dot: "bg-muted-foreground" },
 };
 
 const PLAN_CONFIG: Record<PlanType, string> = {
-    basic: "border-slate-200 text-slate-600",
-    standard: "border-blue-200 text-blue-700 bg-blue-50",
-    max: "border-purple-200 text-purple-700 bg-purple-50",
+    basic: "border-border text-muted-foreground bg-muted/50",
+    standard: "border-blue-200 text-blue-700 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800",
+    max: "border-purple-200 text-purple-700 bg-purple-50 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800",
 };
 
 function ActionsCell({ row }: { row: { original: TreeRow } }) {
@@ -65,13 +65,13 @@ function ActionsCell({ row }: { row: { original: TreeRow } }) {
         <DropdownMenu>
             <DropdownMenuTrigger
                 render={
-                    <Button variant="ghost" size="icon" className="rounded-lg hover:bg-slate-100 text-slate-400" disabled={isPending}>
+                    <Button variant="ghost" size="icon" className="rounded-lg hover:bg-muted text-muted-foreground" disabled={isPending}>
                         <MoreHorizontal size={18} />
                     </Button>
                 }
             />
-            <DropdownMenuContent align="end" className="w-48 rounded-xl border-slate-200 shadow-xl">
-                <div className="px-2 py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <DropdownMenuContent align="end" className="w-48 rounded-xl border-border shadow-xl">
+                <div className="px-2 py-1.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                     Management
                 </div>
                 <DropdownMenuItem
@@ -108,7 +108,7 @@ export const treeColumns: ColumnDef<TreeRow>[] = [
         accessorKey: "variety",
         header: ({ column }) => (
             <button
-                className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-700"
+                className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
                 Tree Details <ArrowUpDown size={12} />
@@ -119,18 +119,18 @@ export const treeColumns: ColumnDef<TreeRow>[] = [
             const photo = (tree.photos as string[] | null)?.[0];
             return (
                 <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
+                    <div className="h-12 w-12 rounded-xl bg-muted overflow-hidden shrink-0 border border-border">
                         {photo ? (
                             <img src={photo} alt={tree.variety ?? ""} className="w-full h-full object-cover" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-slate-300 text-xs font-black">N/A</div>
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 text-xs font-black">N/A</div>
                         )}
                     </div>
                     <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase">#{tree.id.slice(0, 8)}</p>
-                        <p className="text-sm font-bold text-slate-900">{tree.variety}</p>
+                        <p className="text-[10px] font-black text-muted-foreground uppercase">#{tree.id.slice(0, 8)}</p>
+                        <p className="text-sm font-bold text-foreground">{tree.variety}</p>
                         {tree.age_years && (
-                            <p className="text-[10px] text-slate-400 font-bold">{tree.age_years} yrs old</p>
+                            <p className="text-[10px] text-muted-foreground font-bold">{tree.age_years} yrs old</p>
                         )}
                     </div>
                 </div>
@@ -139,13 +139,13 @@ export const treeColumns: ColumnDef<TreeRow>[] = [
     },
     {
         accessorKey: "farmers",
-        header: () => <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Farmer / Estate</span>,
+        header: () => <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Farmer / Estate</span>,
         cell: ({ row }) => (
             <div>
-                <p className="text-xs font-bold text-slate-900 uppercase tracking-tight">
+                <p className="text-xs font-bold text-foreground uppercase tracking-tight">
                     {row.original.farmers?.farm_name ?? "Individual"}
                 </p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                     {row.original.farmers?.location ?? "—"}
                 </p>
             </div>
@@ -154,10 +154,10 @@ export const treeColumns: ColumnDef<TreeRow>[] = [
     },
     {
         accessorKey: "plan_type",
-        header: () => <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Plan</span>,
+        header: () => <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Plan</span>,
         cell: ({ row }) => {
             const plan = row.original.plan_type as PlanType | null;
-            if (!plan) return <span className="text-slate-300">—</span>;
+            if (!plan) return <span className="text-muted-foreground/30">—</span>;
             return (
                 <Badge variant="outline" className={cn("rounded-md text-[9px] font-black uppercase tracking-widest px-3 py-1", PLAN_CONFIG[plan])}>
                     {plan}
@@ -169,7 +169,7 @@ export const treeColumns: ColumnDef<TreeRow>[] = [
         accessorKey: "price",
         header: ({ column }) => (
             <button
-                className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-700"
+                className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
                 Price <ArrowUpDown size={12} />
@@ -177,14 +177,14 @@ export const treeColumns: ColumnDef<TreeRow>[] = [
         ),
         cell: ({ row }) => (
             <div>
-                <p className="text-sm font-black text-slate-900">₹{row.original.price?.toLocaleString() ?? "—"}</p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Per Season</p>
+                <p className="text-sm font-black text-foreground">₹{row.original.price?.toLocaleString() ?? "—"}</p>
+                <p className="text-[9px] font-bold text-muted-foreground uppercase">Per Season</p>
             </div>
         ),
     },
     {
         accessorKey: "status",
-        header: () => <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status</span>,
+        header: () => <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Status</span>,
         cell: ({ row }) => {
             const status = row.original.status as TreeStatus | null;
             if (!status) return null;
@@ -192,7 +192,7 @@ export const treeColumns: ColumnDef<TreeRow>[] = [
             return (
                 <div className="flex items-center gap-2">
                     <div className={cn("h-2 w-2 rounded-full", cfg.dot)} />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">{cfg.label}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{cfg.label}</span>
                 </div>
             );
         },

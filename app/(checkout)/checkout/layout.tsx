@@ -39,7 +39,7 @@ export default function CheckoutLayout({
             </header>
 
             <main className="flex-1 overflow-y-auto">
-                <div className="max-w-5xl mx-auto">
+                <div className="max-w-5xl mx-auto px-6 py-10 lg:py-16">
                     {children}
                 </div>
             </main>

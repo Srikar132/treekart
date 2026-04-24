@@ -5,6 +5,18 @@ export const signInSchema = z.object({
     password: z.string().min(1, "Password is required"),
 });
 
+export const forgotPasswordSchema = z.object({
+    email: z.string().email("Enter a valid email address"),
+});
+
+export const resetPasswordSchema = z.object({
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+});
+
 export const signUpSchema = z
     .object({
         fullName: z.string().min(1, "Full name is required"),
@@ -22,10 +34,13 @@ export const signUpSchema = z
 
 export type SignInFields = z.infer<typeof signInSchema>;
 export type SignUpFields = z.infer<typeof signUpSchema>;
+export type ForgotPasswordFields = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordFields = z.infer<typeof resetPasswordSchema>;
 
 export type ActionState<T extends Record<string, string>> = {
     errors?: Partial<Record<keyof T | "_server", string>>;
     values?: Partial<T>;
+    success?: boolean;
 };
 
 // schema for tree form
@@ -92,25 +107,40 @@ export type BlogFormValues = z.infer<typeof blogSchema>
 
 // schema for hero slide form
 export const heroSlideSchema = z.object({
-  eyebrow: z.string().min(2, "Eyebrow is required"),
-  title: z.string().min(2, "Title is required"),
-  sub_heading: z.string().min(2, "Sub-heading is required"),
-  description: z.string().min(2, "Description is required"),
-  image_url: z.string().url("Valid image URL is required"),
-  button_label: z.string().min(1, "Button label is required"),
-  button_link: z.string().min(1, "Button link is required"),
-  order_index: z.coerce.number().int().min(0),
+    eyebrow: z.string().min(2, "Eyebrow is required"),
+    title: z.string().min(2, "Title is required"),
+    sub_heading: z.string().min(2, "Sub-heading is required"),
+    description: z.string().min(2, "Description is required"),
+    image_url: z.string().url("Valid image URL is required"),
+    button_label: z.string().min(1, "Button label is required"),
+    button_link: z.string().min(1, "Button link is required"),
+    order_index: z.coerce.number().int().min(0),
 });
 
 export type HeroSlideFormValues = z.infer<typeof heroSlideSchema>;
 
 // schema for testimonial form
 export const testimonialSchema = z.object({
-  name: z.string().min(2, "Name is required"),
-  role: z.string().min(2, "Role is required"),
-  content: z.string().min(10, "Review must be at least 10 characters"),
-  rating: z.coerce.number().min(1).max(5),
-  avatar_url: z.string().url("Valid avatar URL is required").or(z.literal("")).optional(),
+    name: z.string().min(2, "Name is required"),
+    role: z.string().min(2, "Role is required"),
+    content: z.string().min(10, "Review must be at least 10 characters"),
+    rating: z.coerce.number().min(1).max(5),
+    avatar_url: z.string().url("Valid avatar URL is required").or(z.literal("")).optional(),
 });
 
 export type TestimonialFormValues = z.infer<typeof testimonialSchema>;
+
+
+
+export const contactSchema = z.object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    email: z.string().email("Invalid email address"),
+    subject: z.string().min(5, "Subject must be at least 5 characters"),
+    message: z.string().min(10, "Message must be at least 10 characters"),
+});
+
+export type ContactFormState = {
+    success?: boolean;
+    error?: string;
+    fieldErrors?: Record<string, string[]>;
+};

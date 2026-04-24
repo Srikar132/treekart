@@ -23,8 +23,8 @@ export default async function AdminProductsPage({ searchParams }: Props) {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Mango Shop</h1>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+          <h1 className="text-2xl font-black text-foreground uppercase tracking-tight">Mango Shop</h1>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
             Manage your physical product inventory
           </p>
         </div>

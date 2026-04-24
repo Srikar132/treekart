@@ -32,8 +32,8 @@ export const orderColumns: ColumnDef<any>[] = [
                         <ShoppingBag size={18} />
                     </div>
                     <div>
-                        <p className="text-xs font-black text-slate-900 uppercase">#{order.id.slice(0, 8)}</p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">{order.created_at ? new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : "Date TBD"}</p>
+                        <p className="text-xs font-black text-foreground uppercase">#{order.id.slice(0, 8)}</p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase">{order.created_at ? new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : "Date TBD"}</p>
                     </div>
                 </div>
             )
@@ -46,8 +46,8 @@ export const orderColumns: ColumnDef<any>[] = [
             const profile = row.original.profiles
             return (
                 <div>
-                    <p className="text-xs font-bold text-slate-900 uppercase">{profile?.full_name}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{profile?.phone || 'No Phone'}</p>
+                    <p className="text-xs font-bold text-foreground uppercase">{profile?.full_name}</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">{profile?.phone || 'No Phone'}</p>
                 </div>
             )
         }
@@ -58,14 +58,14 @@ export const orderColumns: ColumnDef<any>[] = [
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                className="hover:bg-transparent p-0 text-[10px] font-black uppercase tracking-widest text-slate-400"
+                className="hover:bg-transparent p-0 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
             >
                 Amount <ArrowUpDown className="ml-2 h-3 w-3" />
             </Button>
         ),
         cell: ({ row }) => (
             <div>
-                <p className="text-sm font-black text-slate-900 uppercase">₹{row.getValue<number>("total_amount").toLocaleString()}</p>
+                <p className="text-sm font-black text-foreground uppercase">₹{row.getValue<number>("total_amount").toLocaleString()}</p>
                 <p className="text-[9px] font-bold text-green-600 uppercase tracking-widest">Paid via Razorpay</p>
             </div>
         )
@@ -123,13 +123,13 @@ function OrderActions({ order }: { order: any }) {
         <div className="text-right">
             <DropdownMenu>
                 <DropdownMenuTrigger 
-                    className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "rounded-lg hover:bg-slate-100 text-slate-400")}
+                    className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "rounded-lg hover:bg-muted text-muted-foreground")}
                 >
                     <MoreHorizontal size={18} />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 rounded-xl border-slate-200 shadow-xl">
+                <DropdownMenuContent align="end" className="w-56 rounded-xl border-border shadow-xl">
                     <DropdownMenuGroup>
-                        <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 py-3">Fulfillment Action</DropdownMenuLabel>
+                        <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-2 py-3">Fulfillment Action</DropdownMenuLabel>
                         <DropdownMenuItem 
                             className="rounded-lg cursor-pointer flex items-center gap-2"
                             render={(props) => <Link {...props} href={`/admin/orders/${order.id}`} className="w-full flex items-center gap-2" />}

@@ -4,8 +4,10 @@ import Link from "next/link";
 import { ShoppingBag, ArrowRight, Package, Truck, CheckCircle2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
+import { Order } from "@/types/database.types";
+
 interface OrdersListProps {
-  orders: any[];
+  orders: Order[];
 }
 
 export function OrdersList({ orders }: OrdersListProps) {
@@ -18,7 +20,7 @@ export function OrdersList({ orders }: OrdersListProps) {
         <div className="space-y-3">
           <h3 className="text-2xl font-black text-slate-900 tracking-tight">No orders placed yet</h3>
           <p className="text-sm text-slate-500 font-medium max-w-xs mx-auto leading-relaxed">
-            You haven't purchased any fresh mangoes yet. Our seasonal harvest is waiting for you to taste the heritage.
+            You haven&apos;t purchased any fresh mangoes yet. Our seasonal harvest is waiting for you to taste the heritage.
           </p>
         </div>
         <Link 

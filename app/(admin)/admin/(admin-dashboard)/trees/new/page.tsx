@@ -11,14 +11,14 @@ export default async function NewTreePage() {
       <div className="space-y-4">
         <Link 
           href="/admin/trees" 
-          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary transition-colors"
+          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
         >
           <ChevronLeft size={14} />
           Back to Inventory
         </Link>
         <div>
-          <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Deploy New Tree</h1>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Onboard a new heritage Alphonso tree to the platform</p>
+          <h1 className="text-2xl font-black text-foreground uppercase tracking-tight">Deploy New Tree</h1>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Onboard a new heritage Alphonso tree to the platform</p>
         </div>
       </div>
 

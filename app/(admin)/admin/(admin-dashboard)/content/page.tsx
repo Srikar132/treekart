@@ -19,16 +19,16 @@ export default async function AdminContentPage() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Landing Management</h1>
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Fine-tune your storefront narrative</p>
+        <h1 className="text-2xl font-black text-foreground uppercase tracking-tight">Landing Management</h1>
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Fine-tune your storefront narrative</p>
       </div>
 
       <Tabs defaultValue="hero" className="w-full">
-        <TabsList className="bg-slate-100/50 p-1 rounded-xl mb-8">
-          <TabsTrigger value="hero" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary text-[10px] font-black uppercase tracking-widest gap-2">
+        <TabsList className="bg-muted p-1 rounded-xl mb-8">
+          <TabsTrigger value="hero" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary text-[10px] font-black uppercase tracking-widest gap-2">
             <ImageIcon size={14} /> Hero Slides
           </TabsTrigger>
-          <TabsTrigger value="testimonials" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary text-[10px] font-black uppercase tracking-widest gap-2">
+          <TabsTrigger value="testimonials" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary text-[10px] font-black uppercase tracking-widest gap-2">
             <MessageSquare size={14} /> Social Proof
           </TabsTrigger>
         </TabsList>
@@ -36,17 +36,17 @@ export default async function AdminContentPage() {
         {/* Hero Slides Content */}
         <TabsContent value="hero" className="space-y-6">
           <div className="flex justify-between items-center mb-4">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Slides ({slides.length})</p>
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Active Slides ({slides.length})</p>
             
             <Dialog>
                 <DialogTrigger 
                     render={
-                        <Button size="sm" variant="outline" className="rounded-lg text-[9px] font-black uppercase tracking-widest border-slate-200">
+                        <Button size="sm" variant="outline" className="rounded-lg text-[9px] font-black uppercase tracking-widest border-border">
                             <Plus size={12} className="mr-1" /> Add Slide
                         </Button>
                     }
                 />
-                <DialogContent className="max-w-4xl rounded-2xl border-slate-200">
+                <DialogContent className="max-w-4xl rounded-2xl border-border">
                     <DialogHeader>
                         <DialogTitle className="text-sm font-black uppercase tracking-tight">Deploy New Hero Story</DialogTitle>
                     </DialogHeader>
@@ -65,17 +65,17 @@ export default async function AdminContentPage() {
         {/* Testimonials Content */}
         <TabsContent value="testimonials" className="space-y-6">
           <div className="flex justify-between items-center mb-4">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Member Reviews ({testimonials.length})</p>
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Member Reviews ({testimonials.length})</p>
             
             <Dialog>
                 <DialogTrigger 
                     render={
-                        <Button size="sm" variant="outline" className="rounded-lg text-[9px] font-black uppercase tracking-widest border-slate-200">
+                        <Button size="sm" variant="outline" className="rounded-lg text-[9px] font-black uppercase tracking-widest border-border">
                             <Plus size={12} className="mr-1" /> Add Review
                         </Button>
                     }
                 />
-                <DialogContent className="max-w-xl rounded-2xl border-slate-200">
+                <DialogContent className="max-w-xl rounded-2xl border-border">
                     <DialogHeader>
                         <DialogTitle className="text-sm font-black uppercase tracking-tight">Curate Social Proof</DialogTitle>
                     </DialogHeader>

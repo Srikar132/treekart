@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { AnimatedButton } from "@/components/shared/animated-button";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
+import { Button } from "@/components/ui/button";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -50,7 +51,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+    <main className="admin-theme dark min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-background">
       {/* Background Orbs for Premium Feel */}
       {/* <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-500/10 rounded-full blur-[120px] animate-pulse" /> */}
       {/* <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-orange-600/10 rounded-full blur-[120px] animate-pulse delay-700" /> */}
@@ -68,7 +69,7 @@ export default function AdminLoginPage() {
             </h1>
             <div className="flex items-center justify-center gap-2">
               <span className="h-[1px] w-8 bg-white/10"></span>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em]">
                 TreeKart Corporate Terminal
               </p>
               <span className="h-[1px] w-8 bg-white/10"></span>
@@ -77,60 +78,58 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Login Card - Glassmorphism */}
-        <div className="bg-[#121214] p-8 md:p-10 rounded-[32px] shadow-2xl border border-white/5 backdrop-blur-xl relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+        <div className="p-8 md:p-10 min-w-sm  relative overflow-hidden group">
+          {/* <div className="absolute i opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" /> */}
 
           <form onSubmit={handleLogin} className="space-y-6 relative z-10">
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">Access Identity</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Access Identity</label>
               <div className="relative group/field">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within/field:text-[#E5603E] transition-colors" size={18} />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60 group-focus-within/field:text-[#E5603E] transition-colors" size={18} />
                 <Input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@treekart.in"
-                  className="h-14 pl-12 rounded-2xl bg-white/5 border-white/5 text-white placeholder:text-slate-600 focus-visible:bg-white/10 focus-visible:ring-1 focus-visible:ring-orange-500/50 focus-visible:border-orange-500/50 transition-all font-medium"
+                  className="h-14 pl-12 rounded-2xl bg-white/5 border-white/5 text-white placeholder:text-muted-foreground/40 focus-visible:bg-white/10 focus-visible:ring-1 focus-visible:ring-orange-500/50 focus-visible:border-orange-500/50 transition-all font-medium"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">Security Key</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Security Key</label>
               <div className="relative group/field">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within/field:text-[#E5603E] transition-colors" size={18} />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60 group-focus-within/field:text-[#E5603E] transition-colors" size={18} />
                 <Input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="h-14 pl-12 rounded-2xl bg-white/5 border-white/5 text-white placeholder:text-slate-600 focus-visible:bg-white/10 focus-visible:ring-1 focus-visible:ring-orange-500/50 focus-visible:border-orange-500/50 transition-all font-medium"
+                  className="h-14 pl-12 rounded-2xl bg-white/5 border-white/5 text-white placeholder:text-muted-foreground/40 focus-visible:bg-white/10 focus-visible:ring-1 focus-visible:ring-orange-500/50 focus-visible:border-orange-500/50 transition-all font-medium"
                   required
                 />
               </div>
             </div>
 
-            <AnimatedButton
+            <Button
               type="submit"
               disabled={loading}
-              label={loading ? "Verifying..." : "Initialize Command Center"}
-              icon={loading ? <Loader2 className="animate-spin" size={18} /> : <ArrowRight size={18} />}
               className="w-full h-15 bg-[#E5603E] text-white rounded-2xl font-black uppercase tracking-[0.1em] text-xs shadow-xl shadow-orange-500/20 hover:shadow-orange-500/40 transition-all duration-300 border-0"
-              fillClassName="bg-white"
-              hoverTextClassName="hover:text-black"
-            />
+            >
+              {loading ? <Loader2 className="animate-spin" size={18} /> : "Initialize Command Center"}
+            </Button>
           </form>
         </div>
 
         <div className="flex flex-col items-center gap-4">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
             <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
               Secure AES-256 Link Active
             </p>
           </div>
-          <p className="text-center text-[9px] font-medium text-slate-600 uppercase tracking-[0.2em]">
+          <p className="text-center text-[9px] font-medium text-muted-foreground/60 uppercase tracking-[0.2em]">
             Authorized Personnel Only • Node: IN-WEST-01
           </p>
         </div>

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { useState } from "react";
 import { Play, Video } from "lucide-react";
+import Image from "next/image";
 import { NoResults } from "@/components/ui/no-results";
 import { TreeUpdate } from "@/types/database.types";
 
@@ -42,10 +43,11 @@ function YouTubePlayer({ url, title }: { url: string; title: string }) {
       ) : (
         <>
           {/* Thumbnail */}
-          <img
+          <Image
             src={getYouTubeThumbnail(videoId)}
             alt={title}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
           />
 
           {/* Dark overlay */}

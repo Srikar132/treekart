@@ -3,12 +3,12 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
+import { loginUser } from "@/actions/auth.actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Leaf, Loader2, Eye, EyeOff, TreePine } from "lucide-react";
 import { AnimatedButton } from "@/components/shared/animated-button";
-import { signInSchema, type ActionState, type SignInFields } from "@/lib/validations";
+import { type ActionState, type SignInFields } from "@/lib/validations";
 import { useState } from "react";
 
 type SignInState = ActionState<SignInFields>;
@@ -17,47 +17,16 @@ export function SigninForm({ redirectTo }: { redirectTo: string }) {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
 
-    async function signInAction(
-        _prev: SignInState,
-        formData: FormData
-    ): Promise<SignInState> {
-        const raw = {
-            email: formData.get("email") as string,
-            password: formData.get("password") as string,
-        };
+    const [state, action, pending] = useActionState(async (prev: SignInState, formData: FormData) => {
+        const result = await loginUser(prev, formData);
 
-        const parsed = signInSchema.safeParse(raw);
-        if (!parsed.success) {
-            return {
-                errors: parsed.error.flatten().fieldErrors as SignInState["errors"],
-                values: raw,
-            };
+        if (result.success) {
+            router.push(redirectTo);
+            router.refresh();
         }
 
-        const supabase = createClient();
-        const { error } = await supabase.auth.signInWithPassword(parsed.data);
-
-        if (error) {
-            return {
-                errors: {
-                    _server:
-                        error.message === "Invalid login credentials"
-                            ? "Incorrect email or password. Please try again."
-                            : error.message,
-                },
-                values: raw,
-            };
-        }
-
-        router.push(redirectTo);
-        router.refresh();
-        return {};
-    }
-
-    const [state, action, pending] = useActionState<SignInState, FormData>(
-        signInAction,
-        {}
-    );
+        return result;
+    }, {} as SignInState);
 
     return (
         <div className="flex min-h-[calc(100vh-200px)] items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
@@ -91,6 +60,7 @@ export function SigninForm({ redirectTo }: { redirectTo: string }) {
                                 type="email"
                                 placeholder="YOUR@EMAIL.COM"
                                 autoComplete="email"
+                                key={state.values?.email}
                                 defaultValue={state.values?.email ?? ""}
                                 className={`h-12 border-border bg-background px-4 text-sm focus-visible:ring-primary rounded-none ${state.errors?.email ? "border-destructive" : ""}`}
                             />
@@ -110,7 +80,7 @@ export function SigninForm({ redirectTo }: { redirectTo: string }) {
                                     Password
                                 </Label>
                                 <Link
-                                    href="/forgot-password"
+                                    href="/auth/forgot-password"
                                     className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground hover:text-primary transition-colors"
                                 >
                                     Forgot?
@@ -161,7 +131,7 @@ export function SigninForm({ redirectTo }: { redirectTo: string }) {
                             New to Treekart?{" "}
                             <Link
                                 href={`/auth/signup?redirectTo=${encodeURIComponent(redirectTo)}`}
-                                className="text-primary hover:text-grove-light transition-colors ml-2 border-b border-primary/30 hover:border-primary"
+                                className="text-primary hover:underline transition-colors ml-2 border-b border-primary/30 hover:border-primary"
                             >
                                 Create Account
                             </Link>
