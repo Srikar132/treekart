@@ -12,6 +12,8 @@ import type { Database } from "@/types/database.types";
 type OrderStatus = Database["public"]["Enums"]["order_status"];
 
 import { type DeliveryAddress } from "@/types/checkout";
+import { paymentAj } from "@/lib/arcjet";
+import { headers } from "next/headers";
 
 // Shape stored in orders.items (Json column)
 type OrderItemRecord = {
@@ -94,6 +96,12 @@ export async function createMangoOrder(
   items: CartItem[],
   deliveryAddress: DeliveryAddress
 ): Promise<CreateOrderResult> {
+
+  const decision = await paymentAj.protect({ headers: await headers() }, { requested: 1 });
+  if (decision.isDenied()) {
+    throw new Error("Too many payment requests. Please try again later.");
+  }
+
   if (!items || items.length === 0) {
     throw new Error("Cart is empty");
   }
@@ -103,7 +111,7 @@ export async function createMangoOrder(
   const razorpay = getRazorpay();
 
   const { grandTotalPaise, grandTotal } = computeTotals(items);
-  
+
   // Verify product availability
   const productIds = items.map(i => i.id);
   const { data: dbProducts, error: productError } = await supabase

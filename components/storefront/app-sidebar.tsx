@@ -1,7 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Home, Store, Package, FileText, User, X } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
+import { type User as SupabaseUser } from "@supabase/supabase-js";
 import {
     Sidebar,
     SidebarContent,
@@ -50,6 +53,25 @@ const menuItems = [
 
 export function AppSidebar() {
     const { setOpenMobile } = useSidebar();
+    const [user, setUser] = useState<SupabaseUser | null>(null);
+    const supabase = createClient();
+
+    useEffect(() => {
+        const getUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
+        };
+
+
+        getUser();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [supabase]);
+
 
     const handleClose = () => {
         setOpenMobile(false);
@@ -97,16 +119,16 @@ export function AppSidebar() {
 
             </SidebarContent>
 
-            {/* Footer with Login & Wishlist */}
+            {/* Footer with Login or Account */}
             <SidebarFooter className="border-t p-4 w-full">
                 <div className="flex items-center w-full gap-3">
                     <Link
-                        href="/auth/signin"
+                        href={user ? "/account" : "/auth/signin"}
                         onClick={handleClose}
                         className="flex items-center w-full gap-2 px-4 py-2.5 rounded-md border border-sidebar-border hover:bg-sidebar-accent transition-colors text-sm font-medium"
                     >
                         <User className="w-4 h-4" strokeWidth={2} />
-                        <span>Login</span>
+                        <span>{user ? "Account" : "Login"}</span>
                     </Link>
                 </div>
             </SidebarFooter>

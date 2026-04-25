@@ -1,41 +1,12 @@
-import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next";
+import arcjet, { slidingWindow, tokenBucket, shield } from "@arcjet/next";
 
-/**
- * Public/Global Arcjet instance.
- * Uses IP-based rate limiting for sign-in, sign-up, and public pages.
- */
-export const aj = arcjet({
+const base = arcjet({
     key: process.env.ARCJET_KEY!,
-    rules: [
-        shield({ mode: "LIVE" }),
-        detectBot({
-            mode: "LIVE",
-            allow: ["CATEGORY:SEARCH_ENGINE"],
-        }),
-        tokenBucket({
-            mode: "LIVE",
-            characteristics: ["ip.src"], // track requests by IP
-            refillRate: 5,
-            interval: 10,
-            capacity: 10,
-        }),
-    ],
+    characteristics: ["ip.src"],
+    rules: [shield({ mode: "LIVE" })],
 });
 
-/**
- * Authenticated Arcjet instance.
- * Uses userId-based rate limiting for protected routes (/account, /checkout, etc).
- */
-export const authenticatedAj = arcjet({
-    key: process.env.ARCJET_KEY!,
-    rules: [
-        shield({ mode: "LIVE" }),
-        tokenBucket({
-            mode: "LIVE",
-            characteristics: ["userId"], // track requests by user ID
-            refillRate: 10,
-            interval: 10,
-            capacity: 20,
-        }),
-    ],
-});
+export const authAj = base.withRule(slidingWindow({ mode: "LIVE", interval: "1m", max: 5 }));
+export const signupAj = base.withRule(slidingWindow({ mode: "LIVE", interval: "1h", max: 3 }));
+export const contactAj = base.withRule(slidingWindow({ mode: "LIVE", interval: "1h", max: 5 }));
+export const paymentAj = base.withRule(tokenBucket({ mode: "LIVE", refillRate: 2, interval: "1m", capacity: 5 }));

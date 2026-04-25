@@ -3,13 +3,21 @@
 import { z } from "zod";
 import { sendContactEmail } from "@/lib/email";
 import { ContactFormState, contactSchema } from "@/lib/validations";
-
+import { contactAj } from "@/lib/arcjet";
+import { headers } from "next/headers";
 
 
 export async function submitContactForm(
   prevState: ContactFormState,
   formData: FormData
 ): Promise<ContactFormState> {
+
+
+  const decision = await contactAj.protect({ headers: await headers() });
+  if (decision.isDenied()) {
+    return { error: "You're sending too many messages. Please wait." };
+  }
+
   const rawData = {
     name: formData.get("name") as string,
     email: formData.get("email") as string,

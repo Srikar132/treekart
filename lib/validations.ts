@@ -41,6 +41,7 @@ export type ActionState<T extends Record<string, string>> = {
     errors?: Partial<Record<keyof T | "_server", string>>;
     values?: Partial<T>;
     success?: boolean;
+    isUnverified?: boolean;
 };
 
 // schema for tree form

@@ -3,19 +3,22 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { loginUser } from "@/actions/auth.actions";
+import { loginUser, resendVerificationEmail } from "@/actions/auth.actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Leaf, Loader2, Eye, EyeOff, TreePine } from "lucide-react";
+import { Leaf, Loader2, Eye, EyeOff, TreePine, MailCheck } from "lucide-react";
 import { AnimatedButton } from "@/components/shared/animated-button";
 import { type ActionState, type SignInFields } from "@/lib/validations";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 type SignInState = ActionState<SignInFields>;
 
 export function SigninForm({ redirectTo }: { redirectTo: string }) {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+    const [isResending, startResendTransition] = useTransition();
+    const [resent, setResent] = useState(false);
 
     const [state, action, pending] = useActionState(async (prev: SignInState, formData: FormData) => {
         const result = await loginUser(prev, formData);
@@ -27,6 +30,24 @@ export function SigninForm({ redirectTo }: { redirectTo: string }) {
 
         return result;
     }, {} as SignInState);
+
+    const handleResend = () => {
+        const email = state.values?.email;
+        if (!email) {
+            toast.error("Email is missing");
+            return;
+        }
+
+        startResendTransition(async () => {
+            const res = await resendVerificationEmail(email);
+            if (res.success) {
+                setResent(true);
+                toast.success("Verification link resent!");
+            } else {
+                toast.error(res.error || "Failed to resend link");
+            }
+        });
+    };
 
     return (
         <div className="flex min-h-[calc(100vh-200px)] items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
@@ -111,8 +132,31 @@ export function SigninForm({ redirectTo }: { redirectTo: string }) {
                         </div>
 
                         {state.errors?._server && (
-                            <div className="border border-destructive/50 bg-destructive/5 px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-destructive">
-                                {state.errors._server}
+                            <div
+                                className={`flex flex-col gap-3 border px-4 py-3 text-[11px] font-bold uppercase tracking-wider ${state.isUnverified
+                                    ? "border-primary/50 bg-primary/5 text-primary"
+                                    : "border-destructive/50 bg-destructive/5 text-destructive"
+                                    }`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    {state.isUnverified && <MailCheck size={14} />}
+                                    <span>{state.errors._server}</span>
+                                </div>
+
+                                {state.isUnverified && (
+                                    <button
+                                        type="button"
+                                        disabled={isResending || resent}
+                                        onClick={handleResend}
+                                        className="text-left underline decoration-primary/30 transition-all hover:text-primary/80 hover:decoration-primary disabled:opacity-50 disabled:no-underline"
+                                    >
+                                        {resent
+                                            ? "Link Sent! Check your inbox"
+                                            : isResending
+                                                ? "Sending Link..."
+                                                : "Resend Verification Link"}
+                                    </button>
+                                )}
                             </div>
                         )}
 

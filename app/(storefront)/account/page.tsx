@@ -22,12 +22,12 @@ export default async function AccountPage() {
 
 
   return (
-    <main className="section container min-h-screen">
+    <div className="section overflow-x-hidden" style={{ overflowX: "hidden" }}>
       <AccountClient
         user={user}
         rentals={rentals}
         orders={orders}
       />
-    </main>
+    </div>
   );
 }
