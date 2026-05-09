@@ -2,6 +2,7 @@
 
 import { getSupabaseServer, requireAdmin } from "@/lib/auth";
 import { Database } from "@/types/database.types";
+import { getSupabasePublic } from "@/utils/supabase/public";
 import { revalidatePath } from "next/cache";
 
 type ProductBadge = Database["public"]["Enums"]["product_badge"];
@@ -25,7 +26,7 @@ export interface GetProductsOptions {
 // ── PUBLIC ─────────────────────────────────────────────────────────
 
 export async function getMangoProducts(options?: GetProductsOptions) {
-    const supabase = await getSupabaseServer();
+    const supabase = await getSupabasePublic();
 
     let query = supabase
         .from("mango_products")

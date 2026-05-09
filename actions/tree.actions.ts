@@ -1,7 +1,7 @@
 "use server";
 
 import { getSupabaseServer, requireUser, requireAdmin } from "@/lib/auth";
-import { Database } from "@/types/database.types";
+import { Database, TreeInsert } from "@/types/database.types";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
@@ -131,7 +131,7 @@ export async function getAvailableTrees(options?: GetTreesOptions) {
 // ── getTreeById ────────────────────────────────────────────────────
 // Returns tree + farmer only. No rental data embedded.
 export async function getTreeById(treeId: string) {
-    const supabase = await getSupabaseServer();
+    const supabase = await getSupabasePublic();
 
     const { data: tree, error } = await supabase
         .from("trees")
@@ -367,16 +367,9 @@ export async function verifyAndFulfilRental(payload: {
 
     return { success: true, rentalId: rental.id };
 }
-type TreeInsert = Database["public"]["Tables"]["trees"]["Insert"];
-type TreeUpdate = Database["public"]["Tables"]["trees"]["Update"];
+
 
 // ── ADMIN - TREE MUTATIONS ──────────────────────────────────────────────────────────
-
-/**
- * 
- * @param 
- * @returns 
- */
 export async function createTree(input: TreeInsert) {
     await requireAdmin();
     const supabase = await getSupabaseServer();
@@ -389,15 +382,13 @@ export async function createTree(input: TreeInsert) {
 
     if (error) throw new Error(error.message);
 
-    // Revalidate paths to ensure the storefront is updated
-    revalidatePath("/", "layout");
-    revalidatePath("/rent", "layout");
-    revalidatePath("/admin/trees", "layout");
-    
+    revalidatePath("/rent", "page");
+    revalidatePath("/admin/trees", "page");
+
     return data;
 }
 
-export async function updateTree(id: string, input: TreeUpdate) {
+export async function updateTree(id: string, input: Database["public"]["Tables"]["trees"]["Update"]) {
     await requireAdmin();
     const supabase = await getSupabaseServer();
 
@@ -410,13 +401,10 @@ export async function updateTree(id: string, input: TreeUpdate) {
 
     if (error) throw new Error(error.message);
 
-    // Revalidate paths to ensure both admin and storefront reflect changes
-    revalidatePath("/", "layout");
-    revalidatePath("/rent", "layout");
-    revalidatePath(`/rent/${id}`, "page");
-    revalidatePath("/admin/trees", "layout");
+    revalidatePath("/rent", "page");
+    revalidatePath(`/trees/${id}`, "page");
+    revalidatePath("/admin/trees", "page");
     revalidatePath(`/admin/trees/${id}`, "page");
 
     return data;
 }
-

@@ -9,6 +9,8 @@ import { AnimatedButton } from "@/components/shared/animated-button";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { ShareDialog } from "@/components/shared/share-dialog";
+import { useLoginPrompt } from "@/store/use-login-prompt";
+import { createClient } from "@/utils/supabase/client";
 
 import { MangoProduct } from "@/types/database.types";
 
@@ -19,6 +21,7 @@ interface ProductInfoProps {
 export function ProductInfo({ product }: ProductInfoProps) {
   const router = useRouter();
   const { add } = useMangoCart();
+  const { openLoginPrompt } = useLoginPrompt();
   const [isAdding, setIsAdding] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
@@ -28,7 +31,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
   const handleAddToCart = async () => {
     setIsAdding(true);
-    await new Promise(resolve => setTimeout(resolve, 600));
 
     add({
       id: product.id,
@@ -47,6 +49,14 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
   const handleBuyNow = async () => {
     handleAddToCart();
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      openLoginPrompt("/checkout/store");
+      return;
+    }
+
     router.push("/checkout/store");
   };
 

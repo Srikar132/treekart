@@ -1,10 +1,10 @@
-import { TreeCard, type TreeProduct } from "@/components/storefront/cards/tree-card";
+import { TreeCard } from "@/components/storefront/cards/tree-card";
 import { AnimatedButton } from "@/components/shared/animated-button";
+import { TreeListItem } from "@/types";
 
-import { Tree } from "@/types/database.types";
 
 interface RentedTreesProps {
-    initialTrees: Tree[];
+    initialTrees: TreeListItem[];
 }
 
 export function RentedTrees({ initialTrees }: RentedTreesProps) {
@@ -22,24 +22,17 @@ export function RentedTrees({ initialTrees }: RentedTreesProps) {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
                     {initialTrees.map((tree) => {
-                        const product: TreeProduct = {
-                            id: tree.id,
-                            title: `${tree.variety} Mango Tree`,
-                            price: tree.price ?? 0,
-                            images: Array.isArray(tree.photos) ? (tree.photos as string[]) : [],
-                            isSale: false,
-                        };
                         return (
-                            <TreeCard key={tree.id} product={product} />
+                            <TreeCard key={tree.id} tree={tree} />
                         );
                     })}
                 </div>
 
-                <div className="flex justify-center">
+                <div className="flex justify-center items-center">
                     <AnimatedButton
                         href="/rent"
                         label="Explore Full Inventory"
-                        className="h-14 px-10 border-slate-200 text-slate-400"
+                        className="h-14 max-w-fit px-10 border-slate-200 text-slate-400"
                         fillClassName="bg-slate-900"
                         hoverTextClassName="hover:text-white"
                     />

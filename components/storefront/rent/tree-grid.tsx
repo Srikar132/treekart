@@ -1,6 +1,6 @@
 "use client";
 
-import { TreeCard, type TreeProduct } from "@/components/storefront/cards/tree-card";
+import { TreeCard } from "@/components/storefront/cards/tree-card";
 import { NoResults } from "@/components/ui/no-results";
 import type { Database } from "@/types/database.types";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
@@ -49,19 +49,19 @@ export function TreeGrid({ initialData, options }: Props) {
       pages: [initialData],
       pageParams: [1],
     },
-    staleTime: 0,
-    refetchOnMount: "always",
+    // staleTime: 0,
+    // refetchOnMount: "always",
   });
 
   // Sync React Query cache with fresh initialData from Server Component
-  useEffect(() => {
-    if (initialData) {
-      queryClient.setQueryData(["trees", options.filters, options.sort], {
-        pages: [initialData],
-        pageParams: [1],
-      });
-    }
-  }, [initialData, queryClient, options.filters, options.sort]);
+  // useEffect(() => {
+  //   if (initialData) {
+  //     queryClient.setQueryData(["trees", options.filters, options.sort], {
+  //       pages: [initialData],
+  //       pageParams: [1],
+  //     });
+  //   }
+  // }, [initialData, queryClient, options.filters, options.sort]);
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -79,19 +79,7 @@ export function TreeGrid({ initialData, options }: Props) {
     <div className="space-y-10">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
         {allTrees.map((tree) => {
-          const photos = Array.isArray(tree.photos) && tree.photos.length > 0
-            ? (tree.photos as string[])
-            : ["/assets/images/placeholder.jpg"];
-
-          const product: TreeProduct = {
-            id: tree.id,
-            title: `${tree.variety ?? "Alphonso"} Mango Tree`,
-            price: tree.price ?? 0,
-            images: photos,
-            isSale: true,
-          };
-
-          return <TreeCard key={tree.id} product={product} />;
+          return <TreeCard key={tree.id} tree={tree} />;
         })}
       </div>
 

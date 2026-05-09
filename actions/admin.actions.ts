@@ -1,8 +1,6 @@
 "use server";
 
-import { unstable_cache } from "next/cache";
 import { requireAdmin, getSupabaseServer } from "@/lib/auth";
-import { revalidateTag } from "next/cache";
 import { revalidatePath } from "next/cache";
 import { Database, OrderStatus, PlanType, TreeStatus } from "@/types/database.types";
 
@@ -21,35 +19,14 @@ export async function getAdminStats() {
   await requireAdmin();
   const supabase = await getSupabaseServer();
 
-  // Fetch in parallel
-  const [
-    { count: userCount },
-    { count: treeCount },
-    { count: orderCount },
-    { data: orders },
-    { data: rentals }
-  ] = await Promise.all([
-    supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase.from("trees").select("*", { count: "exact", head: true }),
-    supabase.from("orders").select("*", { count: "exact", head: true }),
-    supabase.from("orders")
-      .select("total_amount")
-      .in("status", ["confirmed", "shipped", "delivered"]),
-    supabase.from("rentals")
-      .select("amount_paid")
-      .in("status", ["active", "completed"])
-  ]);
-
-  const orderRevenue = orders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
-  const rentalRevenue = rentals?.reduce((sum, rental) => sum + (rental.amount_paid || 0), 0) || 0;
-
-  const totalRevenue = orderRevenue + rentalRevenue;
+  const { data, error } = await supabase.rpc("get_admin_stats");
+  if (error) throw new Error(error.message);
 
   return {
-    users: userCount || 0,
-    trees: treeCount || 0,
-    orders: orderCount || 0,
-    revenue: totalRevenue
+    users: data.users,
+    trees: data.trees,
+    orders: data.orders,
+    revenue: data.order_revenue + data.rental_revenue,
   };
 }
 
@@ -235,16 +212,15 @@ export async function adminCreateTreeUpdate(input: TreeUpdateInsert) {
   if (error) throw new Error(error.message);
 
   if (input.tree_id) {
-    revalidatePath(`/rent/${input.tree_id}`);
-    revalidatePath(`/admin/trees/${input.tree_id}/updates`);
+    revalidatePath(`/trees/${input.tree_id}`, "page"); // ✅ correct path
+    revalidatePath(`/admin/trees/${input.tree_id}/updates`, "page");
   }
   if (input.rental_id) {
-    revalidatePath(`/admin/rentals/${input.rental_id}/updates`);
+    revalidatePath(`/admin/rentals/${input.rental_id}/updates`, "page");
   }
 
   return data;
 }
-
 export async function adminDeleteTreeUpdate(id: string, rentalId?: string) {
   await requireAdmin();
   const supabase = await getSupabaseServer();
@@ -317,7 +293,7 @@ export async function adminUpdateOrderStatus(
   status: OrderStatus,
   trackingId?: string
 ) {
-  const { requireAdmin } = await import("@/lib/auth");
+
   await requireAdmin();
 
   const supabase = await getSupabaseServer();

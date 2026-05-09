@@ -17,22 +17,20 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-export type TreeProduct = {
-    id: string | number;
-    title: string;
-    price: number;
-    oldPrice?: number;
-    images: string[];
-    isSale?: boolean;
-};
+import { TreeListItem } from "@/types";
 
 interface TreeCardProps {
-    product: TreeProduct;
+    tree: TreeListItem;
 }
 
-export function TreeCard({ product }: TreeCardProps) {
-    const images = product.images && product.images.length > 0 ? product.images : ["/assets/images/placeholder.jpg"];
+export function TreeCard({ tree }: TreeCardProps) {
+
+    const images = Array.isArray(tree.photos) && tree.photos.length > 0
+        ? (tree.photos as string[])
+        : ["/assets/images/placeholder.jpg"];
+
+    const isSale = tree.plan_type === "basic";
+    const title = `${tree.variety} Mango Tree`;
 
     return (
         <motion.div
@@ -46,7 +44,7 @@ export function TreeCard({ product }: TreeCardProps) {
             {/* Image Container */}
             <div className="relative aspect-square w-full overflow-hidden mb-5 bg-muted/10 rounded-lg">
                 {/* Sale Ribbon */}
-                {product.isSale && (
+                {isSale && (
                     <div className="absolute top-2 -right-7 w-30 h-8 bg-red-500 text-white flex items-end justify-center pb-2 rotate-45 z-10 shadow-sm pointer-events-none">
                         <span className="text-xs font-heading font-bold uppercase tracking-wider">Sale</span>
                     </div>
@@ -57,10 +55,10 @@ export function TreeCard({ product }: TreeCardProps) {
                     <CarouselContent className="h-full">
                         {images.map((img, index) => (
                             <CarouselItem key={index} className="relative h-full aspect-square">
-                                <Link href={`/trees/${product.id}`} className="absolute inset-0 block">
+                                <Link href={`/trees/${tree.id}`} className="absolute inset-0 block">
                                     <Image
                                         src={img}
-                                        alt={`${product.title} - Image ${index + 1}`}
+                                        alt={`${title} - Image ${index + 1}`}
                                         fill
                                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                         className="object-cover drop-shadow-md group-hover:scale-110 transition-transform duration-700 ease-in-out"
@@ -98,14 +96,11 @@ export function TreeCard({ product }: TreeCardProps) {
 
             {/* Text Content */}
             <div className="text-center mt-auto">
-                <Link href={`/trees/${product.id}`} className="inline-block hover:text-primary transition-colors">
-                    <h3 className="text-base font-bold text-foreground mb-1">{product.title}</h3>
+                <Link href={`/trees/${tree.id}`} className="inline-block hover:text-primary transition-colors">
+                    <h3 className="text-base font-bold text-foreground mb-1">{title}</h3>
                 </Link>
                 <div className="flex items-center justify-center gap-2 font-medium">
-                    <span className="text-primary">₹{product.price.toFixed(2)}</span>
-                    {product.oldPrice && (
-                        <span className="text-muted-foreground line-through text-sm">₹{product.oldPrice.toFixed(2)}</span>
-                    )}
+                    <span className="text-primary">₹{tree.price.toFixed(2)}</span>
                 </div>
             </div>
         </motion.div>

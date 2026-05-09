@@ -503,7 +503,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_admin_stats: {
+        Args: Record<string, never>  // no arguments
+        Returns: {
+          users: number
+          trees: number
+          orders: number
+          order_revenue: number
+          rental_revenue: number
+        }
+      }
     }
     Enums: {
       product_badge: "Pre-Order" | "Sale" | "New" | "None"

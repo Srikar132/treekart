@@ -9,6 +9,8 @@ import { ShareDialog } from "@/components/shared/share-dialog";
 import { useRentalStore } from "@/store/use-rental-store";
 import { useRouter } from "next/navigation";
 import { Database, Tree, Farmer } from "@/types/database.types";
+import { useLoginPrompt } from "@/store/use-login-prompt";
+import { createClient } from "@/utils/supabase/client";
 
 type PlanType = Database["public"]["Enums"]["plan_type"];
 
@@ -42,8 +44,9 @@ const item = {
 export function TreeInfo({ tree, activeRental }: TreeInfoProps) {
   const router = useRouter();
   const { setPlan } = useRentalStore();
+  const { openLoginPrompt } = useLoginPrompt();
 
-  const handleRentNow = () => {
+  const handleRentNow = async () => {
     setPlan({
       treeId: tree.id,
       planType: (tree.plan_type as PlanType) || "standard",
@@ -55,6 +58,15 @@ export function TreeInfo({ tree, activeRental }: TreeInfoProps) {
       gpsLat: tree.gps_lat || 0,
       gpsLng: tree.gps_lng || 0,
     });
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      openLoginPrompt(`/checkout/rental/${tree.id}`);
+      return;
+    }
+
     router.push(`/checkout/rental/${tree.id}`);
   };
 

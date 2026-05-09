@@ -21,6 +21,8 @@ import {
 import { useMangoCart } from "@/store/use-mango-cart";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
+import { useLoginPrompt } from "@/store/use-login-prompt";
 
 export function CartSidebar() {
     const {
@@ -35,9 +37,19 @@ export function CartSidebar() {
         clear,
     } = useMangoCart();
 
+    const { openLoginPrompt } = useLoginPrompt();
     const router = useRouter();
 
-    const handleCheckout = () => {
+    const handleCheckout = async () => {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            closeCart();
+            openLoginPrompt("/checkout/store");
+            return;
+        }
+
         closeCart();
         router.push("/checkout/store");
     };

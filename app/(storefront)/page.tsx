@@ -24,12 +24,12 @@ const Page = async () => {
         <main className="flex flex-col">
             <HeroSection slides={heroSlides} />
             <FeaturedCategories />
-            <AvailableTrees initialTrees={availableData.trees || []} />
             <HowItWorks />
+            <AvailableTrees initialTrees={availableData.trees || []} />
             <WhyChooseUs />
-            <RentedTrees initialTrees={rentedData.trees || []} />
             <PricingSection />
             <Testimonials testimonials={testimonials} />
+            <RentedTrees initialTrees={rentedData.trees || []} />
             <PromoBanner />
         </main>
     )

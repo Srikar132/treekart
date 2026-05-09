@@ -32,9 +32,6 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
         setIsAdding(true);
 
-        // Simulate a small delay for the loading state to be visible
-        await new Promise(resolve => setTimeout(resolve, 600));
-
         onAddToCart();
 
         setIsAdding(false);
