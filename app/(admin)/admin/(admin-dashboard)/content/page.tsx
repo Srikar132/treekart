@@ -8,11 +8,17 @@ import { HeroSlideCard } from "@/components/admin/content/hero-slide-card";
 import { TestimonialCard } from "@/components/admin/content/testimonial-card";
 import { HeroSlideForm } from "@/components/admin/content/hero-slide-form";
 import { TestimonialForm } from "@/components/admin/content/testimonial-form";
+import { TreePlanForm } from "@/components/admin/content/tree-plan-form";
+import { TreePlanCard } from "@/components/admin/content/tree-plan-card";
+import { HeroSlidesList } from "@/components/admin/content/hero-slides-list";
+import { adminGetTreePlans } from "@/actions/admin.actions";
+import { Tag } from "lucide-react";
 
 export default async function AdminContentPage() {
-  const [slides, testimonials] = await Promise.all([
+  const [slides, testimonials, treePlans] = await Promise.all([
     adminGetHeroSlides(),
-    adminGetTestimonials()
+    adminGetTestimonials(),
+    adminGetTreePlans()
   ]);
 
   return (
@@ -31,62 +37,90 @@ export default async function AdminContentPage() {
           <TabsTrigger value="testimonials" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary text-[10px] font-black uppercase tracking-widest gap-2">
             <MessageSquare size={14} /> Social Proof
           </TabsTrigger>
+          <TabsTrigger value="plans" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary text-[10px] font-black uppercase tracking-widest gap-2">
+            <Tag size={14} /> Pricing Plans
+          </TabsTrigger>
         </TabsList>
 
         {/* Hero Slides Content */}
         <TabsContent value="hero" className="space-y-6">
           <div className="flex justify-between items-center mb-4">
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Active Slides ({slides.length})</p>
-            
+
             <Dialog>
-                <DialogTrigger 
-                    render={
-                        <Button size="sm" variant="outline" className="rounded-lg text-[9px] font-black uppercase tracking-widest border-border">
-                            <Plus size={12} className="mr-1" /> Add Slide
-                        </Button>
-                    }
-                />
-                <DialogContent className="max-w-4xl rounded-2xl border-border">
-                    <DialogHeader>
-                        <DialogTitle className="text-sm font-black uppercase tracking-tight">Deploy New Hero Story</DialogTitle>
-                    </DialogHeader>
-                    <HeroSlideForm />
-                </DialogContent>
+              <DialogTrigger
+                render={
+                  <Button size="sm" variant="outline" className="rounded-lg text-[9px] font-black uppercase tracking-widest border-border">
+                    <Plus size={12} className="mr-1" /> Add Slide
+                  </Button>
+                }
+              />
+              <DialogContent className="w-full h-full sm:h-auto max-w-none sm:max-w-7xl rounded-none sm:rounded-[2.5rem] border-none sm:border border-border max-h-none sm:max-h-[95vh] p-6 sm:p-10">
+                <DialogHeader className="mb-8">
+                  <DialogTitle className="text-xl font-black uppercase tracking-tight">Deploy New Hero Story</DialogTitle>
+                </DialogHeader>
+                <HeroSlideForm />
+              </DialogContent>
             </Dialog>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-            {slides.map((slide: any) => (
-              <HeroSlideCard key={slide.id} slide={slide} />
-            ))}
-          </div>
+
+          <HeroSlidesList initialSlides={slides} />
         </TabsContent>
 
         {/* Testimonials Content */}
         <TabsContent value="testimonials" className="space-y-6">
           <div className="flex justify-between items-center mb-4">
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Member Reviews ({testimonials.length})</p>
-            
+
             <Dialog>
-                <DialogTrigger 
-                    render={
-                        <Button size="sm" variant="outline" className="rounded-lg text-[9px] font-black uppercase tracking-widest border-border">
-                            <Plus size={12} className="mr-1" /> Add Review
-                        </Button>
-                    }
-                />
-                <DialogContent className="max-w-xl rounded-2xl border-border">
-                    <DialogHeader>
-                        <DialogTitle className="text-sm font-black uppercase tracking-tight">Curate Social Proof</DialogTitle>
-                    </DialogHeader>
-                    <TestimonialForm />
-                </DialogContent>
+              <DialogTrigger
+                render={
+                  <Button size="sm" variant="outline" className="rounded-lg text-[9px] font-black uppercase tracking-widest border-border">
+                    <Plus size={12} className="mr-1" /> Add Review
+                  </Button>
+                }
+              />
+              <DialogContent className="w-full h-full sm:h-auto max-w-none sm:max-w-6xl rounded-none sm:rounded-[2.5rem] border-none sm:border border-border max-h-none sm:max-h-[95vh] p-6 sm:p-10">
+                <DialogHeader className="mb-8">
+                  <DialogTitle className="text-xl font-black uppercase tracking-tight">Curate Social Proof</DialogTitle>
+                </DialogHeader>
+                <TestimonialForm />
+              </DialogContent>
             </Dialog>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {testimonials.map((t: any) => (
               <TestimonialCard key={t.id} testimonial={t} />
+            ))}
+          </div>
+        </TabsContent>
+
+        {/* Tree Plans Content */}
+        <TabsContent value="plans" className="space-y-6">
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Pricing Packages ({treePlans.length})</p>
+
+            <Dialog>
+              <DialogTrigger
+                render={
+                  <Button size="sm" variant="outline" className="rounded-lg text-[9px] font-black uppercase tracking-widest border-border">
+                    <Plus size={12} className="mr-1" /> Add Plan
+                  </Button>
+                }
+              />
+              <DialogContent className="w-full h-full sm:h-auto max-w-none sm:max-w-7xl rounded-none sm:rounded-[2.5rem] border-none sm:border border-border max-h-none sm:max-h-[95vh] p-6 sm:p-10">
+                <DialogHeader className="mb-8">
+                  <DialogTitle className="text-xl font-black uppercase tracking-tight">Create Pricing Plan</DialogTitle>
+                </DialogHeader>
+                <TreePlanForm />
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {treePlans.map((plan: any) => (
+              <TreePlanCard key={plan.id} plan={plan} />
             ))}
           </div>
         </TabsContent>

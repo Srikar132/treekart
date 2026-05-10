@@ -36,6 +36,7 @@ import {
   ArrowRight,
   CreditCard,
   Info,
+  Hotel,
 } from "lucide-react";
 
 import { CheckoutSuccess, CheckoutProcessing } from "@/components/checkout/shared/checkout-stages";
@@ -47,18 +48,15 @@ const EMPTY_ADDRESS: DeliveryAddress = {
   name: "", phone: "", line1: "", city: "", state: "", pincode: "",
 };
 
-const PLAN_LABELS: Record<string, string> = {
-  basic: "Basic Heritage",
-  standard: "Standard Orchard",
-  max: "Premium Max",
-};
+
 
 interface RentalCheckoutClientProps {
   tree: {
     id: string;
     variety: string;
     price: number;
-    plan_type: string;
+    plan_id: string;
+    tree_plans?: { name: string; badge_text?: string | null; badge_color?: string | null } | null;
     yield_min_kg: number;
     yield_max_kg: number;
     photos: string[];
@@ -117,7 +115,7 @@ export default function RentalCheckoutClient({ tree, user, initialStep = "detail
         amount: orderData.amount,
         currency: orderData.currency,
         name: "TreeKart",
-        description: `${PLAN_LABELS[tree.plan_type] || tree.plan_type} — ${tree.variety}`,
+        description: `${tree.tree_plans?.name || "Premium Plan"} — ${tree.variety}`,
         order_id: orderData.rzpOrderId,
         onDismiss: async () => {
           await releaseTreeReservation(tree.id);
@@ -223,6 +221,20 @@ export default function RentalCheckoutClient({ tree, user, initialStep = "detail
                   className="data-[state=checked]:bg-primary"
                 />
               </div>
+
+              {/* Room Booking Info */}
+              <div className="flex items-start gap-4 p-5 bg-blue-50/50 border border-blue-100/50">
+                <div className="bg-white p-2 border border-blue-100 flex-shrink-0">
+                  <Hotel size={14} className="text-blue-600" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-blue-900">Guest Accommodation</p>
+                  <p className="text-[11px] text-blue-800/70 leading-relaxed uppercase tracking-wider">
+                    For your convenience, we offer premium guest rooms at our orchard. You can book a stay to experience the serene farm life while you visit your tree. 
+                    <span className="font-bold text-blue-600 ml-1">(Online booking coming soon)</span>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -275,7 +287,7 @@ export default function RentalCheckoutClient({ tree, user, initialStep = "detail
                 <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
                   <div className="space-y-1">
                     <Badge className="bg-primary text-white border-0 rounded-none text-[8px] font-bold uppercase tracking-[0.2em] mb-2">
-                      {tree.plan_type} PLAN
+                      {tree.tree_plans?.name || "Premium Plan"}
                     </Badge>
                     <h3 className="text-2xl font-bold text-white uppercase tracking-tight">
                       {tree.variety} Heritage

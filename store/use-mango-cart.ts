@@ -14,6 +14,7 @@ export type CartItem = {
     imageUrl: string;
     badge?: ProductBadge | null;
     weightKg?: number | null;
+    status?: Database["public"]["Enums"]["product_status"] | null;
 };
 
 // What gets persisted to localStorage
@@ -28,16 +29,18 @@ type MangoCartStore = PersistedState & {
 
     // Actions
     add: (item: Omit<CartItem, "qty"> & { qty?: number }) => void;
-    remove: (id: string) => void;
-    updateQty: (id: string, qty: number) => void;
+    remove: (id: string, weightKg?: number | null) => void;
+    updateQty: (id: string, qty: number, weightKg?: number | null) => void;
     clear: () => void;
     openCart: () => void;
     closeCart: () => void;
     toggleCart: () => void;
     setHasHydrated: (state: boolean) => void;
+    updateStatuses: (statuses: Record<string, Database["public"]["Enums"]["product_status"]>) => void;
 
     // Computed — call as functions
     totalItems: () => number;
+    totalQty: () => number;
     totalPrice: () => number;
     totalWithDelivery: () => number;
     deliveryFee: () => number;
@@ -62,11 +65,13 @@ export const useMangoCart = create<MangoCartStore>()(
             add: (item) => {
                 const { qty = 1, ...rest } = item;
                 set((s) => {
-                    const existing = s.items.find((i) => i.id === rest.id);
+                    const existing = s.items.find(
+                        (i) => i.id === rest.id && i.weightKg === rest.weightKg
+                    );
                     return {
                         items: existing
                             ? s.items.map((i) =>
-                                i.id === rest.id
+                                i.id === rest.id && i.weightKg === rest.weightKg
                                     ? { ...i, qty: i.qty + qty }
                                     : i
                             )
@@ -76,16 +81,22 @@ export const useMangoCart = create<MangoCartStore>()(
                 });
             },
 
-            remove: (id) =>
-                set((s) => ({ items: s.items.filter((i) => i.id !== id) })),
+            remove: (id, weightKg) =>
+                set((s) => ({
+                    items: s.items.filter(
+                        (i) => !(i.id === id && i.weightKg === weightKg)
+                    ),
+                })),
 
-            updateQty: (id, qty) => {
+            updateQty: (id, qty, weightKg) => {
                 if (qty <= 0) {
-                    get().remove(id);
+                    get().remove(id, weightKg);
                     return;
                 }
                 set((s) => ({
-                    items: s.items.map((i) => (i.id === id ? { ...i, qty } : i)),
+                    items: s.items.map((i) =>
+                        i.id === id && i.weightKg === weightKg ? { ...i, qty } : i
+                    ),
                 }));
             },
 
@@ -95,16 +106,25 @@ export const useMangoCart = create<MangoCartStore>()(
             openCart: () => set({ isOpen: true }),
             closeCart: () => set({ isOpen: false }),
             toggleCart: () => set((s) => ({ isOpen: !s.isOpen })),
+            updateStatuses: (statuses) => set((s) => ({
+                items: s.items.map(item => ({
+                    ...item,
+                    status: statuses[item.id] || item.status
+                }))
+            })),
 
             // ── Computed ───────────────────────────────────────
             isEmpty: () => get().items.length === 0,
 
             totalItems: () =>
+                get().items.reduce((sum, i) => sum + (i.qty * (i.weightKg || 0)), 0),
+
+            totalQty: () =>
                 get().items.reduce((sum, i) => sum + i.qty, 0),
 
             totalPrice: () =>
                 get().items.reduce(
-                    (sum, i) => sum + i.pricePerKg * i.qty,
+                    (sum, i) => sum + i.price * i.qty,
                     0
                 ),
 

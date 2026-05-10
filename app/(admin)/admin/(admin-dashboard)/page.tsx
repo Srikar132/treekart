@@ -134,26 +134,37 @@ function RecentRentals({ rentals }: { rentals: RentalWithDetails[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {rentals.map((rental) => (
-              <tr key={rental.id} className="group hover:bg-muted/50 transition-colors">
-                <td className="py-4 px-2">
-                  <p className="text-xs font-bold text-foreground uppercase truncate max-w-[120px]">{rental.profiles?.full_name}</p>
-                </td>
-                <td className="py-4 px-2">
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-tight">{rental.trees?.variety}</p>
-                </td>
-                <td className="py-4 px-2">
-                  <Badge className="bg-green-100 text-green-700 hover:bg-green-100 rounded-md text-[8px] font-black uppercase tracking-widest border-0">
-                    {rental.status}
-                  </Badge>
-                </td>
-                <td className="py-4 px-2 text-right">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase">
-                    {rental.rented_at ? new Date(rental.rented_at).toLocaleDateString() : 'N/A'}
-                  </p>
-                </td>
-              </tr>
-            ))}
+            {rentals.map((rental) => {
+              const href = `/admin/rentals/${rental.id}/updates`;
+              return (
+                <tr key={rental.id} className="group hover:bg-muted/50 transition-colors">
+                  <td className="p-0">
+                    <Link href={href} className="block py-4 px-2 text-xs font-bold text-foreground uppercase truncate max-w-[120px]">
+                      {rental.profiles?.full_name}
+                    </Link>
+                  </td>
+                  <td className="p-0">
+                    <Link href={href} className="block py-4 px-2 text-xs font-bold text-muted-foreground uppercase tracking-tight">
+                      {rental.trees?.variety}
+                    </Link>
+                  </td>
+                  <td className="p-0">
+                    <Link href={href} className="block py-4 px-2">
+                      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 rounded-md text-[8px] font-black uppercase tracking-widest border-0">
+                        {rental.status}
+                      </Badge>
+                    </Link>
+                  </td>
+                  <td className="p-0 text-right">
+                    <Link href={href} className="block py-4 px-2">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                        {rental.rented_at ? new Date(rental.rented_at).toLocaleDateString() : 'N/A'}
+                      </p>
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -180,7 +191,7 @@ function RecentOrders({ orders }: { orders: OrderWithProfile[] }) {
         {orders.map((order) => (
           <Link
             key={order.id}
-            href={`/admin/orders?search=${order.id.slice(0, 8)}`}
+            href={`/admin/orders/${order.id}`}
             className="flex items-center justify-between p-3 rounded-xl border border-border hover:border-primary/20 hover:bg-primary/5 transition-all bg-muted/30 group cursor-pointer block"
           >
             <div className="flex items-center gap-3">

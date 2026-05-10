@@ -55,7 +55,7 @@ export const treeSchema = z.object({
     age_years: z.coerce.number().min(1, "Age is required").nullable().optional(),
     yield_min_kg: z.coerce.number().min(1, "Min yield is required").nullable().optional(),
     yield_max_kg: z.coerce.number().min(1, "Max yield is required").nullable().optional(),
-    plan_type: z.enum(["basic", "standard", "max"]),
+    plan_id: z.string().min(1, "Plan is required"),
     source: z.enum(["own_farm", "partner"]),
     status: z.enum(["available", "rented", "inactive"]),
     photos: z.array(z.string()).max(4, "Maximum 4 photos allowed").optional().default([]),
@@ -85,10 +85,10 @@ export const productSchema = z.object({
     description: z.string().min(20, "Description must be at least 20 characters"),
     price: z.coerce.number().min(1, "Price is required"),
     original_price: z.coerce.number().optional().nullable(),
-    weight_kg: z.coerce.number().min(0.01, "Weight is required"),
+    weight_kg: z.array(z.coerce.number()).min(1, "At least one weight variant is required"),
     badge: z.enum(["New", "Sale", "Pre-Order", "None"]).default("None"),
     status: z.enum(["available", "out_of_stock", "pre_order"]).default("available"),
-    image_url: z.string().or(z.literal("")).optional(),
+    image_url: z.array(z.string()).min(1, "At least one image is required"),
 });
 
 export type ProductFormValues = z.infer<typeof productSchema>
@@ -115,7 +115,7 @@ export const heroSlideSchema = z.object({
     image_url: z.string().url("Valid image URL is required"),
     button_label: z.string().min(1, "Button label is required"),
     button_link: z.string().min(1, "Button link is required"),
-    order_index: z.coerce.number().int().min(0),
+    order_index: z.coerce.number().int().min(0).optional().default(0),
 });
 
 export type HeroSlideFormValues = z.infer<typeof heroSlideSchema>;
@@ -136,6 +136,7 @@ export type TestimonialFormValues = z.infer<typeof testimonialSchema>;
 export const contactSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
+    phone: z.string().min(10, "Enter a valid phone number"),
     subject: z.string().min(5, "Subject must be at least 5 characters"),
     message: z.string().min(10, "Message must be at least 10 characters"),
 });
@@ -145,3 +146,19 @@ export type ContactFormState = {
     error?: string;
     fieldErrors?: Record<string, string[]>;
 };
+
+export const featureSchema = z.object({
+    text: z.string().min(1, "Text is required"),
+    isHighlight: z.boolean().default(false),
+    highlightColor: z.string().optional()
+});
+
+export const treePlanSchema = z.object({
+    name: z.string().min(1, "Name is required"),
+    badge_text: z.string().optional(),
+    badge_color: z.string().optional(),
+    features: z.array(featureSchema).min(1, "At least one feature is required"),
+    is_active: z.boolean().default(true),
+});
+
+export type TreePlanFormValues = z.infer<typeof treePlanSchema>;

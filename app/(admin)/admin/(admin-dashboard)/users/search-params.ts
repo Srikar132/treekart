@@ -8,11 +8,11 @@ import {
 
 export const usersSearchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
-    pageSize: parseAsInteger.withDefault(15),
+    pageSize: parseAsInteger.withDefault(5),
     sort: parseAsString.withDefault("created_at"),
     order: parseAsStringEnum(["asc", "desc"] as const).withDefault("desc"),
     q: parseAsString.withDefault(""),
-    role: parseAsString.withDefault(""),
+    role: parseAsStringEnum(["admin", "farmer", "user"] as const).withDefault("user"),
 });
 
 export type UsersSearchParams = ReturnType<typeof usersSearchParamsCache.parse>;

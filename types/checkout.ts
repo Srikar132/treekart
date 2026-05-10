@@ -2,9 +2,12 @@ export type DeliveryAddress = {
   name: string;
   phone: string;
   line1: string;
+  locality?: string | null;
   city: string;
+  district?: string | null;
   state: string;
   pincode: string;
+  country?: string | null;
 };
 
 export const INDIAN_STATES = [

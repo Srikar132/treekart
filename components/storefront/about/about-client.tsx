@@ -23,7 +23,7 @@ export function AboutClient() {
           className="absolute inset-0 z-0"
         >
           <Image
-            src="/images/mango_banner_bg.png"
+            src="/images/mango_banner_bg.webp"
             alt="Mango Orchard"
             fill
             className="object-cover grayscale-[0.3]"
@@ -93,7 +93,7 @@ export function AboutClient() {
               className="relative aspect-[4/5] bg-secondary/20 overflow-hidden border border-border/50 group"
             >
               <Image
-                src="/images/mango_basket.png"
+                src="/images/mango_basket.webp"
                 alt="Our Orchard"
                 fill
                 className="object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -184,7 +184,7 @@ export function AboutClient() {
               className="order-1 md:order-2 relative aspect-[4/5] bg-secondary/20 overflow-hidden border border-border/50 group"
             >
               <Image
-                src="/images/mango_banganapalli.png"
+                src="/images/mango_banganapalli.webp"
                 alt="The Mission"
                 fill
                 className="object-cover transition-transform duration-1000 group-hover:scale-110"

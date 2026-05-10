@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { TreeCard, type TreeProduct } from "@/components/storefront/cards/tree-card";
+import { TreeCard } from "@/components/storefront/cards/tree-card";
+import type { TreeListItem } from "@/types/index.d";
 import {
   Carousel,
   CarouselContent,
@@ -11,11 +12,9 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import { Database } from "@/types/database.types";
 
 interface RelatedTreesProps {
-  trees: Database["public"]["Tables"]["trees"]["Row"][]
+  trees: TreeListItem[]
 }
 
 export function RelatedTrees({ trees }: RelatedTreesProps) {
@@ -70,24 +69,11 @@ export function RelatedTrees({ trees }: RelatedTreesProps) {
         className="w-full"
       >
         <CarouselContent className="-ml-6">
-          {trees.map((tree) => {
-            const photos = Array.isArray(tree.photos) ? (tree.photos as string[]) : [];
-            const product: TreeProduct = {
-              id: tree.id,
-              title: `${tree.variety} Mango Tree`,
-              price: tree.price ?? 0,
-              images: photos,
-              isSale: true,
-            };
-
-            // wait one min
-            // in call
-            return (
-              <CarouselItem key={tree.id} className="pl-6 md:basis-1/2 lg:basis-1/4">
-                <TreeCard product={product} />
-              </CarouselItem>
-            );
-          })}
+          {trees.map((tree) => (
+            <CarouselItem key={tree.id} className="pl-6 md:basis-1/2 lg:basis-1/4">
+              <TreeCard tree={tree} />
+            </CarouselItem>
+          ))}
         </CarouselContent>
         <CarouselPrevious className="-left-12 hidden lg:flex" />
         <CarouselNext className="-right-12 hidden lg:flex" />

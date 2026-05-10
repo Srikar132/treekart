@@ -28,6 +28,7 @@ interface OrderItem {
   name: string;
   variety: string;
   qty: number;
+  weightKg: number;
   pricePerKg: number;
   lineTotal: number;
   imageUrl?: string;
@@ -144,7 +145,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                 <div className="flex-1 min-w-0">
                   <h4 className="text-lg font-mono font-bold text-foreground leading-tight">{item.name}</h4>
                   <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-[0.1em] mt-1.5">
-                    Variety: {item.variety} • {item.qty} KG
+                    Variety: {item.variety} • {item.qty} {item.qty > 1 ? 'Boxes' : 'Box'} ({item.weightKg}kg each)
                   </p>
                 </div>
                 <div className="text-right">
@@ -189,10 +190,19 @@ export function OrderDetails({ order }: OrderDetailsProps) {
               <p className="font-mono font-bold text-foreground text-sm uppercase tracking-wide">
                 {(order.delivery_address as any)?.name}
               </p>
-              <p className="text-sm text-muted-foreground font-mono leading-relaxed">
-                {(order.delivery_address as any)?.line1},<br />
-                {(order.delivery_address as any)?.city}
-              </p>
+              <div className="text-sm text-muted-foreground font-mono leading-relaxed space-y-1">
+                <p>{(order.delivery_address as any)?.line1}</p>
+                {(order.delivery_address as any)?.locality && (
+                  <p>{(order.delivery_address as any)?.locality}</p>
+                )}
+                <p>
+                  {(order.delivery_address as any)?.city}, {(order.delivery_address as any)?.district && `${(order.delivery_address as any).district}, `}
+                  {(order.delivery_address as any)?.state}
+                </p>
+                <p className="font-bold text-foreground">
+                  {(order.delivery_address as any)?.pincode} • {(order.delivery_address as any)?.country || "India"}
+                </p>
+              </div>
             </div>
 
             <div className="pt-5 border-t border-border/40 flex items-center justify-between">

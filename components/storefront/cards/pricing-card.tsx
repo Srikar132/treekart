@@ -16,6 +16,7 @@ export type Feature = {
 
 export type Package = {
     title: string;
+    id: string;
     badge?: string;
     badgeColor?: string;
     status?: string;
@@ -69,7 +70,7 @@ export function PricingCard({ pkg }: { pkg: Package }) {
                 <AnimatedButton
                     disabled={pkg.disabled}
                     label={pkg.buttonText}
-                    href={pkg.isCustom ? "/contact" : undefined}
+                    href={pkg.isCustom ? "/contact" : `/rent?plan=${pkg.id}`}
                     hideArrow
                     className={pkg.disabled
                         ? "w-full border-transparent"

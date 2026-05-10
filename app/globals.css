@@ -83,7 +83,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.88 0.05 145);
   /* green-tinted border */
-  --input: oklch(0.92 0.03 145);
+  --input: oklch(0.85 0.05 145);
   --ring: oklch(0.42 0.14 145);
   --radius: 0rem;
 
@@ -177,7 +177,7 @@
   }
 
   .section {
-    @apply py-16 md:py-24 relative bg-background;
+    @apply py-16 md:py-24 relative bg-background overflow-x-hidden;
   }
 
   .section-header {

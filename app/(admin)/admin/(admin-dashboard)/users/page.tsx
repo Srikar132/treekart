@@ -59,6 +59,8 @@ async function UsersTable({ params }: { params: Awaited<ReturnType<typeof usersS
       rowCount={count}
       page={params.page}
       pageSize={params.pageSize}
+      sort={params.sort}
+      order={params.order}
     />
   );
 }

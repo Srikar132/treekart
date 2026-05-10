@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, type Variants } from "framer-motion";
-import { Leaf, Users, Droplets, ShieldCheck, ShoppingBasket, Sun } from "lucide-react";
+import { TreeDeciduous, Users, ShieldCheck, ShoppingBasket, MapPin, Home } from "lucide-react";
 import Image from "next/image";
 
 const containerVariants: Variants = {
@@ -26,37 +26,37 @@ const itemVariants: Variants = {
 
 const leftFeatures = [
     {
-        title: "100% Organic",
-        description: "Our mangoes are guaranteed to be naturally grown and fresh. Great for your health.",
-        icon: <Leaf className="w-10 h-10 md:w-12 md:h-12 text-primary" strokeWidth={1.5} />,
+        title: "Direct Tree Leasing",
+        description: "Experience the joy of owning a real Alphonso tree. We handle the labor; you enjoy the 100% organic harvest.",
+        icon: <TreeDeciduous className="w-10 h-10 md:w-12 md:h-12 text-primary" strokeWidth={1.5} />,
     },
     {
-        title: "Family Healthy",
-        description: "Our mangoes are guaranteed to be naturally grown and fresh. Great for your health.",
-        icon: <Users className="w-10 h-10 md:w-12 md:h-12 text-primary" strokeWidth={1.5} />,
+        title: "Curated Mango Store",
+        description: "Explore a boutique selection of premium mangoes and artisanal farm products, harvested at peak ripeness.",
+        icon: <ShoppingBasket className="w-10 h-10 md:w-12 md:h-12 text-primary" strokeWidth={1.5} />,
     },
     {
-        title: "Always Fresh",
-        description: "Our mangoes are guaranteed to be naturally grown and fresh. Great for your health.",
-        icon: <Droplets className="w-10 h-10 md:w-12 md:h-12 text-primary" strokeWidth={1.5} />,
+        title: "Immersive Farm Stays",
+        description: "Escape to the orchard. Book luxury farm rooms and witness the journey of your fruit from soil to basket.",
+        icon: <Home className="w-10 h-10 md:w-12 md:h-12 text-primary" strokeWidth={1.5} />,
     },
 ];
 
 const rightFeatures = [
     {
-        title: "100% Organic",
-        description: "Our mangoes are guaranteed to be naturally grown and fresh. Great for your health.",
+        title: "Certified Organic Care",
+        description: "Nurtured in a chemical-free ecosystem where nature does the heavy lifting for unmatched flavor.",
         icon: <ShieldCheck className="w-10 h-10 md:w-12 md:h-12 text-primary" strokeWidth={1.5} />,
     },
     {
-        title: "Family Healthy",
-        description: "Our mangoes are guaranteed to be naturally grown and fresh. Great for your health.",
-        icon: <ShoppingBasket className="w-10 h-10 md:w-12 md:h-12 text-primary" strokeWidth={1.5} />,
+        title: "Precision Tracking",
+        description: "Transparency at your fingertips. Monitor your tree's health and exact GPS location through our portal.",
+        icon: <MapPin className="w-10 h-10 md:w-12 md:h-12 text-primary" strokeWidth={1.5} />,
     },
     {
-        title: "Always Fresh",
-        description: "Our mangoes are guaranteed to be naturally grown and fresh. Great for your health.",
-        icon: <Sun className="w-10 h-10 md:w-12 md:h-12 text-primary" strokeWidth={1.5} />,
+        title: "Generational Expertise",
+        description: "Our community of expert farmers brings ancestral knowledge to ensure every tree reaches its thriving potential.",
+        icon: <Users className="w-10 h-10 md:w-12 md:h-12 text-primary" strokeWidth={1.5} />,
     },
 ];
 
@@ -111,7 +111,7 @@ export function WhyChooseUs() {
                     >
                         <div className="relative aspect-square w-full">
                             <Image
-                                src="/images/mango_basket.png"
+                                src="/images/mango_basket.webp"
                                 alt="Fresh organic mangoes in a woven basket"
                                 fill
                                 className="object-contain mix-blend-multiply select-none"

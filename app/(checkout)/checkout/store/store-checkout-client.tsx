@@ -19,13 +19,10 @@ import { type DeliveryAddress } from "@/types/checkout";
 import {
   ShoppingBag,
   Leaf,
-  CheckCircle2,
   Loader2,
-  ChevronLeft,
   ShieldCheck,
   Truck,
   PackageCheck,
-  CreditCard,
   Info,
   Navigation,
   ArrowRight,
@@ -242,7 +239,7 @@ export default function StoreCheckoutClient({ user }: StoreCheckoutClientProps) 
               {/* Items */}
               <div className="max-h-[300px] overflow-y-auto divide-y divide-border/40">
                 {items.map((item) => (
-                  <div key={item.id} className="p-6 flex items-center gap-4 group">
+                  <div key={`${item.id}-${item.weightKg}`} className="p-6 flex items-center gap-4 group">
                     <div className="relative h-16 w-16 bg-secondary overflow-hidden border border-border/50 flex-shrink-0">
                       {item.imageUrl ? (
                         <Image
@@ -262,7 +259,7 @@ export default function StoreCheckoutClient({ user }: StoreCheckoutClientProps) 
                         {item.name}
                       </p>
                       <p className="text-[9px] text-muted-foreground uppercase tracking-widest mt-1">
-                        {item.qty} KG × ₹{item.pricePerKg}
+                        {item.qty} BOXES ({item.weightKg}kg each) × ₹{item.pricePerKg}
                       </p>
                     </div>
                     <div className="text-right">

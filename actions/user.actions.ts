@@ -42,7 +42,7 @@ export async function getMyRentals() {
       trees (
         id,
         variety,
-        plan_type,
+        plan_id,
         gps_lat,
         gps_lng,
         photos,
@@ -51,6 +51,11 @@ export async function getMyRentals() {
         farmers (
           farm_name,
           location
+        ),
+        tree_plans (
+          name,
+          badge_text,
+          badge_color
         )
       )
     `)
@@ -71,7 +76,8 @@ export async function getMyRentalById(rentalId: string) {
       *,
       trees (
         *,
-        farmers ( farm_name, location, is_organic )
+        farmers ( farm_name, location, is_organic ),
+        tree_plans ( name, badge_text, badge_color )
       ),
       tree_updates (
         id,

@@ -4,16 +4,27 @@ import { getSupabaseServer, requireUser, requireAdmin } from "@/lib/auth";
 import { Database, TreeInsert } from "@/types/database.types";
 import Razorpay from "razorpay";
 import crypto from "crypto";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getSupabasePublic } from "@/utils/supabase/public";
 
-type PlanType = Database["public"]["Enums"]["plan_type"];
 
 export type TreeSortOption = "newest" | "price_asc" | "price_desc" | "age_asc" | "age_desc";
 
+export async function getTreePlans() {
+    const supabase = getSupabasePublic();
+    const { data, error } = await supabase
+        .from("tree_plans")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: true });
+
+    if (error) return [];
+    return data;
+}
+
 export interface GetTreesOptions {
     filters?: {
-        planType?: PlanType[];
+        planId?: string[];
         minPrice?: number;
         maxPrice?: number;
         minAge?: number;
@@ -46,6 +57,12 @@ export async function getAvailableTrees(options?: GetTreesOptions) {
         is_organic,
         profile_id
       ),
+      tree_plans (
+        id,
+        name,
+        badge_text,
+        badge_color
+      ),
       rentals (
         status,
         profiles (
@@ -65,9 +82,9 @@ export async function getAvailableTrees(options?: GetTreesOptions) {
     }
 
     if (options?.filters) {
-        const { planType, minPrice, maxPrice, minAge, maxAge } = options.filters;
-        if (planType && planType.length > 0) {
-            query = query.in("plan_type", planType);
+        const { planId, minPrice, maxPrice, minAge, maxAge } = options.filters;
+        if (planId && planId.length > 0) {
+            query = query.in("plan_id", planId);
         }
         if (minPrice !== undefined) {
             query = query.gte("price", minPrice);
@@ -142,6 +159,12 @@ export async function getTreeById(treeId: string) {
         farm_name,
         location,
         is_organic
+      ),
+      tree_plans (
+        id,
+        name,
+        badge_text,
+        badge_color
       )
     `)
         .eq("id", treeId)
@@ -202,7 +225,7 @@ export async function reserveTree(treeId: string) {
     // Check tree is still available
     const { data: tree, error: fetchError } = await supabase
         .from("trees")
-        .select("id, status, price, plan_type, yield_min_kg, yield_max_kg, variety")
+        .select("id, status, price, plan_id, yield_min_kg, yield_max_kg, variety")
         .eq("id", treeId)
         .single();
 
@@ -249,7 +272,7 @@ export async function createRentalOrder(input: {
     // Fetch tree price
     const { data: tree } = await supabase
         .from("trees")
-        .select("price, plan_type, variety")
+        .select("price, plan_id, variety")
         .eq("id", input.treeId)
         .single();
 
@@ -265,7 +288,7 @@ export async function createRentalOrder(input: {
         notes: {
             tree_id: input.treeId,
             user_id: user.id,
-            plan_type: tree.plan_type ?? "",
+            plan_id: tree.plan_id ?? "",
         },
     });
 
@@ -332,6 +355,15 @@ export async function verifyAndFulfilRental(payload: {
 
     if (!tree) throw new Error("Tree details not found for finalization");
 
+    // Compute the reservation expiry — 1 year from today (end of mango season: May 31 of next year)
+    const rentalStart = new Date();
+    const reservedUntil = new Date(rentalStart);
+    reservedUntil.setFullYear(reservedUntil.getFullYear() + 1);
+    // Always expire at end of May to align with mango season
+    reservedUntil.setMonth(4); // May (0-indexed)
+    reservedUntil.setDate(31);
+    reservedUntil.setHours(23, 59, 59, 999);
+
     // IMPORTANT: rentals.user_id must exactly equal auth.uid() (UUID)
     const { data: rental, error: rentalError } = await supabase
         .from("rentals")
@@ -355,7 +387,7 @@ export async function verifyAndFulfilRental(payload: {
 
     const { error: treeUpdateError } = await supabase
         .from("trees")
-        .update({ status: "rented" })
+        .update({ status: "rented", reserved_until: reservedUntil.toISOString() })
         .eq("id", payload.treeId);
 
     if (treeUpdateError) {
@@ -364,6 +396,7 @@ export async function verifyAndFulfilRental(payload: {
 
     revalidatePath("/account");
     revalidatePath("/rent");
+    revalidateTag("trees", "max");
 
     return { success: true, rentalId: rental.id };
 }
@@ -384,6 +417,7 @@ export async function createTree(input: TreeInsert) {
 
     revalidatePath("/rent", "page");
     revalidatePath("/admin/trees", "page");
+    revalidateTag("trees", "max");
 
     return data;
 }
@@ -391,6 +425,32 @@ export async function createTree(input: TreeInsert) {
 export async function updateTree(id: string, input: Database["public"]["Tables"]["trees"]["Update"]) {
     await requireAdmin();
     const supabase = await getSupabaseServer();
+
+    // ── Protection Layer: block premature "available" transition ────────────
+    if (input.status === "available") {
+        const { data: current, error: fetchErr } = await supabase
+            .from("trees")
+            .select("status, reserved_until")
+            .eq("id", id)
+            .single();
+
+        if (fetchErr) throw new Error(fetchErr.message);
+
+        if (current?.status === "rented" && current.reserved_until) {
+            const expiry = new Date(current.reserved_until);
+            if (expiry > new Date()) {
+                const formatted = expiry.toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                });
+                throw new Error(
+                    `Cannot mark tree as Available — it is reserved until ${formatted}. The rental period must expire first.`
+                );
+            }
+        }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     const { data, error } = await supabase
         .from("trees")
@@ -405,6 +465,7 @@ export async function updateTree(id: string, input: Database["public"]["Tables"]
     revalidatePath(`/trees/${id}`, "page");
     revalidatePath("/admin/trees", "page");
     revalidatePath(`/admin/trees/${id}`, "page");
+    revalidateTag("trees", "max");
 
     return data;
 }

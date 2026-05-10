@@ -4,8 +4,9 @@ import { useActionState, useEffect } from "react";
 import { Mail, Phone, MapPin, Globe, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { AnimatedButton } from "@/components/shared/animated-button";
-import settings from "@/constants/settings";
+import { CONTACT_INFO, SOCIAL_LINKS } from "@/constants/contact";
 import { toast } from "sonner";
 import { ContactFormState } from "@/lib/validations";
 import { submitContactForm } from "@/actions/contact.actions";
@@ -43,22 +44,27 @@ export function ContactForm() {
 
         <div className="space-y-16">
           <div className="space-y-10">
-            {[
-              { icon: Mail, label: "Concierge Email", value: settings.EMAIL },
-              { icon: Phone, label: "Customer Support", value: settings.PHONE },
-              { icon: MapPin, label: "The Headquarters", value: settings.ADDRESS },
-              { icon: Globe, label: "Web Presence", value: settings.WEB || "www.treekart.in" },
-            ].map(({ icon: Icon, label, value }) => (
-              <div key={label} className="flex gap-8 group">
-                <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 transition-all group-hover:bg-primary group-hover:text-white shadow-sm border border-slate-100">
-                  <Icon size={20} className="transition-colors" />
+            {CONTACT_INFO.map(({ icon: Icon, label, value, href, target, rel }) => {
+              const innerContent = (
+                <div className="flex gap-8 group cursor-pointer">
+                  <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 transition-all group-hover:bg-primary group-hover:text-white shadow-sm border border-slate-100">
+                    <Icon size={20} className="transition-colors" />
+                  </div>
+                  <div className="space-y-1.5 flex flex-col justify-center">
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{label}</p>
+                    <p className="text-lg font-black text-slate-900 tracking-tight break-words transition-colors group-hover:text-primary">{value}</p>
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{label}</p>
-                  <p className="text-lg font-black text-slate-900 tracking-tight break-words">{value}</p>
-                </div>
-              </div>
-            ))}
+              );
+
+              return href ? (
+                <a key={label} href={href} target={target} rel={rel} className="block">
+                  {innerContent}
+                </a>
+              ) : (
+                <div key={label}>{innerContent}</div>
+              );
+            })}
           </div>
 
           <div className="h-1.5 w-24 bg-primary rounded-full" />
@@ -66,10 +72,16 @@ export function ContactForm() {
           <div className="space-y-6">
             <p className="text-xs font-black uppercase tracking-widest text-slate-400 px-1">Follow Our Harvest</p>
             <div className="flex gap-6">
-              {["Instagram", "X"].map((social) => (
-                <button key={social} className="text-sm font-black uppercase tracking-widest text-slate-900 hover:text-primary transition-colors border-b-2 border-transparent hover:border-primary pb-1">
-                  {social}
-                </button>
+              {SOCIAL_LINKS.map((social) => (
+                <a
+                  key={social.name}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-black uppercase tracking-widest text-slate-900 hover:text-primary transition-colors border-b-2 border-transparent hover:border-primary pb-1"
+                >
+                  {social.name}
+                </a>
               ))}
             </div>
           </div>
@@ -78,15 +90,16 @@ export function ContactForm() {
 
       {/* RIGHT — Form */}
       <div className="lg:col-span-7">
-        <div className="bg-slate-50 rounded-[3rem] p-8 md:p-16 space-y-12 border border-slate-100 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+        <Card className="relative shadow-sm md:p-6 lg:p-8">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
-          <div className="space-y-4 relative z-10">
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Send a message</h2>
-            <p className="text-sm text-slate-500 font-medium">Expected response time is 2–4 business hours.</p>
-          </div>
+          <CardHeader className="relative z-10 space-y-2 pb-8">
+            <CardTitle className="text-3xl font-black tracking-tight">Send a message</CardTitle>
+            <CardDescription className="font-medium">Expected response time is 2–4 business hours.</CardDescription>
+          </CardHeader>
 
-          {state.success ? (
+          <CardContent className="relative z-10">
+            {state.success ? (
             <div className="relative z-10 py-12 flex flex-col items-center text-center space-y-6 bg-white rounded-3xl border border-primary/10 shadow-sm animate-in fade-in zoom-in duration-500">
               <div className="h-20 w-20 bg-primary/10 text-primary rounded-full flex items-center justify-center">
                 <CheckCircle2 size={40} />
@@ -113,7 +126,7 @@ export function ContactForm() {
                     name="name"
                     required
                     placeholder="Enter your name"
-                    className="h-16 rounded-2xl border-slate-200 bg-white px-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
+                    className="h-16 rounded-2xl px-6 text-sm font-bold text-slate-900 placeholder:text-slate-400 focus-visible:ring-primary/20 transition-all"
                   />
                   {state.fieldErrors?.name && (
                     <p className="text-[10px] text-destructive font-bold px-1">{state.fieldErrors.name[0]}</p>
@@ -126,7 +139,7 @@ export function ContactForm() {
                     type="email"
                     required
                     placeholder="name@example.com"
-                    className="h-16 rounded-2xl border-slate-200 bg-white px-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
+                    className="h-16 rounded-2xl px-6 text-sm font-bold text-slate-900 placeholder:text-slate-400 focus-visible:ring-primary/20 transition-all"
                   />
                   {state.fieldErrors?.email && (
                     <p className="text-[10px] text-destructive font-bold px-1">{state.fieldErrors.email[0]}</p>
@@ -134,17 +147,33 @@ export function ContactForm() {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400 px-1">Subject</label>
-                <Input
-                  name="subject"
-                  required
-                  placeholder="What is this about?"
-                  className="h-16 rounded-2xl border-slate-200 bg-white px-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus-visible:ring-primary/20 focus-visible:border-primary transition-all"
-                />
-                {state.fieldErrors?.subject && (
-                  <p className="text-[10px] text-destructive font-bold px-1">{state.fieldErrors.subject[0]}</p>
-                )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400 px-1">Phone Number</label>
+                  <Input
+                    name="phone"
+                    type="tel"
+                    required
+                    placeholder="+91 98765 43210"
+                    className="h-16 rounded-2xl px-6 text-sm font-bold text-slate-900 placeholder:text-slate-400 focus-visible:ring-primary/20 transition-all"
+                  />
+                  {state.fieldErrors?.phone && (
+                    <p className="text-[10px] text-destructive font-bold px-1">{state.fieldErrors.phone[0]}</p>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400 px-1">Subject</label>
+                  <Input
+                    name="subject"
+                    required
+                    placeholder="What is this about?"
+                    className="h-16 rounded-2xl px-6 text-sm font-bold text-slate-900 placeholder:text-slate-400 focus-visible:ring-primary/20 transition-all"
+                  />
+                  {state.fieldErrors?.subject && (
+                    <p className="text-[10px] text-destructive font-bold px-1">{state.fieldErrors.subject[0]}</p>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-3">
@@ -153,7 +182,7 @@ export function ContactForm() {
                   name="message"
                   required
                   placeholder="How can we help you today?"
-                  className="min-h-[220px] rounded-2xl border-slate-200 bg-white p-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus-visible:ring-primary/20 focus-visible:border-primary transition-all resize-none"
+                  className="min-h-[220px] rounded-2xl px-6 py-6 text-sm font-bold text-slate-900 placeholder:text-slate-400 focus-visible:ring-primary/20 transition-all resize-none"
                 />
                 {state.fieldErrors?.message && (
                   <p className="text-[10px] text-destructive font-bold px-1">{state.fieldErrors.message[0]}</p>
@@ -171,7 +200,8 @@ export function ContactForm() {
               />
             </form>
           )}
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

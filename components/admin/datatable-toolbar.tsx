@@ -10,6 +10,7 @@ import { useDebouncedCallback } from "use-debounce";
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { useState, useEffect } from "react";
 
 interface FilterOption { label: string; value: string; }
 
@@ -30,7 +31,7 @@ export function DataTableToolbar({ searchPlaceholder = "Search...", filters = []
             q: parseAsString.withDefault(""),
             page: parseAsString.withDefault("1"),
             status: parseAsString.withDefault(""),
-            plan_type: parseAsString.withDefault(""),
+            plan_id: parseAsString.withDefault(""),
             season: parseAsString.withDefault(""),
             badge: parseAsString.withDefault(""),
             role: parseAsString.withDefault(""),
@@ -38,11 +39,17 @@ export function DataTableToolbar({ searchPlaceholder = "Search...", filters = []
         { startTransition, shallow: false }
     );
 
+    const [searchValue, setSearchValue] = useState(params.q);
+
+    useEffect(() => {
+        setSearchValue(params.q);
+    }, [params.q]);
+
     const debouncedSearch = useDebouncedCallback((value: string) => {
         setParams({ q: value || null, page: "1" });
     }, 300);
 
-    const hasActiveFilters = params.q !== "" || params.status !== "" || params.plan_type !== "" || params.season !== "" || params.badge !== "" || params.role !== "";
+    const hasActiveFilters = params.q !== "" || params.status !== "" || params.plan_id !== "" || params.season !== "" || params.badge !== "" || params.role !== "";
 
     return (
         <div className="flex flex-col md:flex-row gap-4">
@@ -53,8 +60,12 @@ export function DataTableToolbar({ searchPlaceholder = "Search...", filters = []
                     size={16}
                 />
                 <Input
-                    defaultValue={params.q}
-                    onChange={(e) => debouncedSearch(e.target.value)}
+                    value={searchValue}
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        setSearchValue(val);
+                        debouncedSearch(val);
+                    }}
                     placeholder={searchPlaceholder}
                     className="pl-10 h-12 bg-card border-border focus-visible:ring-primary/20 rounded-xl text-xs font-medium"
                 />
@@ -83,7 +94,7 @@ export function DataTableToolbar({ searchPlaceholder = "Search...", filters = []
             {hasActiveFilters && (
                 <Button
                     variant="ghost"
-                    onClick={() => setParams({ q: null, page: null, status: null, plan_type: null, season: null, badge: null, role: null })}
+                    onClick={() => setParams({ q: null, page: null, status: null, plan_id: null, season: null, badge: null, role: null })}
                     className="h-12 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
                 >
                     <X size={14} className="mr-1" /> Clear

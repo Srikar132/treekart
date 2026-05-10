@@ -8,16 +8,22 @@ import { WhyChooseUs } from "@/components/storefront/home/why-choose-us";
 import { PricingSection } from "@/components/storefront/home/pricing";
 import { Testimonials } from "@/components/storefront/home/testimonials";
 import { PromoBanner } from "@/components/storefront/home/promo-banner";
-import { getHeroSlides, getTestimonials } from "@/actions/admin.actions";
-import { getAvailableTrees } from "@/actions/tree.actions";
+import {
+    getCachedHeroSlides,
+    getCachedTestimonials,
+    getCachedTreePlans,
+    getCachedFeaturedAvailableTrees,
+    getCachedFeaturedRentedTrees
+} from "@/actions/public.actions";
 
 const Page = async () => {
     // Parallel fetch for maximum performance
-    const [heroSlides, testimonials, availableData, rentedData] = await Promise.all([
-        getHeroSlides(),
-        getTestimonials(),
-        getAvailableTrees({ filters: { status: ["available"] }, limit: 8 }),
-        getAvailableTrees({ filters: { status: ["rented"] }, limit: 8 })
+    const [heroSlides, testimonials, availableData, rentedData, treePlans] = await Promise.all([
+        getCachedHeroSlides(),
+        getCachedTestimonials(),
+        getCachedFeaturedAvailableTrees(),
+        getCachedFeaturedRentedTrees(),
+        getCachedTreePlans()
     ]);
 
     return (
@@ -27,7 +33,7 @@ const Page = async () => {
             <HowItWorks />
             <AvailableTrees initialTrees={availableData.trees || []} />
             <WhyChooseUs />
-            <PricingSection />
+            <PricingSection treePlans={treePlans} />
             <Testimonials testimonials={testimonials} />
             <RentedTrees initialTrees={rentedData.trees || []} />
             <PromoBanner />

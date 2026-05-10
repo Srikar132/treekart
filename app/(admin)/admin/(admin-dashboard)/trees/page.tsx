@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { DataTableSkeleton } from "@/components/admin/datatable-skeleton";
 import { DataTableToolbar } from "@/components/admin/datatable-toolbar";
-import { getTrees } from "@/actions/admin.actions";
+import { getTrees, adminGetTreePlans } from "@/actions/admin.actions";
 
 interface Props {
   searchParams: Promise<SearchParams>;
@@ -17,6 +17,7 @@ interface Props {
 
 export default async function AdminTreesPage({ searchParams }: Props) {
   const params = await treesSearchParamsCache.parse(searchParams);
+  const treePlans = await adminGetTreePlans();
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -48,13 +49,9 @@ export default async function AdminTreesPage({ searchParams }: Props) {
             ],
           },
           {
-            key: "plan_type",
+            key: "plan_id",
             placeholder: "All Plans",
-            options: [
-              { label: "Basic", value: "basic" },
-              { label: "Standard", value: "standard" },
-              { label: "Max", value: "max" },
-            ],
+            options: treePlans.map(p => ({ label: p.name, value: p.id })),
           },
         ]}
       />
@@ -78,6 +75,9 @@ async function TreesTable({ params }: { params: Awaited<ReturnType<typeof treesS
       rowCount={count}
       page={params.page}
       pageSize={params.pageSize}
+      sort={params.sort}
+      order={params.order}
+      rowHrefPrefix="/admin/trees"
     />
   );
 }

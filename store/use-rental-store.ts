@@ -2,11 +2,11 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Database } from "@/types/database.types";
 
-type PlanType = Database["public"]["Enums"]["plan_type"];
+
 
 export interface SelectedRentalPlan {
   treeId: string;
-  planType: PlanType;
+  planId: string;
   variety: string;
   price: number;
   yieldMinKg: number;

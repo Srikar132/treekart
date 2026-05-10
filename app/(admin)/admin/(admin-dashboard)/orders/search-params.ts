@@ -5,11 +5,10 @@ import {
     parseAsString,
     parseAsStringEnum,
 } from "nuqs/server";
-import type { OrderStatus } from "@/types/database.types";
 
 export const ordersSearchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
-    pageSize: parseAsInteger.withDefault(15),
+    pageSize: parseAsInteger.withDefault(5),
     sort: parseAsString.withDefault("created_at"),
     order: parseAsStringEnum(["asc", "desc"] as const).withDefault("desc"),
     q: parseAsString.withDefault(""),

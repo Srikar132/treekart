@@ -87,7 +87,7 @@ export default async function AdminOrderDetailsPage({ params }: Props) {
                   <div className="flex-1">
                     <p className="text-sm font-bold text-foreground leading-none">{item.name}</p>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase mt-1">
-                      Variety: {item.variety} • {item.qty} KG
+                      Variety: {item.variety} • {item.qty} {item.qty > 1 ? 'Boxes' : 'Box'} ({item.weightKg}kg each)
                     </p>
                   </div>
                   <div className="text-right">
@@ -135,6 +135,10 @@ export default async function AdminOrderDetailsPage({ params }: Props) {
                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Phone Number</p>
                 <p className="text-xs font-bold text-foreground uppercase">{order.profiles?.phone || 'No Phone'}</p>
               </div>
+              <div>
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Email Address</p>
+                <p className="text-xs font-bold text-foreground lowercase">{order.profiles?.email || 'No Email'}</p>
+              </div>
             </div>
           </div>
 
@@ -152,11 +156,18 @@ export default async function AdminOrderDetailsPage({ params }: Props) {
                 <p className="text-xs font-bold text-foreground uppercase">{delivery?.name}</p>
               </div>
               <div>
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Shipping Address</p>
-                <p className="text-xs font-medium text-muted-foreground leading-relaxed uppercase tracking-tight">
-                  {delivery?.line1},<br />
-                  {delivery?.city}
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Shipping Address</p>
+              <div className="text-xs font-medium text-muted-foreground leading-relaxed uppercase tracking-tight space-y-1">
+                <p>{delivery?.line1}</p>
+                {delivery?.locality && <p>{delivery.locality}</p>}
+                <p>
+                  {delivery?.city}, {delivery?.district && `${delivery.district}, `}
+                  {delivery?.state}
                 </p>
+                <p className="font-bold text-foreground">
+                  {delivery?.pincode} • {delivery?.country || "India"}
+                </p>
+              </div>
               </div>
             </div>
           </div>

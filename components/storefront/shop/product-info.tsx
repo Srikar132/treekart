@@ -24,6 +24,13 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const { openLoginPrompt } = useLoginPrompt();
   const [isAdding, setIsAdding] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [selectedWeight, setSelectedWeight] = useState<number>(
+    Array.isArray(product.weight_kg) && product.weight_kg.length > 0
+      ? product.weight_kg[0]
+      : typeof product.weight_kg === 'number'
+        ? product.weight_kg
+        : 1
+  );
 
   const discount = product.original_price && product.original_price > product.price
     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
@@ -38,9 +45,9 @@ export function ProductInfo({ product }: ProductInfoProps) {
       variety: product.variety,
       price: product.price,
       pricePerKg: product.price,
-      imageUrl: product.image_url || "/placeholder-mango.png",
+      imageUrl: (product.image_url && product.image_url.length > 0) ? product.image_url[0] : "/placeholder-mango.png",
       badge: product.badge,
-      weightKg: product.weight_kg,
+      weightKg: selectedWeight,
       qty: quantity,
     });
 
@@ -130,11 +137,34 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </motion.div>
 
       <motion.div variants={item} className="grid grid-cols-2 gap-6 mb-10">
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/30 border border-border/50">
-          <Scale className="text-primary" size={24} />
-          <div>
-            <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Weight</p>
-            <p className="font-bold">Upto {product.weight_kg || "N/A"} Kg</p>
+        <div className="flex flex-col gap-3 p-4 rounded-xl bg-secondary/30 border border-border/50 col-span-2">
+          <div className="flex items-center gap-3">
+            <Scale className="text-primary" size={24} />
+            <div>
+              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Select Weight Variant</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {Array.isArray(product.weight_kg) ? (
+                  product.weight_kg.map((w) => (
+                    <button
+                      key={w}
+                      onClick={() => setSelectedWeight(w)}
+                      className={cn(
+                        "px-4 py-2 rounded-lg text-sm font-bold border transition-all",
+                        selectedWeight === w
+                          ? "bg-primary text-white border-primary shadow-md shadow-primary/20 scale-105"
+                          : "bg-white text-muted-foreground border-border hover:border-primary/50"
+                      )}
+                    >
+                      {w} Kg
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-4 py-2 rounded-lg text-sm font-bold border bg-primary text-white border-primary">
+                    {product.weight_kg} Kg
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/30 border border-border/50">

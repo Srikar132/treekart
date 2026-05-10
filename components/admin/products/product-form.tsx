@@ -7,7 +7,7 @@ import { useTransition } from "react"
 import { toast } from "sonner"
 import {
   Save, X, Loader2, Info, Image as ImageIcon,
-  Tag, BadgePercent, Package, AlertCircle
+  Tag, BadgePercent, Package, AlertCircle, Plus, Trash2
 } from "lucide-react"
 import { CldUploadWidget } from "next-cloudinary"
 
@@ -45,10 +45,10 @@ export function ProductForm({ initialData }: ProductFormProps) {
       description: initialData?.description ?? "",
       price: initialData?.price ?? undefined,
       original_price: initialData?.original_price ?? null,
-      weight_kg: initialData?.weight_kg ?? undefined,
+      weight_kg: initialData?.weight_kg ?? [1],
       badge: (initialData?.badge as any) ?? "None",
       status: (initialData?.status as any) ?? "available",
-      image_url: initialData?.image_url ?? "",
+      image_url: initialData?.image_url ?? [],
     },
   })
 
@@ -133,22 +133,52 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 )} />
 
                 <FormField control={form.control} name="weight_kg" render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="md:col-span-2">
                     <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                      Net Weight (kg)
+                      Weight Variants (kg)
                     </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Package className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" size={16} />
-                        <Input
-                          {...field}
-                          value={field.value ?? ""}
-                          type="number" step="0.01"
-                          placeholder="e.g. 3.5"
-                          className="h-12 pl-10 bg-muted/50 border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold"
-                        />
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap gap-2">
+                        {field.value.map((weight: number, index: number) => (
+                          <div key={index} className="flex items-center gap-2 bg-secondary/50 p-2 rounded-lg border border-border">
+                            <Package size={14} className="text-muted-foreground" />
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={weight}
+                              onChange={(e) => {
+                                const newVal = [...field.value];
+                                newVal[index] = parseFloat(e.target.value) || 0;
+                                field.onChange(newVal);
+                              }}
+                              className="w-20 h-8 text-xs font-bold border-none bg-transparent focus-visible:ring-0 p-0"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newVal = field.value.filter((_: any, i: number) => i !== index);
+                                field.onChange(newVal);
+                              }}
+                              className="text-destructive hover:bg-destructive/10 p-1 rounded-md transition-colors"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => field.onChange([...field.value, 1])}
+                          className="h-10 border-dashed border-primary/30 text-primary hover:bg-primary/5 rounded-lg text-[10px] font-black uppercase tracking-widest"
+                        >
+                          <Plus size={14} className="mr-2" /> Add Variant
+                        </Button>
                       </div>
-                    </FormControl>
+                      <p className="text-[10px] text-muted-foreground font-medium italic">
+                        Define available weights for this product variant (e.g. 1kg, 2kg, 5kg).
+                      </p>
+                    </div>
                     <FormMessage className="text-[10px] font-bold" />
                   </FormItem>
                 )} />
@@ -179,7 +209,8 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 <CldUploadWidget
                   uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
                   onSuccess={(result: any) => {
-                    form.setValue("image_url", result.info.secure_url)
+                    const current = form.getValues("image_url") || [];
+                    form.setValue("image_url", [...current, result.info.secure_url])
                   }}
                 >
                   {({ open }) => (
@@ -195,22 +226,27 @@ export function ProductForm({ initialData }: ProductFormProps) {
                 </CldUploadWidget>
               </div>
 
-              <div className="max-w-[300px]">
-                {imageUrl ? (
-                  <div className="group relative aspect-square bg-muted rounded-2xl overflow-hidden border border-border shadow-sm">
-                    <img src={imageUrl} alt="Product Preview" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => form.setValue("image_url", "")}
-                      className="absolute top-2 right-2 h-8 w-8 bg-white/90 backdrop-blur-sm flex items-center justify-center rounded-full text-destructive shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {imageUrl && imageUrl.length > 0 ? (
+                  imageUrl.map((url: string, index: number) => (
+                    <div key={index} className="group relative aspect-square bg-muted rounded-2xl overflow-hidden border border-border shadow-sm">
+                      <img src={url} alt={`Product ${index + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newVal = imageUrl.filter((_: any, i: number) => i !== index);
+                          form.setValue("image_url", newVal);
+                        }}
+                        className="absolute top-2 right-2 h-8 w-8 bg-white/90 backdrop-blur-sm flex items-center justify-center rounded-full text-destructive shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))
                 ) : (
-                  <div className="aspect-square border-2 border-dashed border-border/50 rounded-2xl flex flex-col items-center justify-center text-muted-foreground/30">
+                  <div className="col-span-full aspect-[2/1] border-2 border-dashed border-border/50 rounded-2xl flex flex-col items-center justify-center text-muted-foreground/30">
                     <ImageIcon size={40} strokeWidth={1} className="mb-2" />
-                    <p className="text-[10px] font-black uppercase tracking-widest">No Image Set</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest">No Images Uploaded</p>
                   </div>
                 )}
                 <FormField control={form.control} name="image_url" render={({ field }) => (

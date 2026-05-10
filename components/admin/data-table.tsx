@@ -17,16 +17,24 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+import { useRouter } from "next/navigation";
+
 interface DataTableProps<TData> {
     columns: ColumnDef<TData>[];
     data: TData[];
     rowCount: number;
     page: number;
     pageSize: number;
+    sort?: string;
+    order?: "asc" | "desc";
+    rowHrefPrefix?: string;
+    rowHrefSuffix?: string;
 }
 
+import Link from "next/link";
+
 export function DataTable<TData>({
-    columns, data, rowCount, page, pageSize,
+    columns, data, rowCount, page, pageSize, sort, order, rowHrefPrefix, rowHrefSuffix
 }: DataTableProps<TData>) {
     const [isPending, startTransition] = useTransition();
 
@@ -36,7 +44,7 @@ export function DataTable<TData>({
             sort: parseAsString.withDefault("created_at"),
             order: parseAsString.withDefault("desc"),
         },
-        { startTransition }
+        { startTransition, shallow: false }
     );
 
     const pageCount = Math.ceil(rowCount / pageSize);
@@ -47,6 +55,7 @@ export function DataTable<TData>({
         rowCount,
         state: {
             pagination: { pageIndex: page - 1, pageSize },
+            sorting: sort ? [{ id: sort, desc: order === "desc" }] : [],
         },
         manualPagination: true,
         manualSorting: true,
@@ -58,8 +67,13 @@ export function DataTable<TData>({
             setParams({ page: next.pageIndex + 1 });
         },
         onSortingChange: (updater) => {
-            const next = typeof updater === "function" ? updater([]) : updater;
-            if (next[0]) setParams({ sort: next[0].id, order: next[0].desc ? "desc" : "asc" });
+            const currentSorting = sort ? [{ id: sort, desc: order === "desc" }] : [];
+            const next = typeof updater === "function" ? updater(currentSorting) : updater;
+            if (next[0]) {
+                setParams({ sort: next[0].id, order: next[0].desc ? "desc" : "asc", page: 1 });
+            } else {
+                setParams({ sort: "created_at", order: "desc", page: 1 });
+            }
         },
         getCoreRowModel: getCoreRowModel(),
     });
@@ -76,7 +90,7 @@ export function DataTable<TData>({
                         {table.getHeaderGroups().map((hg) => (
                             <tr key={hg.id} className="admin-table-header border-b border-border">
                                 {hg.headers.map((header) => (
-                                    <th key={header.id} className="py-5 px-6">
+                                    <th key={header.id} className="py-5 px-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                     </th>
                                 ))}
@@ -91,19 +105,47 @@ export function DataTable<TData>({
                                 </td>
                             </tr>
                         ) : (
-                            table.getRowModel().rows.map((row) => (
-                                <tr key={row.id} className="group hover:bg-accent/50 transition-colors">
-                                    {row.getVisibleCells().map((cell) => (
-                                        <td key={cell.id} className="py-5 px-6">
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))
+                            table.getRowModel().rows.map((row) => {
+                                // @ts-ignore - assuming row.original has an id property
+                                const href = rowHrefPrefix ? `${rowHrefPrefix}/${row.original.id}${rowHrefSuffix || ""}` : null;
+                                return (
+                                    <tr
+                                        key={row.id}
+                                        className="group hover:bg-accent/50 transition-colors"
+                                    >
+                                        {row.getVisibleCells().map((cell) => {
+                                            const isActions = cell.column.id === "actions";
+                                            const content = flexRender(cell.column.columnDef.cell, cell.getContext());
+                                            
+                                            return (
+                                                <td
+                                                    key={cell.id}
+                                                    className={cn(
+                                                        "py-5 px-6",
+                                                        !isActions && href && "p-0"
+                                                    )}
+                                                >
+                                                    {isActions || !href ? (
+                                                        content
+                                                    ) : (
+                                                        <Link 
+                                                            href={href} 
+                                                            className="block py-5 px-6 h-full w-full outline-none focus-visible:bg-accent/50"
+                                                        >
+                                                            {content}
+                                                        </Link>
+                                                    )}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                );
+                            })
                         )}
                     </tbody>
                 </table>
             </div>
+
 
             {/* Pagination */}
             <div className="flex items-center justify-between px-6 py-4 border-t border-border">

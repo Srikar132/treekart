@@ -266,7 +266,6 @@ export function ProductFilters({
                   </span>
                 </div>
                 <Slider
-                  defaultValue={[activeMinPrice || 0, activeMaxPrice || MAX_PRICE]}
                   value={priceRange}
                   onValueChange={(vals) => setPriceRange(vals as number[])}
                   onValueCommitted={(vals) => {

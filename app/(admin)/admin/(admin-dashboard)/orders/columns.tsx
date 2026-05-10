@@ -47,7 +47,9 @@ export const orderColumns: ColumnDef<any>[] = [
             return (
                 <div>
                     <p className="text-xs font-bold text-foreground uppercase">{profile?.full_name}</p>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">{profile?.phone || 'No Phone'}</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
+                        {profile?.phone || 'No Phone'} • <span className="lowercase">{profile?.email || 'No Email'}</span>
+                    </p>
                 </div>
             )
         }

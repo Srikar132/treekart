@@ -60,6 +60,9 @@ async function OrdersTable({ params }: { params: Awaited<ReturnType<typeof order
       rowCount={count}
       page={params.page}
       pageSize={params.pageSize}
+      sort={params.sort}
+      order={params.order}
+      rowHrefPrefix="/admin/orders"
     />
   );
 }

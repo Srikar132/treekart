@@ -25,18 +25,19 @@ export default async function ProductDetailsPage({ params }: Props) {
           <ProductInfo product={product as any} />
         </div>
 
-        <div className="relative w-full aspect-[21/9] rounded-2xl overflow-hidden group">
+        {/* <div className="relative w-full aspect-[21/9] rounded-2xl overflow-hidden group">
           <Image
             src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1920&q=80"
             alt="Farm Advertisement"
             fill
+            sizes="100vw"
             className="object-cover transition-transform duration-700 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center text-white p-6 text-center">
             <h2 className="text-3xl md:text-5xl font-bold mb-4">Farm Fresh Handpicked Mangoes</h2>
             <p className="text-lg md:text-xl max-w-2xl opacity-90">Naturally ripened and packed with care. From our groves to your doorstep.</p>
           </div>
-        </div>
+        </div> */}
 
         <Separator />
 

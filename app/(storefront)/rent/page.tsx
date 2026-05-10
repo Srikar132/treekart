@@ -1,10 +1,7 @@
-import { getAvailableTrees, type TreeSortOption } from "@/actions/tree.actions";
+import { getAvailableTrees, getTreePlans, type TreeSortOption } from "@/actions/tree.actions";
 import { TreeGrid } from "@/components/storefront/rent/tree-grid";
 import { TreeFilters } from "@/components/storefront/rent/tree-filters";
 import { TreeSort } from "@/components/storefront/rent/tree-sort";
-import { type Database } from "@/types/database.types";
-
-type PlanType = Database["public"]["Enums"]["plan_type"];
 
 type SearchParams = {
   plan?: string;
@@ -24,13 +21,13 @@ type Props = {
 export default async function RentPage({ searchParams }: Props) {
   const params = await searchParams;
 
-  const planTypes = params.plan
-    ? (params.plan.split(",").filter(Boolean) as PlanType[])
+  const planIds = params.plan
+    ? params.plan.split(",").filter(Boolean)
     : [];
 
   const options = {
     filters: {
-      planType: planTypes.length > 0 ? planTypes : undefined,
+      planId: planIds.length > 0 ? planIds : undefined,
       minPrice: params.minPrice ? Number(params.minPrice) : undefined,
       maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
       minAge: params.minAge ? Number(params.minAge) : undefined,
@@ -42,7 +39,10 @@ export default async function RentPage({ searchParams }: Props) {
     limit: 12,
   };
 
-  const initialData = await getAvailableTrees(options);
+  const [initialData, treePlans] = await Promise.all([
+    getAvailableTrees(options),
+    getTreePlans()
+  ]);
 
   return (
     <main className="section container">
@@ -57,7 +57,8 @@ export default async function RentPage({ searchParams }: Props) {
         {/* Toolbar: Filters and Sort */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-4 border-b">
           <TreeFilters
-            activePlans={planTypes}
+            activePlans={planIds}
+            treePlans={treePlans}
             activeMinPrice={options.filters.minPrice}
             activeMaxPrice={options.filters.maxPrice}
             activeMinAge={options.filters.minAge}

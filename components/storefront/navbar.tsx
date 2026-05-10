@@ -22,14 +22,14 @@ const navLinks = [
 ];
 
 function NavContent() {
-    const { toggleCart, totalItems } = useMangoCart();
+    const { toggleCart, totalQty } = useMangoCart();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
-    const itemCount = mounted ? totalItems() : 0;
+    const itemCount = mounted ? totalQty() : 0;
 
     return (
         <div className="container flex h-16 items-center justify-between">

@@ -7,9 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Database } from "@/types/database.types";
 
 type Rental = Database["public"]["Tables"]["rentals"]["Row"] & {
-  trees: Database["public"]["Tables"]["trees"]["Row"] & {
+  trees: (Database["public"]["Tables"]["trees"]["Row"] & {
     farmers: { farm_name: string | null } | null;
-  } | null;
+    tree_plans: { name: string; badge_text: string | null; badge_color: string | null } | null;
+  }) | null;
 };
 
 interface RentalsListProps {
@@ -84,7 +85,7 @@ export function RentalsList({ rentals }: RentalsListProps) {
                         {rental.trees?.variety} Heritage
                       </h3>
                       <Badge className="bg-primary/10 text-primary border-0 rounded-full text-[8px] font-black uppercase tracking-widest px-2 py-0.5 shrink-0">
-                        {rental.trees?.plan_type}
+                        {rental.trees?.tree_plans?.name || "Premium Plan"}
                       </Badge>
                     </div>
                     <div className="flex flex-wrap items-center gap-3 text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">

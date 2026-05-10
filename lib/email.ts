@@ -262,14 +262,16 @@ export async function sendOrderDeliveredEmail(
 export async function sendContactEmail(input: {
   name: string;
   email: string;
+  phone: string;
   subject: string;
   message: string;
 }): Promise<EmailResult> {
-  const { name, email, subject, message } = input;
-  validateFields({ name, email, subject, message });
+  const { name, email, phone, subject, message } = input;
+  validateFields({ name, email, phone, subject, message });
 
   const safeName = escapeHtml(name);
   const safeEmail = escapeHtml(email);
+  const safePhone = escapeHtml(phone);
   const safeSubject = escapeHtml(subject);
   const safeMessage = escapeHtml(message).replace(/\n/g, "<br>");
 
@@ -279,6 +281,7 @@ export async function sendContactEmail(input: {
     <p>You have received a new message from the contact form.</p>
     <div class="divider"></div>
     <p><strong>From:</strong> ${safeName} (${safeEmail})</p>
+    <p><strong>Phone:</strong> ${safePhone}</p>
     <p><strong>Subject:</strong> ${safeSubject}</p>
     <p><strong>Message:</strong></p>
     <div style="background: #f7fde8; padding: 20px; border-left: 4px solid ${BRAND_COLOR}; margin: 20px 0;">

@@ -9,7 +9,7 @@ import type { RentalStatus } from "@/types/database.types";
 
 export const rentalsSearchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
-    pageSize: parseAsInteger.withDefault(15),
+    pageSize: parseAsInteger.withDefault(5),
     sort: parseAsString.withDefault("rented_at"),
     order: parseAsStringEnum(["asc", "desc"] as const).withDefault("desc"),
     q: parseAsString.withDefault(""),

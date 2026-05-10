@@ -42,15 +42,18 @@ export function ProductGrid({ initialData, options }: Props) {
   });
 
   const handleAddToCart = useCallback((product: MangoProduct) => {
+    const firstImage = product.image_url?.[0] || "/placeholder-mango.png";
+    const firstWeight = product.weight_kg?.[0] || 1;
+
     add({
       id: product.id,
       name: product.name,
       variety: product.variety,
       price: product.price,
       pricePerKg: product.price,
-      imageUrl: product.image_url || "/placeholder-mango.png",
+      imageUrl: firstImage,
       badge: product.badge,
-      weightKg: product.weight_kg,
+      weightKg: firstWeight,
       qty: 1
     });
     

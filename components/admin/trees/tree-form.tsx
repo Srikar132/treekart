@@ -17,7 +17,7 @@ import { CldUploadWidget } from "next-cloudinary"
 
 import { treeSchema, type TreeFormValues } from "@/lib/validations"
 import { createTree, updateTree } from "@/actions/tree.actions"
-import { adminGetAllFarmers } from "@/actions/admin.actions"
+import { adminGetAllFarmers, adminGetTreePlans } from "@/actions/admin.actions"
 import { type Tree } from "@/types/database.types"
 
 import {
@@ -53,7 +53,7 @@ export function TreeForm({ initialData }: TreeFormProps) {
       age_years: initialData?.age_years ?? 0,
       yield_min_kg: initialData?.yield_min_kg ?? 0,
       yield_max_kg: initialData?.yield_max_kg ?? 0,
-      plan_type: initialData?.plan_type ?? "standard",
+      plan_id: initialData?.plan_id ?? "",
       source: initialData?.source ?? "own_farm",
       status: initialData?.status ?? "available",
       photos: (initialData?.photos as string[]) || [],
@@ -66,6 +66,12 @@ export function TreeForm({ initialData }: TreeFormProps) {
     queryKey: ["admin", "farmers"],
     queryFn: () => adminGetAllFarmers(),
     staleTime: 1000 * 60 * 5, // farmers list barely changes
+  })
+
+  const { data: treePlans = [], isLoading: loadingPlans } = useQuery({
+    queryKey: ["admin", "treePlans"],
+    queryFn: () => adminGetTreePlans(),
+    staleTime: 1000 * 60 * 5,
   })
 
   function onSubmit(values: TreeFormValues) {
@@ -119,15 +125,20 @@ export function TreeForm({ initialData }: TreeFormProps) {
                       Farmer / Orchard Owner
                     </FormLabel>
                     <Select
+                      key={loadingFarmers ? "loading" : `loaded-${farmers.length}`}
                       onValueChange={(val) => field.onChange(val === "none" ? null : val)}
                       value={field.value || "none"}
                     >
                       <FormControl>
                         <SelectTrigger className="h-12 bg-muted/50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
-                          <SelectValue placeholder={loadingFarmers ? "Loading..." : "Select Farmer"} />
+                          <SelectValue placeholder={loadingFarmers ? "Loading..." : "Select Farmer"}>
+                            {field.value === "none" || !field.value 
+                              ? "None / TreeKart Owned" 
+                              : farmers.find(f => f.id === field.value)?.farm_name}
+                          </SelectValue>
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="rounded-xl border-border">
+                      <SelectContent className="rounded-xl border-border bg-card">
                         <SelectItem value="none" className="text-xs font-bold uppercase tracking-widest py-3">
                           None / TreeKart Owned
                         </SelectItem>
@@ -382,13 +393,13 @@ export function TreeForm({ initialData }: TreeFormProps) {
                     <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Tree Source
                     </FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="h-12 bg-muted/50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
                           <SelectValue placeholder="Select Source" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="rounded-xl border-border">
+                      <SelectContent className="rounded-xl border-border bg-card">
                         <SelectItem value="own_farm" className="text-xs font-bold uppercase tracking-widest py-3">TreeKart Owned</SelectItem>
                         <SelectItem value="partner" className="text-xs font-bold uppercase tracking-widest py-3">Partner Orchard</SelectItem>
                       </SelectContent>
@@ -397,22 +408,30 @@ export function TreeForm({ initialData }: TreeFormProps) {
                   </FormItem>
                 )} />
 
-                {/* Plan Type */}
-                <FormField control={form.control} name="plan_type" render={({ field }) => (
+                {/* Plan ID */}
+                <FormField control={form.control} name="plan_id" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Rental Plan
                     </FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      key={loadingPlans ? "loading" : `loaded-${treePlans.length}`}
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
                       <FormControl>
                         <SelectTrigger className="h-12 bg-muted/50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
-                          <SelectValue placeholder="Select Plan" />
+                          <SelectValue placeholder={loadingPlans ? "Loading plans..." : "Select Plan"}>
+                            {field.value ? (treePlans.find(p => p.id === field.value)?.name) : null}
+                          </SelectValue>
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="rounded-xl border-border">
-                        <SelectItem value="basic" className="text-xs font-bold uppercase tracking-widest py-3">Basic Yield</SelectItem>
-                        <SelectItem value="standard" className="text-xs font-bold uppercase tracking-widest py-3">Standard Heritage</SelectItem>
-                        <SelectItem value="max" className="text-xs font-bold uppercase tracking-widest py-3">Maximum Premium</SelectItem>
+                      <SelectContent className="rounded-xl border-border bg-card">
+                        {treePlans.map((plan) => (
+                          <SelectItem key={plan.id} value={plan.id} className="text-xs font-bold uppercase tracking-widest py-3">
+                            {plan.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage className="text-[10px] font-bold" />
@@ -420,26 +439,53 @@ export function TreeForm({ initialData }: TreeFormProps) {
                 )} />
 
                 {/* Status */}
-                <FormField control={form.control} name="status" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                      Market Status
-                    </FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="h-12 bg-muted/50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
-                          <SelectValue placeholder="Select Status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="rounded-xl border-border">
-                        <SelectItem value="available" className="text-xs font-bold uppercase tracking-widest py-3">Active Market</SelectItem>
-                        <SelectItem value="rented" className="text-xs font-bold uppercase tracking-widest py-3">Currently Rented</SelectItem>
-                        <SelectItem value="inactive" className="text-xs font-bold uppercase tracking-widest py-3">Maintenance</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className="text-[10px] font-bold" />
-                  </FormItem>
-                )} />
+                <FormField control={form.control} name="status" render={({ field }) => {
+                  const isReserved = !!(initialData?.status === "rented" && initialData?.reserved_until && new Date(initialData.reserved_until) > new Date());
+                  const reservedUntilDate = isReserved ? new Date(initialData!.reserved_until!) : null;
+                  
+                  return (
+                    <FormItem>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        Market Status
+                      </FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={isPending}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12 bg-muted/50 border-transparent rounded-xl text-xs font-bold uppercase tracking-widest">
+                            <SelectValue placeholder="Select Status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="rounded-xl border-border bg-card">
+                          <SelectItem 
+                            value="available" 
+                            disabled={isReserved}
+                            className="text-xs font-bold uppercase tracking-widest py-3"
+                          >
+                            Active Market {isReserved && "(Reserved)"}
+                          </SelectItem>
+                          <SelectItem value="rented" className="text-xs font-bold uppercase tracking-widest py-3">Currently Rented</SelectItem>
+                          <SelectItem value="inactive" className="text-xs font-bold uppercase tracking-widest py-3">Maintenance / Private</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {isReserved && reservedUntilDate && (
+                        <div className="mt-2 flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-600">
+                          <Info size={14} className="mt-0.5 shrink-0" />
+                          <p className="text-[10px] font-bold leading-normal">
+                            STRICT PROTECTION ACTIVE: This tree is rented until {reservedUntilDate.toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric"
+                            })}. You cannot mark it as Available until this date.
+                          </p>
+                        </div>
+                      )}
+                      <FormMessage className="text-[10px] font-bold" />
+                    </FormItem>
+                  )
+                }} />
 
               </div>
             </div>

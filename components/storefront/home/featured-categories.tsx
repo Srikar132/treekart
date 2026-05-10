@@ -7,13 +7,13 @@ import { AnimatedButton } from "@/components/shared/animated-button";
 const categories = [
     {
         title: "Farm Fresh Mangoes",
-        image: "/images/featured_mango_basket.png",
+        image: "/images/featured_mango_basket.webp",
         link: "/store",
         cta: "Shop Now",
     },
     {
         title: "Premium Tree Leasing",
-        image: "/images/featured_mango_orchard.png",
+        image: "/images/featured_mango_orchard.webp",
         link: "/plans",
         cta: "View Plans",
     },
@@ -69,7 +69,7 @@ export function FeaturedCategories() {
                             <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-500 z-10" />
 
                             {/* Center Content Box */}
-                            <div className="relative z-20 bg-white/90 backdrop-blur-sm px-6 py-6 md:px-10 md:py-8 text-center w-full max-w-[60%] transition-transform duration-500 group-hover:-translate-y-2 shadow-xl flex flex-col items-center">
+                            <div className="relative z-20 bg-white/90 backdrop-blur-sm px-6 py-6 md:px-10 md:py-8 text-center w-[85%] md:w-full md:max-w-[60%] transition-transform duration-500 group-hover:-translate-y-2 shadow-xl flex flex-col items-center">
                                 <h2 className="text-lg md:text-xl lg:text-2xl font-black uppercase tracking-widest text-foreground mb-4 leading-snug">
                                     {category.title.split(' ').map((word, i) => (
                                         <span key={i} className="block">{word}</span>

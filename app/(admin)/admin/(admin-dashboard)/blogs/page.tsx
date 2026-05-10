@@ -72,6 +72,9 @@ async function BlogsTable({ params }: { params: Awaited<ReturnType<typeof blogsS
       rowCount={count}
       page={params.page}
       pageSize={params.pageSize}
+      sort={params.sort}
+      order={params.order}
+      rowHrefPrefix="/admin/blogs"
     />
   );
 }

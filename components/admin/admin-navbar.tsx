@@ -25,7 +25,7 @@ export function AdminNavbar() {
             <p className="text-xs font-bold text-foreground">Admin</p>
             <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">Root Administrator</p>
           </div>
-          <div className="h-9 w-9 bg-primary/10 rounded-lg flex items-center justify-center text-primary border border-primary/20 group-hover:bg-primary group-hover:text-white transition-colors">
+          <div className="h-9 w-9 bg-primary/10 rounded-lg flex items-center justify-center border border-primary/20 group-hover:bg-primary group-hover:text-white dark:group-hover:text-black transition-colors">
             <UserCircle size={20} />
           </div>
         </button>

@@ -1,13 +1,15 @@
 "use server";
 
 import { requireAdmin, getSupabaseServer } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { Database, OrderStatus, PlanType, TreeStatus } from "@/types/database.types";
+import {
+  sendOrderShippedEmail,
+  sendOrderDeliveredEmail,
+} from "@/lib/email";
 
 type UserRole = Database["public"]["Enums"]["user_role"];
 type RentalStatus = Database["public"]["Enums"]["rental_status"];
-type HeroSlideUpdate = Database["public"]["Tables"]["hero_slides"]["Update"];
-type TestimonialUpdate = Database["public"]["Tables"]["testimonials"]["Update"];
 type TreeUpdateInsert = Database["public"]["Tables"]["tree_updates"]["Insert"];
 
 
@@ -70,7 +72,7 @@ interface GetTreesParams {
   order: "asc" | "desc";
   q: string;
   status: TreeStatus | "";
-  plan_type: PlanType | "";
+  plan_id: string | "";
 }
 
 export async function getTrees(params: GetTreesParams) {
@@ -78,14 +80,15 @@ export async function getTrees(params: GetTreesParams) {
   const supabase = await getSupabaseServer(); // cookies() — fine
 
   let query = supabase.from("trees").select(`
-    id, variety, price, status, plan_type, photos,
+    id, variety, price, status, plan_id, photos,
     age_years, is_verified, created_at,
-    farmers ( farm_name, location )
+    farmers ( farm_name, location ),
+    tree_plans ( name, badge_text, badge_color )
   `, { count: "exact" });
 
   if (params.q) query = query.ilike("variety", `%${params.q}%`);
   if (params.status) query = query.eq("status", params.status);
-  if (params.plan_type) query = query.eq("plan_type", params.plan_type);
+  if (params.plan_id) query = query.eq("plan_id", params.plan_id);
 
   const from = (params.page - 1) * params.pageSize;
   const to = from + params.pageSize - 1;
@@ -104,15 +107,44 @@ export async function adminDeleteTree(id: string) {
   const { error } = await supabase.from("trees").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/trees");
+  revalidateTag("trees", "max");
 }
 
 export async function adminUpdateTreeStatus(id: string, status: TreeStatus) {
   await requireAdmin();
   const supabase = await getSupabaseServer();
+
+  // ── Protection Layer: block premature "available" transition ────────────
+  if (status === "available") {
+    const { data: current, error: fetchErr } = await supabase
+      .from("trees")
+      .select("status, reserved_until")
+      .eq("id", id)
+      .single();
+
+    if (fetchErr) throw new Error(fetchErr.message);
+
+    if (current?.status === "rented" && current.reserved_until) {
+      const expiry = new Date(current.reserved_until);
+      if (expiry > new Date()) {
+        const formatted = expiry.toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+        throw new Error(
+          `Cannot mark tree as Available — it is reserved until ${formatted}. The rental period must expire first.`
+        );
+      }
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   const { error } = await supabase.from("trees").update({ status }).eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/trees");
   revalidatePath(`/rent`);
+  revalidateTag("trees", "max");
 }
 
 
@@ -134,7 +166,7 @@ export async function getRentals(params: {
 
   let query = supabase.from("rentals").select(`
     *,
-    profiles!inner (full_name, phone),
+    profiles!inner (full_name, phone, email),
     trees (
       variety,
       farmers (location)
@@ -162,13 +194,36 @@ export async function adminUpdateRentalStatus(id: string, status: RentalStatus) 
   await requireAdmin();
   const supabase = await getSupabaseServer();
 
+  // 1. Fetch rental to get tree_id
+  const { data: rental, error: fetchErr } = await supabase
+    .from("rentals")
+    .select("tree_id, status")
+    .eq("id", id)
+    .single();
+
+  if (fetchErr) throw new Error(fetchErr.message);
+
+  // 2. If cancelling, clear tree reservation
+  if (status === "cancelled" && rental?.tree_id) {
+    await supabase
+      .from("trees")
+      .update({
+        status: "available",
+        reserved_until: null
+      })
+      .eq("id", rental.tree_id);
+  }
+
   const { error } = await supabase
     .from("rentals")
     .update({ status })
     .eq("id", id);
 
   if (error) throw new Error(error.message);
+
   revalidatePath("/admin/rentals");
+  revalidatePath("/admin/trees");
+  revalidateTag("trees", "max");
 }
 
 export async function adminDeleteRental(id: string) {
@@ -245,6 +300,8 @@ export async function adminDeleteTreeUpdate(id: string, rentalId?: string) {
 // ===============================================
 // ORDER ACTIONS
 // ===============================================
+
+
 export async function getAdminOrders(params: {
   page: number;
   pageSize: number;
@@ -260,12 +317,13 @@ export async function getAdminOrders(params: {
     *,
     profiles (
       full_name,
-      phone
+      phone,
+      email
     )
   `, { count: "exact" });
 
   if (params.q) {
-    query = query.or(`full_name.ilike.%${params.q}%,phone.ilike.%${params.q}%`, { referencedTable: "profiles" });
+    query = query.or(`full_name.ilike.%${params.q}%,phone.ilike.%${params.q}%,email.ilike.%${params.q}%`, { referencedTable: "profiles" });
   }
 
   if (params.status) query = query.eq("status", params.status as OrderStatus);
@@ -298,10 +356,17 @@ export async function adminUpdateOrderStatus(
 
   const supabase = await getSupabaseServer();
 
-  // 1. Fetch current status to prevent illegal transitions
+  // 1. Fetch current status and user info to send emails
   const { data: currentOrder } = await supabase
     .from("orders")
-    .select("status")
+    .select(`
+      status,
+      total_amount,
+      profiles (
+        full_name,
+        email
+      )
+    `)
     .eq("id", orderId)
     .single();
 
@@ -326,6 +391,21 @@ export async function adminUpdateOrderStatus(
 
   if (error) throw new Error(error.message);
 
+  // 4. Trigger Email Notifications
+  const profile = currentOrder.profiles as any;
+  if (profile?.email) {
+    try {
+      if (status === "shipped") {
+        await sendOrderShippedEmail(profile.email, profile.full_name || "Valued Customer", orderId, trackingId);
+      } else if (status === "delivered") {
+        await sendOrderDeliveredEmail(profile.email, profile.full_name || "Valued Customer", orderId);
+      }
+    } catch (emailErr) {
+      console.error("[AdminAction] Failed to send status update email:", emailErr);
+      // We don't throw here to avoid rolling back the DB update if only the email fails
+    }
+  }
+
   revalidatePath(`/admin/orders/${orderId}`);
   revalidatePath("/admin/orders");
   revalidatePath("/dashboard");
@@ -341,7 +421,8 @@ export async function adminGetOrderById(id: string) {
       *,
       profiles (
         full_name,
-        phone
+        phone,
+        email
       )
     `)
     .eq("id", id)
@@ -416,16 +497,12 @@ export async function adminDeleteBlog(id: string) {
 // ===============================================
 // CONTENT MANAGEMENT ACTIONS (HERO, TESTIMONIALS)
 // ===============================================
-export async function getHeroSlides() {
+export async function adminGetHeroSlides() {
+  await requireAdmin();
   const supabase = await getSupabaseServer();
   const { data, error } = await supabase.from("hero_slides").select("*").order("order_index", { ascending: true });
   if (error) return [];
   return data;
-}
-
-export async function adminGetHeroSlides() {
-  await requireAdmin();
-  return getHeroSlides();
 }
 
 export async function adminUpdateHeroSlide(id: string, input: any) {
@@ -435,6 +512,7 @@ export async function adminUpdateHeroSlide(id: string, input: any) {
   if (error) throw new Error(error.message);
   revalidatePath("/");
   revalidatePath("/admin/content");
+  revalidateTag("hero_slides", "max");
 }
 
 export async function adminCreateHeroSlide(input: any) {
@@ -444,6 +522,7 @@ export async function adminCreateHeroSlide(input: any) {
   if (error) throw new Error(error.message);
   revalidatePath("/");
   revalidatePath("/admin/content");
+  revalidateTag("hero_slides", "max");
 }
 
 export async function adminDeleteHeroSlide(id: string) {
@@ -453,18 +532,34 @@ export async function adminDeleteHeroSlide(id: string) {
   if (error) throw new Error(error.message);
   revalidatePath("/");
   revalidatePath("/admin/content");
+  revalidateTag("hero_slides", "max");
 }
 
-export async function getTestimonials() {
+export async function adminUpdateHeroSlidesOrder(slides: { id: string; order_index: number }[]) {
+  await requireAdmin();
   const supabase = await getSupabaseServer();
-  const { data, error } = await supabase.from("testimonials").select("*").order("created_at", { ascending: false });
-  if (error) return [];
-  return data;
+
+  // Perform updates sequentially to ensure order_index integrity
+  const updates = slides.map(s =>
+    supabase.from("hero_slides").update({ order_index: s.order_index }).eq("id", s.id)
+  );
+
+  const results = await Promise.all(updates);
+  const errors = results.filter(r => r.error);
+
+  if (errors.length > 0) throw new Error("Some slides failed to update order");
+
+  revalidatePath("/");
+  revalidatePath("/admin/content");
+  revalidateTag("hero_slides", "max");
 }
 
 export async function adminGetTestimonials() {
   await requireAdmin();
-  return getTestimonials();
+  const supabase = await getSupabaseServer();
+  const { data, error } = await supabase.from("testimonials").select("*").order("created_at", { ascending: false });
+  if (error) return [];
+  return data;
 }
 
 export async function adminUpdateTestimonial(id: string, input: any) {
@@ -474,6 +569,7 @@ export async function adminUpdateTestimonial(id: string, input: any) {
   if (error) throw new Error(error.message);
   revalidatePath("/");
   revalidatePath("/admin/content");
+  revalidateTag("testimonials", "max");
 }
 
 export async function adminCreateTestimonial(input: any) {
@@ -483,6 +579,7 @@ export async function adminCreateTestimonial(input: any) {
   if (error) throw new Error(error.message);
   revalidatePath("/");
   revalidatePath("/admin/content");
+  revalidateTag("testimonials", "max");
 }
 
 export async function adminDeleteTestimonial(id: string) {
@@ -492,7 +589,50 @@ export async function adminDeleteTestimonial(id: string) {
   if (error) throw new Error(error.message);
   revalidatePath("/");
   revalidatePath("/admin/content");
+  revalidateTag("testimonials", "max");
 }
+
+export async function adminGetTreePlans() {
+  await requireAdmin();
+  const supabase = await getSupabaseServer();
+  const { data, error } = await supabase.from("tree_plans").select("*").order("created_at", { ascending: true });
+  if (error) return [];
+  return data;
+}
+
+export async function adminCreateTreePlan(input: any) {
+  await requireAdmin();
+  const supabase = await getSupabaseServer();
+  const { error } = await supabase.from("tree_plans").insert(input);
+  if (error) throw new Error(error.message);
+  revalidatePath("/");
+  revalidatePath("/admin/content");
+  revalidatePath("/store");
+  revalidateTag("tree_plans", "max");
+}
+
+export async function adminUpdateTreePlan(id: string, input: any) {
+  await requireAdmin();
+  const supabase = await getSupabaseServer();
+  const { error } = await supabase.from("tree_plans").update(input).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/");
+  revalidatePath("/admin/content");
+  revalidatePath("/store");
+  revalidateTag("tree_plans", "max");
+}
+
+export async function adminDeleteTreePlan(id: string) {
+  await requireAdmin();
+  const supabase = await getSupabaseServer();
+  const { error } = await supabase.from("tree_plans").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/");
+  revalidatePath("/admin/content");
+  revalidatePath("/store");
+  revalidateTag("tree_plans", "max");
+}
+
 
 
 // =======================================================

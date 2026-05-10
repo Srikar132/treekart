@@ -23,6 +23,7 @@ type OrderItemRecord = {
   pricePerKg: number;
   qty: number;
   imageUrl: string;
+  weightKg: number;
   lineTotal: number; // pricePerKg * qty — stored for receipt immutability
 };
 
@@ -62,18 +63,22 @@ function buildOrderItems(items: CartItem[]): OrderItemRecord[] {
     pricePerKg: item.pricePerKg,
     qty: item.qty,
     imageUrl: item.imageUrl,
+    weightKg: item.weightKg ?? 0,
     lineTotal: item.pricePerKg * item.qty,
   }));
 }
+
+const DELIVER_CHARGES = 99;
+const MINIMUM_ORDER_AMOUNT = 999;
 
 function computeTotals(items: CartItem[]) {
   const subtotal = items.reduce(
     (sum, i) => sum + i.pricePerKg * i.qty,
     0
   );
-  const deliveryFee = subtotal >= 999 ? 0 : 99;
+  const deliveryFee = subtotal >= MINIMUM_ORDER_AMOUNT ? 0 : DELIVER_CHARGES;
   const grandTotal = subtotal + deliveryFee;
-  const grandTotalPaise = Math.round(grandTotal * 100);
+  const grandTotalPaise = Math.round(grandTotal * 100); // Razorpay works in paise
   return { subtotal, deliveryFee, grandTotal, grandTotalPaise };
 }
 
@@ -116,7 +121,7 @@ export async function createMangoOrder(
   const productIds = items.map(i => i.id);
   const { data: dbProducts, error: productError } = await supabase
     .from("mango_products")
-    .select("id, status, name")
+    .select("id, status, name, weight_kg")
     .in("id", productIds);
 
   if (productError) {
@@ -130,6 +135,11 @@ export async function createMangoOrder(
     }
     if (dbProduct.status === "out_of_stock") {
       throw new Error(`Product "${dbProduct.name}" is currently out of stock`);
+    }
+
+    // Verify weight variant exists
+    if (item.weightKg && !dbProduct.weight_kg.includes(item.weightKg)) {
+      throw new Error(`Weight variant ${item.weightKg}kg for "${dbProduct.name}" is no longer available`);
     }
   }
 
@@ -175,6 +185,8 @@ export async function createMangoOrder(
   };
 }
 
+import { sendOrderConfirmedEmail } from "@/lib/email";
+
 // ── 2. Verify Razorpay signature + fulfil order ─────────────────────
 
 export async function verifyAndFulfilOrder(payload: {
@@ -207,7 +219,16 @@ export async function verifyAndFulfilOrder(payload: {
   // Fetch the pending order — ensures user owns it
   const { data: existing, error: fetchError } = await supabase
     .from("orders")
-    .select("id, status, user_id")
+    .select(`
+      id, 
+      status, 
+      user_id, 
+      total_amount, 
+      profiles (
+        email, 
+        full_name
+      )
+    `)
     .eq("id", payload.orderId)
     .eq("user_id", user.id)  // user can only confirm their own order
     .single();
@@ -237,6 +258,21 @@ export async function verifyAndFulfilOrder(payload: {
 
   if (updateError) {
     throw new Error(`Failed to confirm order: ${updateError.message}`);
+  }
+
+  // 4. Send Confirmation Email
+  const profile = existing.profiles as any;
+  if (profile?.email) {
+    try {
+      await sendOrderConfirmedEmail(
+        profile.email,
+        profile.full_name || "Valued Customer",
+        existing.id,
+        existing.total_amount
+      );
+    } catch (err) {
+      console.error("[OrderAction] Failed to send confirmation email:", err);
+    }
   }
 
   revalidatePath("/dashboard");
@@ -272,7 +308,15 @@ export async function handleRazorpayWebhook(payload: {
   // Find the pending order by rzp order id (stored in payment_id column)
   const { data: order } = await supabase
     .from("orders")
-    .select("id, status")
+    .select(`
+      id, 
+      status, 
+      total_amount, 
+      profiles (
+        email, 
+        full_name
+      )
+    `)
     .eq("payment_id", payload.rzpOrderId)
     .single();
 
@@ -285,6 +329,21 @@ export async function handleRazorpayWebhook(payload: {
       payment_id: payload.paymentId,
     })
     .eq("id", order.id);
+
+  // Send Confirmation Email
+  const profile = order.profiles as any;
+  if (profile?.email) {
+    try {
+      await sendOrderConfirmedEmail(
+        profile.email,
+        profile.full_name || "Valued Customer",
+        order.id,
+        order.total_amount
+      );
+    } catch (err) {
+      console.error("[Webhook] Failed to send confirmation email:", err);
+    }
+  }
 
   revalidatePath("/dashboard");
 }

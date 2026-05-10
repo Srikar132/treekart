@@ -82,6 +82,9 @@ async function ProductsTable({ params }: { params: Awaited<ReturnType<typeof pro
       rowCount={count}
       page={params.page}
       pageSize={params.pageSize}
+      sort={params.sort}
+      order={params.order}
+      rowHrefPrefix="/admin/products"
     />
   );
 }

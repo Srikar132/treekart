@@ -10,7 +10,7 @@ export function PromoBanner() {
             {/* Background Image */}
             <div className="absolute inset-0 -z-10">
                 <Image
-                    src="/images/mango_banner_bg.png"
+                    src="/images/mango_banner_bg.webp"
                     alt="Fresh vibrant mangoes background"
                     fill
                     className="object-cover object-center"

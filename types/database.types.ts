@@ -20,42 +20,42 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
-          image_url: string | null
+          image_url: string[] | null
           name: string
           original_price: number | null
           price: number
           status: Database["public"]["Enums"]["product_status"] | null
           updated_at: string | null
           variety: string
-          weight_kg: number
+          weight_kg: number[]
         }
         Insert: {
           badge?: Database["public"]["Enums"]["product_badge"] | null
           created_at?: string | null
           description?: string | null
           id?: string
-          image_url?: string | null
+          image_url?: string[] | null
           name: string
           original_price?: number | null
           price: number
           status?: Database["public"]["Enums"]["product_status"] | null
           updated_at?: string | null
           variety: string
-          weight_kg?: number | null
+          weight_kg?: number[] | null
         }
         Update: {
           badge?: Database["public"]["Enums"]["product_badge"] | null
           created_at?: string | null
           description?: string | null
           id?: string
-          image_url?: string | null
+          image_url?: string[] | null
           name?: string
           original_price?: number | null
           price?: number
           status?: Database["public"]["Enums"]["product_status"] | null
           updated_at?: string | null
           variety?: string
-          weight_kg?: number | null
+          weight_kg?: number[] | null
         }
         Relationships: []
       }
@@ -306,6 +306,7 @@ export type Database = {
           is_verified: boolean | null
           full_name: string | null
           phone: string | null
+          email: string | null
           id: string
           role: Database["public"]["Enums"]["user_role"] | null
         }
@@ -314,6 +315,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           phone?: string | null
+          email?: string | null
           id: string
           is_verified?: boolean | null
           role?: Database["public"]["Enums"]["user_role"] | null
@@ -323,6 +325,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           phone?: string | null
+          email?: string | null
           id?: string
           is_verified?: boolean | null
           role?: Database["public"]["Enums"]["user_role"] | null
@@ -433,6 +436,36 @@ export type Database = {
           },
         ]
       }
+      tree_plans: {
+        Row: {
+          id: string
+          name: string
+          badge_text: string | null
+          badge_color: string | null
+          features: Json
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          badge_text?: string | null
+          badge_color?: string | null
+          features?: Json
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          badge_text?: string | null
+          badge_color?: string | null
+          features?: Json
+          is_active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
       trees: {
         Row: {
           age_years: number
@@ -443,9 +476,10 @@ export type Database = {
           id: string
           is_verified: boolean
           photos: Json
-          plan_type: Database["public"]["Enums"]["plan_type"]
+          plan_id: string
           price: number
           description: string | null
+          reserved_until: string | null
           source: Database["public"]["Enums"]["tree_source"]
           status: Database["public"]["Enums"]["tree_status"]
           variety: string
@@ -461,9 +495,10 @@ export type Database = {
           id?: string
           is_verified?: boolean | null
           photos?: Json | null
-          plan_type?: Database["public"]["Enums"]["plan_type"] | null
+          plan_id?: string | null
           price?: number | null
           description?: string | null
+          reserved_until?: string | null
           source?: Database["public"]["Enums"]["tree_source"] | null
           status?: Database["public"]["Enums"]["tree_status"] | null
           variety?: string | null
@@ -479,9 +514,10 @@ export type Database = {
           id?: string
           is_verified?: boolean | null
           photos?: Json | null
-          plan_type?: Database["public"]["Enums"]["plan_type"] | null
+          plan_id?: string | null
           price?: number | null
           description?: string | null
+          reserved_until?: string | null
           source?: Database["public"]["Enums"]["tree_source"] | null
           status?: Database["public"]["Enums"]["tree_status"] | null
           variety?: string | null
@@ -494,6 +530,13 @@ export type Database = {
             columns: ["farmer_id"]
             isOneToOne: false
             referencedRelation: "farmers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trees_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "tree_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -684,6 +727,7 @@ export type Order = Database['public']['Tables']['orders']['Row']
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Rental = Database['public']['Tables']['rentals']['Row']
 export type TreeUpdate = Database['public']['Tables']['tree_updates']['Row']
+export type TreePlan = Database['public']['Tables']['tree_plans']['Row']
 export type Tree = Database['public']['Tables']['trees']['Row']
 
 // ========================================
@@ -700,6 +744,7 @@ export type OrderInsert = Database['public']['Tables']['orders']['Insert']
 export type ProfileInsert = Database['public']['Tables']['profiles']['Insert']
 export type RentalInsert = Database['public']['Tables']['rentals']['Insert']
 export type TreeUpdateInsert = Database['public']['Tables']['tree_updates']['Insert']
+export type TreePlanInsert = Database['public']['Tables']['tree_plans']['Insert']
 export type TreeInsert = Database['public']['Tables']['trees']['Insert']
 
 // ========================================
@@ -716,6 +761,7 @@ export type OrderUpdate = Database['public']['Tables']['orders']['Update']
 export type ProfileUpdate = Database['public']['Tables']['profiles']['Update']
 export type RentalUpdate = Database['public']['Tables']['rentals']['Update']
 export type TreeUpdateUpdate = Database['public']['Tables']['tree_updates']['Update']
+export type TreePlanUpdate = Database['public']['Tables']['tree_plans']['Update']
 export type TreeUpdate_Update = Database['public']['Tables']['trees']['Update']
 
 // ========================================
@@ -753,4 +799,20 @@ export type AllTableInserts = {
 // Get all table update types
 export type AllTableUpdates = {
   [K in TableName]: Database['public']['Tables'][K]['Update']
+}
+
+// ========================================
+// JSON FIELD INTERFACES
+// ========================================
+
+export interface DeliveryAddress {
+  name: string;
+  phone: string;
+  line1: string;
+  locality?: string | null;
+  city: string;
+  district?: string | null;
+  state: string;
+  pincode: string;
+  country?: string | null;
 }

@@ -52,7 +52,7 @@ export function HeroSection({ slides: initialSlides }: HeroSectionProps) {
     const slides = initialSlides?.length > 0 ? initialSlides : [
         {
             id: 'default-0',
-            image_url: "/hero-mango-farm.png",
+            image_url: "/hero-mango-farm.webp",
             eyebrow: "Farm-to-Doorstep Since 2024",
             title: "Own a Mango Tree.",
             sub_heading: "Taste the Season.",
@@ -142,13 +142,13 @@ export function HeroSection({ slides: initialSlides }: HeroSectionProps) {
                         <div className="space-y-4 mb-10">
                             <motion.h1
                                 variants={textItemVariants}
-                                className="text-white text-[2.5rem] md:text-[5rem] lg:text-[6.5rem] font-black tracking-tight leading-[1] uppercase drop-shadow-2xl"
+                                className="text-white text-[2rem] xs:text-[2.5rem] md:text-[5rem] lg:text-[6.5rem] font-black tracking-tight leading-[1] uppercase drop-shadow-2xl break-words"
                             >
                                 {slide.title}
                             </motion.h1>
                             <motion.h2
                                 variants={textItemVariants}
-                                className="text-secondary text-[1.5rem] md:text-[3rem] lg:text-[4rem] font-black tracking-tight leading-[1] uppercase"
+                                className="text-secondary text-[1.25rem] xs:text-[1.5rem] md:text-[3rem] lg:text-[4rem] font-black tracking-tight leading-[1] uppercase break-words"
                             >
                                 {slide.sub_heading}
                             </motion.h2>

@@ -108,8 +108,8 @@ This document provides a detailed breakdown of the Supabase PostgreSQL database 
 | `badge` | `product_badge` (Enum)| UI highlight tags: `Pre-Order`, `Sale`, `New`, or `None`. |
 | `status` | `product_status` (Enum)| Shopping cart logic check: `available`, `pre_order`, or `out_of_stock`. |
 | `variety` | `TEXT` | Mango variety type. |
-| `weight_kg` | `NUMERIC` | Weight of the specific package being sold. |
-| `image_url` | `TEXT` | URL pointing to the product thumbnail image. |
+| `weight_kg` | `NUMERIC[]` | Array of available weight variants for the product. |
+| `image_url` | `TEXT[]` | Array of URLs for product images (first image is thumbnail). |
 | `created_at` | `TIMESTAMPTZ` | Timestamp of when the product was added. |
 | `updated_at` | `TIMESTAMPTZ` | Timestamp of the last price/detail modification. |
 

@@ -120,6 +120,7 @@ export async function registerUser(
             data: {
                 full_name: parsed.data.fullName,
                 phone: parsed.data.phone,
+                email: parsed.data.email,
             },
         },
     });

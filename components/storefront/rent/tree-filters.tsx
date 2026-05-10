@@ -16,15 +16,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import type { Database } from "@/types/database.types";
-
-type PlanType = Database["public"]["Enums"]["plan_type"];
-
-const PLANS: { value: PlanType; label: string; range: string }[] = [
-  { value: "basic", label: "Basic", range: "20–30 kg" },
-  { value: "standard", label: "Standard", range: "40–50 kg" },
-  { value: "max", label: "Max", range: "60+ kg" },
-];
+import type { Database, TreePlan } from "@/types/database.types";
 
 const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: "available", label: "Available" },
@@ -35,7 +27,8 @@ const MAX_PRICE = 15000;
 const MAX_AGE = 50;
 
 type Props = {
-  activePlans: PlanType[];
+  activePlans: string[];
+  treePlans: TreePlan[];
   activeMinPrice?: number;
   activeMaxPrice?: number;
   activeMinAge?: number;
@@ -45,6 +38,7 @@ type Props = {
 
 export function TreeFilters({
   activePlans,
+  treePlans = [],
   activeMinPrice,
   activeMaxPrice,
   activeMinAge,
@@ -94,7 +88,7 @@ export function TreeFilters({
     [router, pathname, searchParams]
   );
 
-  function togglePlan(plan: PlanType) {
+  function togglePlan(plan: string) {
     const current = new Set(activePlans);
     if (current.has(plan)) {
       current.delete(plan);
@@ -135,15 +129,17 @@ export function TreeFilters({
 
   const ActivePills = () => (
     <>
-      {activePlans.map((p) => (
+      {activePlans.map((pId) => {
+        const planName = treePlans.find(tp => tp.id === pId)?.name || pId;
+        return (
         <button
-          key={p}
-          onClick={() => togglePlan(p)}
+          key={pId}
+          onClick={() => togglePlan(pId)}
           className="flex items-center gap-1 text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-full hover:bg-destructive/10 hover:text-destructive border border-primary/20 transition-colors"
         >
-          {p} <X size={12} />
+          {planName} <X size={12} />
         </button>
-      ))}
+      )})}
       {activeStatus.filter(s => s !== 'available').map((s) => (
         <button
           key={s}
@@ -235,21 +231,23 @@ export function TreeFilters({
                   Plan Type
                 </h4>
                 <div className="space-y-3">
-                  {PLANS.map((plan) => (
-                    <div key={plan.value} className="flex items-center gap-3">
+                  {treePlans.filter(p => p.is_active).map((plan) => (
+                    <div key={plan.id} className="flex items-center gap-3">
                       <Checkbox
-                        id={`plan-${plan.value}`}
-                        checked={activePlans.includes(plan.value)}
-                        onCheckedChange={() => togglePlan(plan.value)}
+                        id={`plan-${plan.id}`}
+                        checked={activePlans.includes(plan.id)}
+                        onCheckedChange={() => togglePlan(plan.id)}
                       />
                       <Label
-                        htmlFor={`plan-${plan.value}`}
+                        htmlFor={`plan-${plan.id}`}
                         className="flex-1 cursor-pointer flex items-center justify-between"
                       >
-                        <span className="text-sm font-medium">{plan.label}</span>
-                        <span className="text-xs text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded">
-                          {plan.range}
-                        </span>
+                        <span className="text-sm font-medium">{plan.name}</span>
+                        {plan.badge_text && (
+                          <span className="text-xs text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded">
+                            {plan.badge_text}
+                          </span>
+                        )}
                       </Label>
                     </div>
                   ))}
@@ -296,7 +294,6 @@ export function TreeFilters({
                   </span>
                 </div>
                 <Slider
-                  defaultValue={[activeMinPrice || 0, activeMaxPrice || MAX_PRICE]}
                   value={priceRange}
                   onValueChange={(vals) => setPriceRange(vals as number[])}
                   onValueCommitted={(vals) => {
@@ -332,7 +329,6 @@ export function TreeFilters({
                   </span>
                 </div>
                 <Slider
-                  defaultValue={[activeMinAge || 0, activeMaxAge || MAX_AGE]}
                   value={ageRange}
                   onValueChange={(vals) => setAgeRange(vals as number[])}
                   onValueCommitted={(vals) => {

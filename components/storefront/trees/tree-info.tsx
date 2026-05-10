@@ -12,10 +12,11 @@ import { Database, Tree, Farmer } from "@/types/database.types";
 import { useLoginPrompt } from "@/store/use-login-prompt";
 import { createClient } from "@/utils/supabase/client";
 
-type PlanType = Database["public"]["Enums"]["plan_type"];
+
 
 export type TreeWithDetails = Tree & {
   farmers: Pick<Farmer, "id" | "farm_name" | "location" | "is_organic"> | null;
+  tree_plans?: { name: string; badge_text: string | null; badge_color: string | null } | null;
 };
 
 export type ActiveRental = {
@@ -49,7 +50,7 @@ export function TreeInfo({ tree, activeRental }: TreeInfoProps) {
   const handleRentNow = async () => {
     setPlan({
       treeId: tree.id,
-      planType: (tree.plan_type as PlanType) || "standard",
+      planId: tree.plan_id || "",
       variety: tree.variety || "Unknown Variety",
       price: tree.price || 0,
       yieldMinKg: tree.yield_min_kg || 0,
@@ -79,7 +80,7 @@ export function TreeInfo({ tree, activeRental }: TreeInfoProps) {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 capitalize font-medium px-4 py-1">
-              {tree.plan_type} Plan
+              {tree.tree_plans?.name || "Premium Plan"}
             </Badge>
             {tree.is_verified && (
               <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200 flex items-center gap-1 font-medium px-4 py-1">
@@ -100,7 +101,7 @@ export function TreeInfo({ tree, activeRental }: TreeInfoProps) {
           </div>
         </div>
         <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
-          {tree.variety} Mango Tree
+          {tree.variety}
         </h1>
         <div className="flex items-baseline gap-4">
           <span className="text-3xl font-bold text-primary">₹{tree.price?.toLocaleString()}</span>
@@ -181,11 +182,24 @@ export function TreeInfo({ tree, activeRental }: TreeInfoProps) {
                 </>
               )}
             </div>
-            <p className="text-sm text-muted-foreground italic bg-white/50 p-3 rounded-lg border">
-              {activeRental?.profiles?.full_name
-                ? `This heritage tree is currently thriving under ${activeRental.profiles.full_name.split(" ")[0]}'s care.`
-                : "This heritage tree has been secured for the current season by another member."}
-            </p>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground italic bg-white/50 p-3 rounded-lg border">
+                {activeRental?.profiles?.full_name
+                  ? `This heritage tree is currently thriving under ${activeRental.profiles.full_name.split(" ")[0]}'s care.`
+                  : "This heritage tree has been secured for the current season by another member."}
+              </p>
+              
+              {tree.reserved_until && new Date(tree.reserved_until) > new Date() && (
+                <div className="flex items-center gap-2 text-[11px] font-bold text-primary uppercase tracking-wider bg-primary/5 p-2 rounded-md border border-primary/10">
+                  <Calendar size={14} />
+                  <span>Reserved Until: {new Date(tree.reserved_until).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric"
+                  })}</span>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <div className="space-y-4 w-full">

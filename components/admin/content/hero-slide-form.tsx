@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { CldUploadWidget } from "next-cloudinary"
 import { cn } from "@/lib/utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface HeroSlideFormProps {
     initialData?: any
@@ -34,14 +35,14 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
             description: initialData?.description ?? "Rent a real Alphonso mango tree on our farm. GPS-tracked, 10-day updates, fresh mangoes delivered every season.",
             image_url: initialData?.image_url ?? "",
             button_label: initialData?.button_label ?? "Explore Now",
-            button_link: initialData?.button_link ?? "/shop",
+            button_link: initialData?.button_link ?? "/store",
             order_index: initialData?.order_index ?? 0,
         },
     })
 
     function onSubmit(values: HeroSlideFormValues) {
         if (!imageUrl) return toast.error("Hero media is required")
-        
+
         startTransition(async () => {
             try {
                 const data = { ...values, image_url: imageUrl }
@@ -61,21 +62,21 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
 
     return (
         <Form {...form}>
-            <form 
+            <form
                 onSubmit={form.handleSubmit(onSubmit, (errors) => {
-                    console.error("Form Validation Errors:", errors)
+                    // console.error("Form Validation Errors:", errors)
                     toast.error("Please resolve the highlighted errors before deploying")
-                })} 
+                })}
                 className="space-y-8"
             >
                 <input type="hidden" {...form.register("image_url")} value={imageUrl} />
 
-                <div className="max-h-[60vh] overflow-y-auto px-1 scrollbar-none">
+                <div className="max-h-none sm:max-h-[70vh] overflow-y-auto px-1">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Content Section */}
                         <div className="space-y-6">
                             <SectionHeader icon={<Type size={16} />} title="Hero Content" />
-                            
+
                             <FormField control={form.control} name="eyebrow" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Eyebrow</FormLabel>
@@ -128,39 +129,40 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
                                 )} />
                                 <FormField control={form.control} name="button_link" render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">CTA Link</FormLabel>
-                                        <FormControl>
-                                            <Input {...field} className="bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold" />
-                                        </FormControl>
+                                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">CTA Path</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger className="bg-muted border-transparent rounded-xl focus:ring-primary/20 text-xs font-bold h-10 transition-colors hover:bg-muted/80">
+                                                    <SelectValue placeholder="Select destination" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent className="rounded-xl border-border bg-card shadow-2xl">
+                                                <SelectItem value="/" className="text-xs font-bold uppercase tracking-tight focus:bg-primary/10 focus:text-primary rounded-lg transition-colors py-2.5">Storefront Home</SelectItem>
+                                                <SelectItem value="/rent" className="text-xs font-bold uppercase tracking-tight focus:bg-primary/10 focus:text-primary rounded-lg transition-colors py-2.5">Rent a Tree</SelectItem>
+                                                <SelectItem value="/store" className="text-xs font-bold uppercase tracking-tight focus:bg-primary/10 focus:text-primary rounded-lg transition-colors py-2.5">Mango Store</SelectItem>
+                                                <SelectItem value="/about" className="text-xs font-bold uppercase tracking-tight focus:bg-primary/10 focus:text-primary rounded-lg transition-colors py-2.5">Our Story</SelectItem>
+                                                <SelectItem value="/blog" className="text-xs font-bold uppercase tracking-tight focus:bg-primary/10 focus:text-primary rounded-lg transition-colors py-2.5">Orchard Blog</SelectItem>
+                                                <SelectItem value="/contact" className="text-xs font-bold uppercase tracking-tight focus:bg-primary/10 focus:text-primary rounded-lg transition-colors py-2.5">Contact Us</SelectItem>
+                                            </SelectContent>
+                                        </Select>
                                         <FormMessage className="text-[10px] font-bold" />
                                     </FormItem>
                                 )} />
                             </div>
 
-                            <FormField control={form.control} name="order_index" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Sort Priority</FormLabel>
-                                    <FormControl>
-                                        <div className="relative">
-                                            <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/30" size={14} />
-                                            <Input type="number" {...field} className="pl-9 bg-muted border-transparent rounded-xl focus-visible:bg-card focus-visible:ring-primary/20 text-xs font-bold" />
-                                        </div>
-                                    </FormControl>
-                                    <FormMessage className="text-[10px] font-bold" />
-                                </FormItem>
-                            )} />
+
                         </div>
 
                         {/* Media Section */}
                         <div className="space-y-6">
                             <SectionHeader icon={<ImageIcon size={16} />} title="Hero Media" />
-                            
+
                             <div className="aspect-[21/9] bg-muted rounded-2xl overflow-hidden border border-border relative group">
                                 {imageUrl ? (
                                     <>
                                         <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                                        <button 
-                                            type="button" 
+                                        <button
+                                            type="button"
                                             onClick={() => {
                                                 setImageUrl("")
                                                 form.setValue("image_url", "", { shouldValidate: true })
@@ -171,7 +173,7 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
                                         </button>
                                     </>
                                 ) : (
-                                    <CldUploadWidget 
+                                    <CldUploadWidget
                                         uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
                                         onSuccess={(result: any) => {
                                             const url = result.info.secure_url
@@ -180,8 +182,8 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
                                         }}
                                     >
                                         {({ open }) => (
-                                            <button 
-                                                type="button" 
+                                            <button
+                                                type="button"
                                                 onClick={() => open()}
                                                 className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/30 hover:text-primary transition-colors"
                                             >
@@ -197,8 +199,8 @@ export function HeroSlideForm({ initialData, onSuccess }: HeroSlideFormProps) {
                 </div>
 
                 <div className="pt-4 border-t border-border">
-                    <Button 
-                        type="submit" 
+                    <Button
+                        type="submit"
                         disabled={isPending}
                         className="admin-button-primary w-full h-14 flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest"
                     >

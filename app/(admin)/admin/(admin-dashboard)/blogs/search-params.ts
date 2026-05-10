@@ -8,8 +8,8 @@ import {
 
 export const blogsSearchParamsCache = createSearchParamsCache({
     page: parseAsInteger.withDefault(1),
-    pageSize: parseAsInteger.withDefault(10),
-    sort: parseAsString.withDefault("created_at"),
+    pageSize: parseAsInteger.withDefault(5),
+    sort: parseAsString.withDefault("published_at"),
     order: parseAsStringEnum(["asc", "desc"] as const).withDefault("desc"),
     q: parseAsString.withDefault(""),
     category: parseAsString.withDefault(""),

@@ -57,7 +57,7 @@ export default async function TreeDetailsPage({ params }: Props) {
       )}
 
       <Suspense fallback={<RelatedTreesSkeleton />}>
-        <RelatedTreesStream planType={tree.plan_type} excludeId={id} />
+        <RelatedTreesStream planId={tree.plan_id} excludeId={id} />
       </Suspense>
     </main>
   );
@@ -89,12 +89,12 @@ async function TreeUpdatesStream({ treeId }: { treeId: string }) {
   return <TreeUpdates updates={updates} />;
 }
 
-async function RelatedTreesStream({ planType, excludeId }: {
-  planType: string | null;
+async function RelatedTreesStream({ planId, excludeId }: {
+  planId: string | null;
   excludeId: string;
 }) {
   const { trees } = await getAvailableTrees({
-    filters: { planType: planType ? [planType as any] : undefined },
+    filters: { planId: planId ? [planId] : undefined },
     excludeId,
     limit: 8,
   });

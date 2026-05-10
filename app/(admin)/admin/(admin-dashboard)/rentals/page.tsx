@@ -78,6 +78,10 @@ async function RentalsTable({ params }: { params: Awaited<ReturnType<typeof rent
       rowCount={count}
       page={params.page}
       pageSize={params.pageSize}
+      sort={params.sort}
+      order={params.order}
+      rowHrefPrefix="/admin/rentals"
+      rowHrefSuffix="/updates"
     />
   );
 }

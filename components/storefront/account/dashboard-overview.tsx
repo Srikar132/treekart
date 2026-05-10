@@ -68,13 +68,16 @@ export function DashboardOverview({ user, rentals, orders, onTabChange }: Dashbo
           </div>
 
           {recentRental ? (
-            <div className="group rounded-[1.75rem] sm:rounded-[2.5rem] border border-slate-100 p-5 sm:p-8 space-y-5 sm:space-y-8 hover:bg-slate-50 transition-all hover:shadow-lg hover:shadow-slate-100">
+            <Link
+              href={`/trees/${recentRental.tree_id}`}
+              className="block group rounded-[1.75rem] sm:rounded-[2.5rem] border border-slate-100 p-5 sm:p-8 space-y-5 sm:space-y-8 hover:bg-slate-50 transition-all hover:shadow-lg hover:shadow-slate-100 cursor-pointer"
+            >
               <div className="flex justify-between items-start gap-3">
                 <div className="space-y-2 min-w-0">
                   <Badge className="bg-primary/10 text-primary border-0 rounded-full text-[10px] font-black uppercase tracking-widest px-3 py-0.5">
-                    {recentRental.trees?.plan_type} Plan
+                    {recentRental.trees?.tree_plans?.name || "Premium Plan"}
                   </Badge>
-                  <p className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
+                  <p className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight group-hover:text-primary transition-colors">
                     {recentRental.trees?.variety} Heritage
                   </p>
                 </div>
@@ -88,29 +91,34 @@ export function DashboardOverview({ user, rentals, orders, onTabChange }: Dashbo
 
               <Separator className="bg-slate-200/50" />
 
-              <div className="flex flex-wrap items-center gap-4 sm:gap-8">
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                  <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl bg-white flex items-center justify-center shadow-sm border border-slate-100 shrink-0">
-                    <MapPin size={12} className="text-slate-400" />
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-4 sm:gap-8">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl bg-white flex items-center justify-center shadow-sm border border-slate-100 shrink-0">
+                      <MapPin size={12} className="text-slate-400" />
+                    </div>
+                    <span className="text-xs sm:text-sm font-bold text-slate-600 truncate">
+                      {recentRental.trees?.farmers?.farm_name || "Our Orchard"}
+                    </span>
                   </div>
-                  <span className="text-xs sm:text-sm font-bold text-slate-600 truncate">
-                    {recentRental.trees?.farmers?.farm_name || "Our Orchard"}
-                  </span>
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl bg-white flex items-center justify-center shadow-sm border border-slate-100 shrink-0">
+                      <Calendar size={12} className="text-slate-400" />
+                    </div>
+                    <span className="text-xs sm:text-sm font-bold text-slate-600 truncate">
+                      {new Date(recentRental.rented_at).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                  <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl bg-white flex items-center justify-center shadow-sm border border-slate-100 shrink-0">
-                    <Calendar size={12} className="text-slate-400" />
-                  </div>
-                  <span className="text-xs sm:text-sm font-bold text-slate-600 truncate">
-                    {new Date(recentRental.rented_at).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
+                <div className="h-10 w-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all shadow-sm">
+                  <ArrowRight size={16} />
                 </div>
               </div>
-            </div>
+            </Link>
           ) : (
             <div className="rounded-[1.75rem] sm:rounded-[2.5rem] border-2 border-dashed border-slate-100 py-14 sm:py-20 text-center space-y-4 sm:space-y-6">
               <div className="h-14 w-14 sm:h-16 sm:w-16 bg-slate-50 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto shadow-inner">
@@ -139,13 +147,16 @@ export function DashboardOverview({ user, rentals, orders, onTabChange }: Dashbo
           </div>
 
           {recentOrder ? (
-            <div className="rounded-[1.75rem] sm:rounded-[2.5rem] border border-slate-100 p-5 sm:p-8 space-y-5 sm:space-y-8 hover:bg-slate-50 transition-all hover:shadow-lg hover:shadow-slate-100">
+            <Link
+              href={`/account/orders/${recentOrder.id}`}
+              className="block group rounded-[1.75rem] sm:rounded-[2.5rem] border border-slate-100 p-5 sm:p-8 space-y-5 sm:space-y-8 hover:bg-slate-50 transition-all hover:shadow-lg hover:shadow-slate-100 cursor-pointer"
+            >
               <div className="flex justify-between items-start gap-3">
                 <div className="space-y-2 min-w-0">
                   <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     Order #{recentOrder.id.slice(0, 8).toUpperCase()}
                   </p>
-                  <p className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-none">
+                  <p className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-none group-hover:text-primary transition-colors">
                     ₹{recentOrder.total_amount.toLocaleString()}
                   </p>
                 </div>
@@ -156,19 +167,24 @@ export function DashboardOverview({ user, rentals, orders, onTabChange }: Dashbo
 
               <Separator className="bg-slate-200/50" />
 
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl bg-white flex items-center justify-center shadow-sm border border-slate-100 shrink-0">
-                  <ShoppingBag size={12} className="text-slate-400" />
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg sm:rounded-xl bg-white flex items-center justify-center shadow-sm border border-slate-100 shrink-0">
+                    <ShoppingBag size={12} className="text-slate-400" />
+                  </div>
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Shipping to</p>
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                      {(recentOrder.delivery_address as any)?.name || "Valued Customer"} ·{" "}
+                      {(recentOrder.delivery_address as any)?.locality || (recentOrder.delivery_address as any)?.city || "India"}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-0.5 min-w-0">
-                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Shipping to</p>
-                  <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">
-                    {(recentOrder.delivery_address as any)?.name || "Valued Customer"} ·{" "}
-                    {(recentOrder.delivery_address as any)?.city || "India"}
-                  </p>
+                <div className="h-10 w-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all shadow-sm">
+                  <ArrowRight size={16} />
                 </div>
               </div>
-            </div>
+            </Link>
           ) : (
             <div className="rounded-[1.75rem] sm:rounded-[2.5rem] border-2 border-dashed border-slate-100 py-14 sm:py-20 text-center space-y-4 sm:space-y-6">
               <div className="h-14 w-14 sm:h-16 sm:w-16 bg-slate-50 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto shadow-inner">

@@ -2,11 +2,11 @@
 "use client";
 
 import { type ColumnDef } from "@tanstack/react-table";
-import { type Tree, type TreeStatus, type PlanType } from "@/types/database.types";
+import { type Tree, type TreeStatus } from "@/types/database.types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, Edit, Trash2, ArrowUpDown } from "lucide-react";
+import { MoreHorizontal, Eye, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { adminDeleteTree, adminUpdateTreeStatus } from "@/actions/admin.actions";
@@ -15,10 +15,11 @@ import { toast } from "sonner";
 
 // Joined type from your select query
 export type TreeRow = Pick<Tree,
-    "id" | "variety" | "price" | "status" | "plan_type" |
+    "id" | "variety" | "price" | "status" | "plan_id" |
     "photos" | "age_years" | "is_verified" | "created_at"
 > & {
     farmers: { farm_name: string | null; location: string | null } | null;
+    tree_plans: { name: string; badge_text: string | null; badge_color: string | null } | null;
 };
 
 const STATUS_CONFIG: Record<TreeStatus, { label: string; dot: string }> = {
@@ -27,11 +28,7 @@ const STATUS_CONFIG: Record<TreeStatus, { label: string; dot: string }> = {
     inactive: { label: "Inactive", dot: "bg-muted-foreground" },
 };
 
-const PLAN_CONFIG: Record<PlanType, string> = {
-    basic: "border-border text-muted-foreground bg-muted/50",
-    standard: "border-blue-200 text-blue-700 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800",
-    max: "border-purple-200 text-purple-700 bg-purple-50 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800",
-};
+
 
 function ActionsCell({ row }: { row: { original: TreeRow } }) {
     const [isPending, startTransition] = useTransition();
@@ -111,7 +108,14 @@ export const treeColumns: ColumnDef<TreeRow>[] = [
                 className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Tree Details <ArrowUpDown size={12} />
+                Tree Details 
+                {column.getIsSorted() === "asc" ? (
+                    <ArrowUp size={12} className="text-primary" />
+                ) : column.getIsSorted() === "desc" ? (
+                    <ArrowDown size={12} className="text-primary" />
+                ) : (
+                    <ArrowUpDown size={12} />
+                )}
             </button>
         ),
         cell: ({ row }) => {
@@ -153,14 +157,14 @@ export const treeColumns: ColumnDef<TreeRow>[] = [
         enableSorting: false,
     },
     {
-        accessorKey: "plan_type",
+        accessorKey: "plan_id",
         header: () => <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Plan</span>,
         cell: ({ row }) => {
-            const plan = row.original.plan_type as PlanType | null;
+            const plan = row.original.tree_plans;
             if (!plan) return <span className="text-muted-foreground/30">—</span>;
             return (
-                <Badge variant="outline" className={cn("rounded-md text-[9px] font-black uppercase tracking-widest px-3 py-1", PLAN_CONFIG[plan])}>
-                    {plan}
+                <Badge variant="outline" className={cn("rounded-md text-[9px] font-black uppercase tracking-widest px-3 py-1", plan.badge_color || "border-border text-muted-foreground bg-muted/50")}>
+                    {plan.name}
                 </Badge>
             );
         },
@@ -172,7 +176,14 @@ export const treeColumns: ColumnDef<TreeRow>[] = [
                 className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Price <ArrowUpDown size={12} />
+                Price 
+                {column.getIsSorted() === "asc" ? (
+                    <ArrowUp size={12} className="text-primary" />
+                ) : column.getIsSorted() === "desc" ? (
+                    <ArrowDown size={12} className="text-primary" />
+                ) : (
+                    <ArrowUpDown size={12} />
+                )}
             </button>
         ),
         cell: ({ row }) => (

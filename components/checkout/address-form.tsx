@@ -1,5 +1,3 @@
-"use client";
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -9,9 +7,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MapPin, Info } from "lucide-react";
+import { MapPin, Info, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { type DeliveryAddress, INDIAN_STATES } from "@/types/checkout";
 import { cn } from "@/lib/utils";
+import { usePincode, type PostOffice } from "@/hooks/use-pincode";
+import { useEffect, useState } from "react";
 
 type Props = {
   value: DeliveryAddress;
@@ -20,9 +20,36 @@ type Props = {
 };
 
 export function AddressForm({ value, onChange, errors }: Props) {
+  const { fetchPincodeData, loading } = usePincode();
+  const [localities, setLocalities] = useState<PostOffice[]>([]);
+
   const set = (key: keyof DeliveryAddress) =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      onChange({ ...value, [key]: e.target.value } as DeliveryAddress);
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      onChange({ ...value, [key]: e.target.value });
+
+  const handlePincodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const pin = e.target.value.replace(/\D/g, "").slice(0, 6);
+    onChange({ ...value, pincode: pin });
+
+    if (pin.length === 6) {
+      const data = await fetchPincodeData(pin);
+      if (data && data.length > 0) {
+        setLocalities(data);
+        const first = data[0];
+        onChange({
+          ...value,
+          pincode: pin,
+          city: (first.Taluk && first.Taluk !== "NA") ? first.Taluk : first.District,
+          district: first.District,
+          state: first.State,
+          country: "India",
+          locality: data.length === 1 ? first.Name : value.locality
+        });
+      }
+    } else {
+      setLocalities([]);
+    }
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -83,13 +110,70 @@ export function AddressForm({ value, onChange, errors }: Props) {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="space-y-2.5">
+          <Label htmlFor="pincode" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80">
+            Pincode
+          </Label>
+          <div className="relative">
+            <Input
+              id="pincode"
+              placeholder="520001"
+              maxLength={6}
+              value={value.pincode}
+              onChange={handlePincodeChange}
+              className={cn(
+                "h-12 rounded-none border-border bg-background text-sm focus-visible:ring-primary transition-all font-mono",
+                errors?.pincode && "border-destructive focus-visible:ring-destructive"
+              )}
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {loading ? (
+                <Loader2 size={14} className="animate-spin text-primary" />
+              ) : value.pincode.length === 6 && localities.length > 0 ? (
+                <CheckCircle2 size={14} className="text-green-500" />
+              ) : null}
+            </div>
+          </div>
+          {errors?.pincode && (
+            <p className="text-[10px] font-bold text-destructive uppercase tracking-widest">{errors.pincode}</p>
+          )}
+        </div>
+
+        <div className="space-y-2.5">
+          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80">Locality / Area</Label>
+          <Select
+            value={value.locality || ""}
+            onValueChange={(v) => onChange({ ...value, locality: v })}
+            disabled={localities.length === 0}
+          >
+            <SelectTrigger className={cn(
+              "!h-12 !w-full rounded-none border-border bg-background text-sm focus:ring-0 focus:border-primary transition-all",
+              errors?.locality && "border-destructive"
+            )}>
+              <SelectValue placeholder={localities.length > 0 ? "Select Locality" : "Enter PIN first"} />
+            </SelectTrigger>
+            <SelectContent className="rounded-none border-border">
+              {localities.map((po) => (
+                <SelectItem key={po.Name} value={po.Name} className="rounded-none text-xs uppercase tracking-widest">
+                  {po.Name} {po.BranchType !== "NA" ? `(${po.BranchType})` : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors?.locality && (
+            <p className="text-[10px] font-bold text-destructive uppercase tracking-widest">{errors.locality}</p>
+          )}
+        </div>
+      </div>
+
       <div className="space-y-2.5">
         <Label htmlFor="line1" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80">
-          Street Address
+          Street Address / House No.
         </Label>
         <Input
           id="line1"
-          placeholder="Flat No, Apartment, Street, Landmark"
+          placeholder="Flat No, Building Name, Street, Landmark"
           value={value.line1}
           onChange={set("line1")}
           className={cn(
@@ -102,69 +186,52 @@ export function AddressForm({ value, onChange, errors }: Props) {
         )}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
         <div className="space-y-2.5">
           <Label htmlFor="city" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80">
             City
           </Label>
           <Input
             id="city"
-            placeholder="Vijayawada"
+            placeholder="City"
             value={value.city}
-            onChange={set("city")}
-            className={cn(
-              "h-12 rounded-none border-border bg-background text-sm focus-visible:ring-primary transition-all",
-              errors?.city && "border-destructive focus-visible:ring-destructive"
-            )}
+            readOnly
+            className="h-12 rounded-none border-border bg-muted/30 text-sm cursor-default"
           />
-          {errors?.city && (
-            <p className="text-[10px] font-bold text-destructive uppercase tracking-widest">{errors.city}</p>
-          )}
+        </div>
+
+        <div className="space-y-2.5">
+          <Label htmlFor="district" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80">
+            District
+          </Label>
+          <Input
+            id="district"
+            placeholder="District"
+            value={value.district || ""}
+            readOnly
+            className="h-12 rounded-none border-border bg-muted/30 text-sm cursor-default"
+          />
         </div>
 
         <div className="space-y-2.5">
           <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80">State</Label>
-          <Select
+          <Input
+            id="state"
+            placeholder="State"
             value={value.state || ""}
-            onValueChange={(v) => onChange({ ...value, state: v } as DeliveryAddress)}
-          >
-            <SelectTrigger className={cn(
-              "!h-12 !w-full rounded-none border-border bg-background text-sm focus:ring-0 focus:border-primary transition-all",
-              errors?.state && "border-destructive"
-            )}>
-              <SelectValue placeholder="Select State" />
-            </SelectTrigger>
-            <SelectContent className="rounded-none border-border">
-              {INDIAN_STATES.map((s) => (
-                <SelectItem key={s} value={s} className="rounded-none text-xs uppercase tracking-widest">
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors?.state && (
-            <p className="text-[10px] font-bold text-destructive uppercase tracking-widest">{errors.state}</p>
-          )}
+            readOnly
+            className="h-12 rounded-none border-border bg-muted/30 text-sm cursor-default"
+          />
         </div>
 
         <div className="space-y-2.5">
-          <Label htmlFor="pincode" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80">
-            Pincode
-          </Label>
+          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80">Country</Label>
           <Input
-            id="pincode"
-            placeholder="520001"
-            maxLength={6}
-            value={value.pincode}
-            onChange={set("pincode")}
-            className={cn(
-              "h-12 rounded-none border-border bg-background text-sm focus-visible:ring-primary transition-all font-mono",
-              errors?.pincode && "border-destructive focus-visible:ring-destructive"
-            )}
+            id="country"
+            value={value.country || "India"}
+            readOnly
+            className="h-12 rounded-none border-border bg-muted/30 text-sm cursor-default"
           />
-          {errors?.pincode && (
-            <p className="text-[10px] font-bold text-destructive uppercase tracking-widest">{errors.pincode}</p>
-          )}
         </div>
       </div>
 
