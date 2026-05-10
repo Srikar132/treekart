@@ -3,21 +3,7 @@
 import Image from "next/image";
 import { motion, type Variants } from "framer-motion";
 import { AnimatedButton } from "@/components/shared/animated-button";
-
-const categories = [
-    {
-        title: "Farm Fresh Mangoes",
-        image: "/images/featured_mango_basket.webp",
-        link: "/store",
-        cta: "Shop Now",
-    },
-    {
-        title: "Premium Tree Leasing",
-        image: "/images/featured_mango_orchard.webp",
-        link: "/plans",
-        cta: "View Plans",
-    },
-];
+import { FEATURED_CATEGORIES } from "@/constants/categories";
 
 const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -47,7 +33,7 @@ export function FeaturedCategories() {
                     viewport={{ once: true, margin: "-50px" }}
                     className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8"
                 >
-                    {categories.map((category, index) => (
+                    {FEATURED_CATEGORIES.map((category, index) => (
                         <motion.div
                             key={index}
                             variants={itemVariants}
