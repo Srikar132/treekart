@@ -48,6 +48,7 @@ export function TreeMedia({ images, title }: TreeMediaProps) {
                   src={img}
                   alt={`${title} - ${index + 1}`}
                   fill
+                  sizes="(max-width: 1024px) 100vw, 600px"
                   className="object-cover"
                   priority={index === 0}
                 />
@@ -75,7 +76,13 @@ export function TreeMedia({ images, title }: TreeMediaProps) {
                 current === index ? "border-primary scale-105 shadow-md" : "border-transparent opacity-60 hover:opacity-100"
               )}
             >
-              <Image src={img} alt={`Thumbnail ${index + 1}`} fill className="object-cover" />
+              <Image 
+                src={img} 
+                alt={`Thumbnail ${index + 1}`} 
+                fill 
+                sizes="96px"
+                className="object-cover" 
+              />
             </button>
           ))}
         </div>

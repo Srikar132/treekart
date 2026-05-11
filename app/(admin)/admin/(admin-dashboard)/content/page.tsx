@@ -30,7 +30,8 @@ export default async function AdminContentPage() {
       </div>
 
       <Tabs defaultValue="hero" className="w-full">
-        <TabsList className="bg-muted p-1 rounded-xl mb-8">
+      <div className="w-full overflow-x-auto pb-2 -mb-2 scrollbar-hide">
+        <TabsList className="bg-muted p-1 rounded-xl mb-8 w-fit min-w-full">
           <TabsTrigger value="hero" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary text-[10px] font-black uppercase tracking-widest gap-2">
             <ImageIcon size={14} /> Hero Slides
           </TabsTrigger>
@@ -41,6 +42,7 @@ export default async function AdminContentPage() {
             <Tag size={14} /> Pricing Plans
           </TabsTrigger>
         </TabsList>
+      </div>
 
         {/* Hero Slides Content */}
         <TabsContent value="hero" className="space-y-6">
@@ -55,7 +57,7 @@ export default async function AdminContentPage() {
                   </Button>
                 }
               />
-              <DialogContent className="w-full h-full sm:h-auto max-w-none sm:max-w-7xl rounded-none sm:rounded-[2.5rem] border-none sm:border border-border max-h-none sm:max-h-[95vh] p-6 sm:p-10">
+              <DialogContent className="w-full h-full sm:h-auto max-w-none sm:max-w-7xl rounded-none sm:rounded-[2.5rem] border-none sm:border border-border max-h-screen sm:max-h-[95vh] p-6 sm:p-10 overflow-y-auto">
                 <DialogHeader className="mb-8">
                   <DialogTitle className="text-xl font-black uppercase tracking-tight">Deploy New Hero Story</DialogTitle>
                 </DialogHeader>
@@ -80,7 +82,7 @@ export default async function AdminContentPage() {
                   </Button>
                 }
               />
-              <DialogContent className="w-full h-full sm:h-auto max-w-none sm:max-w-6xl rounded-none sm:rounded-[2.5rem] border-none sm:border border-border max-h-none sm:max-h-[95vh] p-6 sm:p-10">
+              <DialogContent className="w-full h-full sm:h-auto max-w-none sm:max-w-6xl rounded-none sm:rounded-[2.5rem] border-none sm:border border-border max-h-screen sm:max-h-[95vh] p-6 sm:p-10 overflow-y-auto">
                 <DialogHeader className="mb-8">
                   <DialogTitle className="text-xl font-black uppercase tracking-tight">Curate Social Proof</DialogTitle>
                 </DialogHeader>
@@ -109,7 +111,7 @@ export default async function AdminContentPage() {
                   </Button>
                 }
               />
-              <DialogContent className="w-full h-full sm:h-auto max-w-none sm:max-w-7xl rounded-none sm:rounded-[2.5rem] border-none sm:border border-border max-h-none sm:max-h-[95vh] p-6 sm:p-10">
+              <DialogContent className="w-full h-full sm:h-auto max-w-none sm:max-w-7xl rounded-none sm:rounded-[2.5rem] border-none sm:border border-border max-h-screen sm:max-h-[95vh] p-6 sm:p-10 overflow-y-auto">
                 <DialogHeader className="mb-8">
                   <DialogTitle className="text-xl font-black uppercase tracking-tight">Create Pricing Plan</DialogTitle>
                 </DialogHeader>

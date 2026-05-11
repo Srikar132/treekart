@@ -49,7 +49,7 @@ export function TreeCard({ tree }: TreeCardProps) {
             transition={{ duration: 0.45, ease: "easeOut" }}
             className="h-full"
         >
-            <Card className="group h-full flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300">
+            <Card className="group h-full flex flex-col overflow-hidden rounded-2xl border border-border bg-card pt-0 shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300">
 
                 {/* ── Images ── */}
                 <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted/30">

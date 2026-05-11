@@ -100,7 +100,7 @@ export default function StoreCheckoutClient({ user }: StoreCheckoutClientProps) 
         amount: orderData.amount,
         currency: orderData.currency,
         name: "TreeKart",
-        description: `Fresh Mango Order — ${totalItems()} KG`,
+        description: `Fresh Mango Order — ${Number(totalItems().toFixed(2))} KG`,
         order_id: orderData.rzpOrderId,
         onDismiss: () => {
           setLoading(false);
@@ -232,7 +232,7 @@ export default function StoreCheckoutClient({ user }: StoreCheckoutClientProps) 
                   </span>
                 </div>
                 <Badge variant="outline" className="rounded-none border-border bg-white text-[9px] font-bold uppercase tracking-widest">
-                  {totalItems()} KG TOTAL
+                  {Number(totalItems().toFixed(2))} KG TOTAL
                 </Badge>
               </div>
 
@@ -259,7 +259,7 @@ export default function StoreCheckoutClient({ user }: StoreCheckoutClientProps) 
                         {item.name}
                       </p>
                       <p className="text-[9px] text-muted-foreground uppercase tracking-widest mt-1">
-                        {item.qty} BOXES ({item.weightKg}kg each) × ₹{item.pricePerKg}
+                        {item.qty} BOXES ({Number(item.weightKg?.toFixed(2))}kg each) × ₹{item.pricePerKg}
                       </p>
                     </div>
                     <div className="text-right">

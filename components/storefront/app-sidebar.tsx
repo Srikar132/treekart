@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Home, Store, Package, FileText, User, X } from "lucide-react";
+import { Home, Store, Package, Newspaper, Info, Phone, User, X } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { type User as SupabaseUser } from "@supabase/supabase-js";
 import {
@@ -36,17 +36,17 @@ const menuItems = [
     },
     {
         title: "Blog",
-        icon: FileText,
+        icon: Newspaper,
         url: "/blog",
     },
     {
         title: "About Us",
-        icon: FileText,
+        icon: Info,
         url: "/about",
     },
     {
         title: "Contact",
-        icon: FileText,
+        icon: Phone,
         url: "/contact",
     },
 ];

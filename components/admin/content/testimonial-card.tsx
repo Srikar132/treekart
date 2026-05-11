@@ -66,7 +66,7 @@ export function TestimonialCard({ testimonial }: TestimonialCardProps) {
                         />
                     ))}
                 </div>
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                     <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger 
                             render={
@@ -75,7 +75,7 @@ export function TestimonialCard({ testimonial }: TestimonialCardProps) {
                                 </button>
                             }
                         />
-                        <DialogContent className="max-w-xl rounded-2xl border-border">
+                        <DialogContent className="max-w-xl rounded-2xl border-border max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
                                 <DialogTitle className="text-sm font-black uppercase tracking-tight">Synchronize Social Proof</DialogTitle>
                             </DialogHeader>

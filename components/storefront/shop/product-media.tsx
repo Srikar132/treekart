@@ -49,14 +49,14 @@ export function ProductMedia({ image, name }: ProductMediaProps) {
             {images.map((img, idx) => (
               <CarouselItem key={idx} className="h-full">
                 <div className="relative h-full aspect-square overflow-hidden rounded-3xl">
-                  <Image
-                    src={img}
-                    alt={`${name} - Image ${idx + 1}`}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover"
-                    priority={idx === 0}
-                  />
+                <Image
+                  src={img}
+                  alt={`${name} - Image ${idx + 1}`}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover"
+                  priority={idx === 0}
+                />
                 </div>
               </CarouselItem>
             ))}
@@ -70,16 +70,7 @@ export function ProductMedia({ image, name }: ProductMediaProps) {
           )}
         </Carousel>
 
-        {/* Overlay Actions */}
-        <div className="absolute top-4 right-4 flex flex-col gap-3 z-20">
-          <ShareDialog
-            trigger={
-              <button className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm text-foreground flex items-center justify-center shadow-lg hover:bg-primary hover:text-white transition-all duration-300">
-                <Share2 size={18} />
-              </button>
-            }
-          />
-        </div>
+
       </div>
 
       {/* Thumbnails */}
@@ -100,6 +91,7 @@ export function ProductMedia({ image, name }: ProductMediaProps) {
                 src={img}
                 alt={`${name} thumb ${idx + 1}`}
                 fill
+                sizes="80px"
                 className="object-cover"
               />
             </button>
