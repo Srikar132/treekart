@@ -37,7 +37,7 @@ const cardVariants: Variants = {
 
 export function PricingSection({ treePlans = [] }: PricingSectionProps) {
     return (
-        <section className="section relative overflow-hidden">
+        <section id="plans" className="section relative overflow-hidden">
             <div className="container relative z-10">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

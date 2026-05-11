@@ -145,7 +145,7 @@ export function OrderDetails({ order }: OrderDetailsProps) {
                 <div className="flex-1 min-w-0">
                   <h4 className="text-lg font-mono font-bold text-foreground leading-tight">{item.name}</h4>
                   <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-[0.1em] mt-1.5">
-                    Variety: {item.variety} • {item.qty} {item.qty > 1 ? 'Boxes' : 'Box'} ({item.weightKg}kg each)
+                    Variety: {item.variety} • {item.qty} {item.qty > 1 ? 'Boxes' : 'Box'} ({Number(item.weightKg?.toFixed(2))}kg each)
                   </p>
                 </div>
                 <div className="text-right">

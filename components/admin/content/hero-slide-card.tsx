@@ -54,48 +54,48 @@ export function HeroSlideCard({ slide, isSortable }: HeroSlideCardProps) {
                 isDragging ? "opacity-50 scale-[1.02] shadow-2xl z-50 ring-2 ring-primary/20" : "hover:shadow-md hover:border-primary/20"
             )}
         >
-            <div className="flex items-center gap-6 p-3">
-                {/* Drag Handle */}
+            <div className="flex items-center gap-3 sm:gap-6 p-2 sm:p-4">
+                {/* 1. Grab Handle - Fixed Width */}
                 <div 
                     {...attributes} 
                     {...listeners}
-                    className="cursor-grab active:cursor-grabbing p-2 text-muted-foreground/30 hover:text-primary transition-colors"
+                    className="cursor-grab active:cursor-grabbing p-2 text-muted-foreground/30 hover:text-primary transition-colors touch-none shrink-0"
                 >
                     <GripVertical size={20} />
                 </div>
 
-                {/* Slim Media Preview */}
-                <div className="h-16 w-32 md:w-48 shrink-0 bg-muted rounded-xl overflow-hidden relative border border-border/50">
+                {/* 2. Media Preview - Fixed Width */}
+                <div className="h-14 w-20 sm:h-20 sm:w-40 shrink-0 bg-muted rounded-xl overflow-hidden relative border border-border/50">
                     <img src={slide.image_url} alt={slide.eyebrow} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent sm:from-black/20" />
                 </div>
 
-                {/* Content Strip */}
+                {/* 3. Content - Fluid */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
-                    <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[8px] font-black text-primary uppercase tracking-[0.2em]">{slide.eyebrow}</span>
-                        <div className="h-1 w-1 rounded-full bg-muted-foreground/20" />
-                        <span className="text-[8px] font-bold text-muted-foreground uppercase">{slide.button_link}</span>
+                    <div className="flex items-center gap-1.5 mb-1 sm:mb-2">
+                        <span className="text-[7px] sm:text-[9px] font-black text-primary uppercase tracking-[0.2em] truncate">{slide.eyebrow}</span>
+                        <div className="h-0.5 w-0.5 rounded-full bg-muted-foreground/30 shrink-0" />
+                        <span className="hidden sm:inline text-[8px] font-bold text-muted-foreground uppercase truncate opacity-60">{slide.button_link}</span>
                     </div>
-                    <h4 className="text-xs font-black text-foreground uppercase tracking-tight truncate max-w-md">
+                    <h4 className="text-[10px] sm:text-sm font-black text-foreground uppercase tracking-tight truncate mb-0.5 sm:mb-1">
                         {slide.title}
                     </h4>
-                    <p className="text-[10px] font-medium text-muted-foreground line-clamp-1 opacity-70">
+                    <p className="text-[9px] sm:text-[11px] font-medium text-muted-foreground/70 line-clamp-1">
                         {slide.sub_heading || slide.description}
                     </p>
                 </div>
 
-                {/* Action Controls */}
-                <div className="flex items-center gap-2 px-2">
+                {/* 4. Actions - Fixed Width */}
+                <div className="flex items-center gap-1 sm:gap-2 shrink-0 ml-auto">
                     <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger 
                             render={
-                                <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl hover:bg-primary/5 hover:text-primary transition-colors">
+                                <Button size="icon" variant="ghost" className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl hover:bg-primary/5 hover:text-primary transition-colors">
                                     <Edit size={16} />
                                 </Button>
                             }
                         />
-                        <DialogContent className="w-full h-full sm:h-auto max-w-none sm:max-w-7xl rounded-none sm:rounded-[2.5rem] border-none sm:border border-border max-h-none sm:max-h-[95vh] p-6 sm:p-10">
+                        <DialogContent className="w-full h-full sm:h-auto max-w-none sm:max-w-7xl rounded-none sm:rounded-[2.5rem] border-none sm:border border-border max-h-screen sm:max-h-[95vh] p-6 sm:p-10 overflow-y-auto">
                             <DialogHeader className="mb-8">
                                 <DialogTitle className="text-xl font-black uppercase tracking-tight">Refine Hero Story</DialogTitle>
                             </DialogHeader>
@@ -108,7 +108,7 @@ export function HeroSlideCard({ slide, isSortable }: HeroSlideCardProps) {
                         variant="ghost" 
                         onClick={handleDelete}
                         disabled={isPending}
-                        className="h-9 w-9 rounded-xl text-destructive/40 hover:text-destructive hover:bg-destructive/5 transition-colors"
+                        className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl text-destructive/40 hover:text-destructive hover:bg-destructive/5 transition-colors"
                     >
                         {isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
                     </Button>

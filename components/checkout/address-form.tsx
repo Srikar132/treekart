@@ -195,8 +195,11 @@ export function AddressForm({ value, onChange, errors }: Props) {
             id="city"
             placeholder="City"
             value={value.city}
-            readOnly
-            className="h-12 rounded-none border-border bg-muted/30 text-sm cursor-default"
+            onChange={set("city")}
+            className={cn(
+              "h-12 rounded-none border-border bg-background text-sm focus-visible:ring-primary transition-all",
+              errors?.city && "border-destructive focus-visible:ring-destructive"
+            )}
           />
         </div>
 
@@ -208,8 +211,11 @@ export function AddressForm({ value, onChange, errors }: Props) {
             id="district"
             placeholder="District"
             value={value.district || ""}
-            readOnly
-            className="h-12 rounded-none border-border bg-muted/30 text-sm cursor-default"
+            onChange={set("district")}
+            className={cn(
+              "h-12 rounded-none border-border bg-background text-sm focus-visible:ring-primary transition-all",
+              errors?.district && "border-destructive focus-visible:ring-destructive"
+            )}
           />
         </div>
 
@@ -219,8 +225,11 @@ export function AddressForm({ value, onChange, errors }: Props) {
             id="state"
             placeholder="State"
             value={value.state || ""}
-            readOnly
-            className="h-12 rounded-none border-border bg-muted/30 text-sm cursor-default"
+            onChange={set("state")}
+            className={cn(
+              "h-12 rounded-none border-border bg-background text-sm focus-visible:ring-primary transition-all",
+              errors?.state && "border-destructive focus-visible:ring-destructive"
+            )}
           />
         </div>
 

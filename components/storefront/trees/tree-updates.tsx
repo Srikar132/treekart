@@ -8,72 +8,7 @@ import Image from "next/image";
 import { NoResults } from "@/components/ui/no-results";
 import { TreeUpdate } from "@/types/database.types";
 
-// ── YouTube helpers ────────────────────────────────────────────────
-
-function getYouTubeId(url: string | null): string | null {
-  if (!url) return null;
-  const match = url.match(
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/
-  );
-  return match?.[1] ?? null;
-}
-
-function getYouTubeThumbnail(id: string) {
-  return `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
-}
-
-// ── YouTube Player ─────────────────────────────────────────────────
-
-function YouTubePlayer({ url, title }: { url: string; title: string }) {
-  const [playing, setPlaying] = useState(false);
-  const videoId = getYouTubeId(url);
-
-  if (!videoId) return null;
-
-  return (
-    <div className="relative aspect-video rounded-2xl overflow-hidden bg-black ring-1 ring-border/40 shadow-lg">
-      {playing ? (
-        <iframe
-          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0`}
-          title={title}
-          className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      ) : (
-        <>
-          {/* Thumbnail */}
-          <Image
-            src={getYouTubeThumbnail(videoId)}
-            alt={title}
-            fill
-            className="object-cover"
-          />
-
-          {/* Dark overlay */}
-          <div className="absolute inset-0 bg-black/40" />
-
-          {/* Play button */}
-          <button
-            onClick={() => setPlaying(true)}
-            className="absolute inset-0 flex items-center justify-center group"
-            aria-label="Play video"
-          >
-            <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-xl shadow-primary/40 group-hover:scale-110 group-hover:shadow-primary/60 transition-all duration-200">
-              <Play size={24} className="text-white fill-white ml-1" />
-            </div>
-          </button>
-
-          {/* Badge */}
-          <div className="absolute top-4 left-4 pointer-events-none flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-[10px] font-mono uppercase tracking-widest">
-            <Video size={11} className="text-primary" />
-            Farmer Exclusive
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
+import { YouTubePlayer } from "@/components/shared/youtube-player";
 
 // ── Update Card ────────────────────────────────────────────────────
 

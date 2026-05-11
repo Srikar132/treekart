@@ -21,13 +21,27 @@ export default function StoreLoading() {
           <Skeleton className="h-5 w-40" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10 lg:gap-x-8 lg:gap-y-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="flex flex-col space-y-4">
-              <Skeleton className="aspect-[4/5] w-full rounded-xl" />
-              <div className="space-y-2">
+            <div key={i} className="rounded-2xl border border-border bg-card overflow-hidden h-full flex flex-col">
+              <Skeleton className="aspect-[4/3] w-full" />
+              <div className="p-5 space-y-4 flex-1">
                 <Skeleton className="h-5 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
+                <div className="h-px bg-border/40 w-full" />
+                <div className="flex justify-between items-center">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+                <div className="flex justify-between items-end pt-2">
+                  <div className="space-y-1">
+                    <Skeleton className="h-6 w-16" />
+                    <Skeleton className="h-2 w-12" />
+                  </div>
+                  <Skeleton className="h-6 w-12 rounded-md" />
+                </div>
+              </div>
+              <div className="px-5 pb-5 lg:hidden">
+                <Skeleton className="h-10 w-full rounded-xl" />
               </div>
             </div>
           ))}
