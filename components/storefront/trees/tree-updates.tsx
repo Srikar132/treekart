@@ -2,13 +2,10 @@
 
 import { motion } from "framer-motion";
 import { format } from "date-fns";
-import { useState } from "react";
-import { Play, Video } from "lucide-react";
-import Image from "next/image";
 import { NoResults } from "@/components/ui/no-results";
 import { TreeUpdate } from "@/types/database.types";
 
-import { YouTubePlayer } from "@/components/shared/youtube-player";
+import { getYouTubeId, YouTubePlayer } from "@/components/shared/youtube-player";
 
 // ── Update Card ────────────────────────────────────────────────────
 
