@@ -62,10 +62,12 @@ export function AccountClient({ user, rentals, orders }: AccountClientProps) {
     }
   }
 
+  const confirmedOrdersCount = orders.filter(o => ["confirmed", "shipped", "delivered"].includes(o.status?.toLowerCase() || "")).length;
+
   const navItems = [
     { id: "dashboard" as Tab, label: "Overview", icon: LayoutDashboard },
     { id: "rentals" as Tab, label: "My Trees", icon: TreePine, count: rentals.length },
-    { id: "orders" as Tab, label: "Orders", icon: ShoppingBag, count: orders.length },
+    { id: "orders" as Tab, label: "Orders", icon: ShoppingBag, count: confirmedOrdersCount },
     { id: "profile" as Tab, label: "Profile", icon: UserCircle },
   ];
 

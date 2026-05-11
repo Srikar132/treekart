@@ -20,9 +20,11 @@ interface DashboardOverviewProps {
 }
 
 export function DashboardOverview({ user, rentals, orders, onTabChange }: DashboardOverviewProps) {
+  const confirmedOrders = orders.filter(o => ["confirmed", "shipped", "delivered"].includes(o.status?.toLowerCase() || ""));
+
   const stats = [
     { label: "Active Rentals", value: rentals.length, icon: TreePine, color: "text-primary", bg: "bg-primary/10" },
-    { label: "Total Orders", value: orders.length, icon: ShoppingBag, color: "text-blue-600", bg: "bg-blue-50" },
+    { label: "Successful Orders", value: confirmedOrders.length, icon: ShoppingBag, color: "text-blue-600", bg: "bg-blue-50" },
     { label: "Member Since", value: new Date(user.created_at).getFullYear(), icon: Calendar, color: "text-amber-600", bg: "bg-amber-50" },
   ];
 
