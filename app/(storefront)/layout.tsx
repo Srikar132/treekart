@@ -21,7 +21,6 @@ export default function StorefrontLayout({
                     <Footer />
                 </div>
             </div>
-
             <CartSidebar />
         </SidebarProvider>
     );

@@ -3,7 +3,37 @@ import { ContactForm } from "@/components/storefront/contact/contact-form";
 
 export const metadata: Metadata = {
   title: "Contact Our Concierge — TreeKart",
-  description: "Get in touch with our orchard concierge for questions about tree rentals, bulk orders, or farm visits.",
+  description: "Get in touch with our orchard concierge for questions about tree rentals, bulk orders, or farm visits. We're here to help you experience the joy of owning a mango tree.",
+  keywords: ["contact TreeKart", "mango tree rental help", "bulk mango orders", "farm visit inquiry", "orchard concierge"],
+  alternates: {
+    canonical: "/contact",
+  },
+  openGraph: {
+    title: "Contact Our Concierge — TreeKart",
+    description: "Get in touch with our orchard concierge for questions about tree rentals, bulk orders, or farm visits.",
+    url: "https://treekart.in/contact",
+    siteName: "TreeKart",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Contact TreeKart",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact Our Concierge — TreeKart",
+    description: "Get in touch with our orchard concierge for questions about tree rentals, bulk orders, or farm visits.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function ContactPage() {
