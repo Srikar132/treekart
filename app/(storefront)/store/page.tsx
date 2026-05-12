@@ -5,6 +5,42 @@ import { ProductGrid } from "@/components/storefront/shop/product-grid";
 import { ProductFilters } from "@/components/storefront/shop/product-filters";
 import { ProductSort } from "@/components/storefront/shop/product-sort";
 import type { Database } from "@/types/database.types";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Shop Organic Alphonso Mangoes — TreeKart Store",
+  description: "Buy premium, hand-picked organic Alphonso mangoes directly from our orchards. Fresh, naturally ripened, and delivered across India.",
+  keywords: ["buy mangoes online", "Alphonso mangoes India", "organic mango store", "fresh mango delivery", "premium fruit shop"],
+  alternates: {
+    canonical: "/store",
+  },
+  openGraph: {
+    title: "Shop Organic Alphonso Mangoes — TreeKart Store",
+    description: "Buy premium, hand-picked organic Alphonso mangoes directly from our orchards. Fresh, naturally ripened, and delivered across India.",
+    url: "https://treekart.in/store",
+    siteName: "TreeKart",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "TreeKart Store",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Shop Organic Alphonso Mangoes — TreeKart Store",
+    description: "Buy premium, hand-picked organic Alphonso mangoes directly from our orchards. Fresh, naturally ripened, and delivered across India.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
 
 type ProductBadge = Database["public"]["Enums"]["product_badge"];
 type ProductStatus = Database["public"]["Enums"]["product_status"];
