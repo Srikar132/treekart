@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Set New Password — TreeKart",
     description: "Securely update your account password.",
-    url: "https://treekart.in/auth/reset-password",
+    url: "https://www.treekart.in/auth/reset-password",
     siteName: "TreeKart",
     images: [
       {

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Rent a Mango Tree — Exclusive Orchard Ownership",
     description: "Browse our heritage Alphonso orchards. Choose your tree, receive seasonal updates, and enjoy a guaranteed harvest delivered to your doorstep.",
-    url: "https://treekart.in/rent",
+    url: "https://www.treekart.in/rent",
     siteName: "TreeKart",
     images: [
       {

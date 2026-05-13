@@ -14,6 +14,6 @@ export default function robots(): MetadataRoute.Robots {
         '/api/',
       ],
     },
-    sitemap: 'https://treekart.in/sitemap.xml',
+    sitemap: 'https://www.treekart.in/sitemap.xml',
   }
 }

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Contact Our Concierge — TreeKart",
     description: "Get in touch with our orchard concierge for questions about tree rentals, bulk orders, or farm visits.",
-    url: "https://treekart.in/contact",
+    url: "https://www.treekart.in/contact",
     siteName: "TreeKart",
     images: [
       {

@@ -18,7 +18,7 @@ import {
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://treekart.in"),
+  metadataBase: new URL("https://www.treekart.in"),
 
   title:
     "TreeKart — Rent a Mango Tree & Buy Fresh Alphonso Mangoes",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     description:
       "Rent a real Alphonso mango tree and enjoy fresh organic mangoes delivered to your doorstep.",
 
-    url: "https://treekart.in",
+    url: "https://www.treekart.in",
 
     siteName: "TreeKart",
 

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "FAQs — TreeKart",
     description: "Frequently asked questions about tree rentals, Alphonso mango harvesting, and climate-controlled shipping.",
-    url: "https://treekart.in/faq",
+    url: "https://www.treekart.in/faq",
     siteName: "TreeKart",
     images: [
       {

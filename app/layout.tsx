@@ -16,7 +16,7 @@ const dmMono = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://treekart.in"),
+  metadataBase: new URL("https://www.treekart.in"),
   title: {
     default: "TreeKart — Rent a Mango Tree & Buy Fresh Alphonso Mangoes",
     template: "%s | TreeKart"
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "TreeKart — Rent a Mango Tree & Buy Fresh Alphonso Mangoes",
     description: "Rent a real Alphonso mango tree and enjoy fresh organic mangoes delivered to your doorstep.",
-    url: "https://treekart.in",
+    url: "https://www.treekart.in",
     siteName: "TreeKart",
     images: [
       {
@@ -118,8 +118,8 @@ export default function RootLayout({
                     "@context": "https://schema.org",
                     "@type": "Organization",
                     "name": "TreeKart",
-                    "url": "https://treekart.in",
-                    "logo": "https://treekart.in/logo.webp",
+                    "url": "https://www.treekart.in",
+                    "logo": "https://www.treekart.in/logo.webp",
                     "contactPoint": {
                       "@type": "ContactPoint",
                       "telephone": "+91-XXXXXXXXXX",

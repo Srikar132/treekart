@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "About Us — TreeKart",
     description: "Learn about our mission to bring fresh, organic Alphonso mangoes from our orchards to your doorstep.",
-    url: "https://treekart.in/about",
+    url: "https://www.treekart.in/about",
     siteName: "TreeKart",
     images: [
       {
