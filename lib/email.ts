@@ -12,7 +12,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // ── Constants ──────────────────────────────────────────────────────────────────
 const BRAND_COLOR = "#2d8a1a";
 const FROM_ADDRESS = `TreeKart <${settings.EMAIL}>`;
-const BASE_URL = "https://treekart.in";
+const BASE_URL = "https://www.treekart.in";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 export interface EmailResult {

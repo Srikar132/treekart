@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Shop Organic Alphonso Mangoes — TreeKart Store",
     description: "Buy premium, hand-picked organic Alphonso mangoes directly from our orchards. Fresh, naturally ripened, and delivered across India.",
-    url: "https://treekart.in/store",
+    url: "https://www.treekart.in/store",
     siteName: "TreeKart",
     images: [
       {

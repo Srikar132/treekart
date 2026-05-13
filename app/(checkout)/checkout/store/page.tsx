@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Checkout — TreeKart Store",
     description: "Finalize your order for fresh, organic Alphonso mangoes.",
-    url: "https://treekart.in/checkout/store",
+    url: "https://www.treekart.in/checkout/store",
     siteName: "TreeKart",
     images: [
       {

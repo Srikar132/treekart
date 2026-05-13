@@ -3,7 +3,7 @@ import { getAvailableTrees } from '@/actions/tree.actions'
 import { getMangoProducts } from '@/actions/products.actions'
  
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://treekart.in'
+  const baseUrl = 'https://www.treekart.in'
  
   // Static routes
   const staticRoutes = [

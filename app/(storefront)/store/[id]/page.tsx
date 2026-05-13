@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      url: `https://treekart.in/store/${id}`,
+      url: `https://www.treekart.in/store/${id}`,
       siteName: "TreeKart",
       images: [
         {

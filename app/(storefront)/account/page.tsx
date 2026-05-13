@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "My Account — TreeKart",
     description: "Manage your heritage tree rentals, track fresh mango orders, and update your orchard concierge preferences.",
-    url: "https://treekart.in/account",
+    url: "https://www.treekart.in/account",
     siteName: "TreeKart",
     images: [
       {
