@@ -9,6 +9,36 @@ import { Order } from "@/types/database.types";
 export const metadata: Metadata = {
   title: "Track Order — TreeKart",
   description: "Track your fresh mango harvest delivery and view order history.",
+  keywords: ["track order", "mango delivery status", "order history"],
+  alternates: {
+    canonical: "/account/orders",
+  },
+  openGraph: {
+    title: "Track Order — TreeKart",
+    description: "Track your fresh mango harvest delivery and view order history.",
+    url: "https://www.treekart.in/account/orders",
+    siteName: "TreeKart",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Track Order",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Track Order — TreeKart",
+    description: "Track your fresh mango harvest delivery and view order history.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 interface OrderPageProps {

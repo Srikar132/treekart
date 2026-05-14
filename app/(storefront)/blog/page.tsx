@@ -7,6 +7,36 @@ import Image from "next/image";
 export const metadata: Metadata = {
   title: "The Journal — TreeKart",
   description: "Notes from the orchard. Updates on harvest cycles, organic farming techniques, and the heritage of Alphonso mangoes.",
+  keywords: ["mango blog", "organic farming journal", "Alphonso harvest updates", "orchard stories", "sustainable agriculture blog"],
+  alternates: {
+    canonical: "/blog",
+  },
+  openGraph: {
+    title: "The Journal — TreeKart",
+    description: "Notes from the orchard. Updates on harvest cycles, organic farming techniques, and the heritage of Alphonso mangoes.",
+    url: "https://www.treekart.in/blog",
+    siteName: "TreeKart",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "TreeKart Journal",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The Journal — TreeKart",
+    description: "Notes from the orchard. Updates on harvest cycles, organic farming techniques, and the heritage of Alphonso mangoes.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 interface BlogPageProps {

@@ -18,12 +18,12 @@ export function LoginPromptDialog() {
 
   const handleLogin = () => {
     closeLoginPrompt();
-    router.push(`/auth/signin?next=${encodeURIComponent(redirectTo)}`);
+    router.push(`/auth/signin?redirectTo=${encodeURIComponent(redirectTo)}`);
   };
 
   const handleSignup = () => {
     closeLoginPrompt();
-    router.push(`/auth/signup?next=${encodeURIComponent(redirectTo)}`);
+    router.push(`/auth/signup?redirectTo=${encodeURIComponent(redirectTo)}`);
   };
 
   return (

@@ -11,6 +11,36 @@ interface Props {
 export const metadata: Metadata = {
   title: "Checkout | TreeKart Rental",
   description: "Secure your mango tree for the upcoming season.",
+  keywords: ["checkout rental", "rent mango tree", "TreeKart payment"],
+  alternates: {
+    canonical: "/checkout/rental",
+  },
+  openGraph: {
+    title: "Checkout | TreeKart Rental",
+    description: "Secure your mango tree for the upcoming season.",
+    url: "https://www.treekart.in/checkout/rental",
+    siteName: "TreeKart",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "TreeKart Checkout",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Checkout | TreeKart Rental",
+    description: "Secure your mango tree for the upcoming season.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function RentalCheckoutPage({ params }: Props) {

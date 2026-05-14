@@ -2,15 +2,18 @@
 
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CheckCircle, Info, Leaf, MapPin, Calendar, Wheat, Share2, UserCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AnimatedButton } from "@/components/shared/animated-button";
 import { ShareDialog } from "@/components/shared/share-dialog";
 import { useRentalStore } from "@/store/use-rental-store";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Database, Tree, Farmer } from "@/types/database.types";
 import { useLoginPrompt } from "@/store/use-login-prompt";
 import { createClient } from "@/utils/supabase/client";
+import { cn } from "@/lib/utils";
 
 
 
@@ -46,6 +49,7 @@ export function TreeInfo({ tree, activeRental }: TreeInfoProps) {
   const router = useRouter();
   const { setPlan } = useRentalStore();
   const { openLoginPrompt } = useLoginPrompt();
+  const [descExpanded, setDescExpanded] = useState(false);
 
   const handleRentNow = async () => {
     setPlan({
@@ -111,9 +115,19 @@ export function TreeInfo({ tree, activeRental }: TreeInfoProps) {
 
       {/* Description */}
       {tree.description && (
-        <motion.div variants={item} className="mb-8">
-          <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-3">About this Tree</h3>
-          <p className="text-muted-foreground leading-relaxed">{tree.description}</p>
+        <motion.div variants={item} className="mb-8 space-y-2">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">About this Tree</h3>
+          <p className={cn("text-muted-foreground leading-relaxed", !descExpanded && "line-clamp-3")}>
+            {tree.description}
+          </p>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setDescExpanded((v) => !v)}
+            className="h-auto px-0 text-primary text-xs font-bold uppercase tracking-widest hover:bg-transparent hover:text-primary/70"
+          >
+            {descExpanded ? "Show Less ↑" : "Show More ↓"}
+          </Button>
         </motion.div>
       )}
 

@@ -32,7 +32,6 @@ type Props = {
 
 export function TreeGrid({ initialData, options }: Props) {
   const { ref, inView } = useInView();
-  const queryClient = useQueryClient();
 
   const {
     data,
@@ -72,7 +71,10 @@ export function TreeGrid({ initialData, options }: Props) {
   const allTrees = data?.pages.flatMap((page) => page.trees) || [];
 
   if (allTrees.length === 0) {
-    return <NoResults />;
+    return <NoResults
+      title="No trees available"
+      description="Available trees will appear here once they are listed by our farmers or as soon as they are in season."
+    />;
   }
 
   return (

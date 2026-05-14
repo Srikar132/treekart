@@ -10,7 +10,37 @@ import {
 
 export const metadata: Metadata = {
   title: "FAQs — TreeKart",
-  description: "Frequently asked questions about tree rentals, Alphonso mango harvesting, and climate-controlled shipping.",
+  description: "Frequently asked questions about tree rentals, Alphonso mango harvesting, and climate-controlled shipping. Get all your queries answered.",
+  keywords: ["mango tree rental FAQ", "Alphonso mango delivery questions", "organic farming questions", "tree adoption help", "TreeKart support"],
+  alternates: {
+    canonical: "/faq",
+  },
+  openGraph: {
+    title: "FAQs — TreeKart",
+    description: "Frequently asked questions about tree rentals, Alphonso mango harvesting, and climate-controlled shipping.",
+    url: "https://www.treekart.in/faq",
+    siteName: "TreeKart",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "TreeKart FAQs",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FAQs — TreeKart",
+    description: "Frequently asked questions about tree rentals, Alphonso mango harvesting, and climate-controlled shipping.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 const FAQ_DATA = [
@@ -66,6 +96,25 @@ const FAQ_DATA = [
 export default function FAQPage() {
   return (
     <main className="bg-white min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": FAQ_DATA.flatMap(section => 
+              section.questions.map(faq => ({
+                "@type": "Question",
+                "name": faq.q,
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": faq.a
+                }
+              }))
+            )
+          })
+        }}
+      />
       <div className="max-w-4xl mx-auto px-6 py-20 md:py-32 space-y-24">
         
         {/* Header */}

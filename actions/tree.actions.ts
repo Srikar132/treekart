@@ -6,6 +6,7 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getSupabasePublic } from "@/utils/supabase/public";
+import { sendRentalConfirmedEmail } from "@/lib/email";
 
 
 export type TreeSortOption = "newest" | "price_asc" | "price_desc" | "age_asc" | "age_desc";
@@ -349,7 +350,7 @@ export async function verifyAndFulfilRental(payload: {
     // Fetch tree details for the final record
     const { data: tree } = await supabase
         .from("trees")
-        .select("price")
+        .select("price, variety")
         .eq("id", payload.treeId)
         .single();
 
@@ -397,6 +398,16 @@ export async function verifyAndFulfilRental(payload: {
     revalidatePath("/account");
     revalidatePath("/rent");
     revalidateTag("trees", "max");
+
+    // Send confirmation email — non-blocking so payment success is never blocked by email failure
+    sendRentalConfirmedEmail(
+        user.email!,
+        user.full_name || "Valued Customer",
+        rental.id,
+        tree.variety || "Mango Tree",
+        tree.price ?? 0,
+        season
+    ).catch((err) => console.error("[Rental Email] Failed to send confirmation:", err));
 
     return { success: true, rentalId: rental.id };
 }

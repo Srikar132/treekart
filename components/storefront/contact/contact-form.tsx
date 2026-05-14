@@ -27,7 +27,7 @@ export function ContactForm() {
   }, [state]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-32">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-28">
       {/* LEFT — Info */}
       <div className="lg:col-span-5 space-y-20">
         <div className="space-y-6">
@@ -90,7 +90,7 @@ export function ContactForm() {
 
       {/* RIGHT — Form */}
       <div className="lg:col-span-7">
-        <Card className="relative shadow-sm md:p-6 lg:p-8">
+        <Card className="relative shadow-sm p-6 md:p-10 overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
 
           <CardHeader className="relative z-10 space-y-2 pb-8">

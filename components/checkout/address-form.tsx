@@ -23,6 +23,15 @@ export function AddressForm({ value, onChange, errors }: Props) {
   const { fetchPincodeData, loading } = usePincode();
   const [localities, setLocalities] = useState<PostOffice[]>([]);
 
+  useEffect(() => {
+    if (value.pincode.length === 6) {
+      fetchPincodeData(value.pincode).then((data) => {
+        if (data && data.length > 0) setLocalities(data);
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const set = (key: keyof DeliveryAddress) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       onChange({ ...value, [key]: e.target.value });

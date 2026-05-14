@@ -12,7 +12,6 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -56,6 +55,15 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         ? product.original_price - product.price
         : null;
 
+    // Single priority badge: pre-order > discount > custom badge
+    const primaryBadge = isPreOrder
+        ? { label: "Pre-Order", style: "bg-blue-600 text-white" }
+        : discount > 0 && !isOutOfStock
+            ? { label: `-${discount}%`, style: "bg-red-500 text-white" }
+            : product.badge && product.badge !== "None" && !isOutOfStock
+                ? { label: product.badge, style: "bg-primary text-primary-foreground" }
+                : null;
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -69,31 +77,17 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                 {/* ── Image ── */}
                 <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted/30">
 
-                    {/* Status/badge pills */}
-                    <div className="absolute top-3 left-3 z-20 flex flex-col gap-1.5">
-                        {isPreOrder && (
-                            <Badge className="bg-blue-600 text-white border-0 shadow text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full">
-                                Pre-order
-                            </Badge>
-                        )}
-                        {discount > 0 && !isOutOfStock && (
-                            <Badge className="bg-red-500 text-white border-0 shadow text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full">
-                                -{discount}% off
-                            </Badge>
-                        )}
-                        {product.badge && product.badge !== "None" && !isOutOfStock && (
-                            <Badge
-                                className={cn(
-                                    "border-0 shadow text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full",
-                                    product.badge === "Sale" ? "bg-red-500 text-white"
-                                        : product.badge === "New" ? "bg-emerald-600 text-white"
-                                            : "bg-primary text-primary-foreground"
-                                )}
-                            >
-                                {product.badge}
-                            </Badge>
-                        )}
-                    </div>
+                    {/* Single priority badge */}
+                    {primaryBadge && (
+                        <div className="absolute top-3 left-3 z-20">
+                            <span className={cn(
+                                "text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md shadow-sm",
+                                primaryBadge.style
+                            )}>
+                                {primaryBadge.label}
+                            </span>
+                        </div>
+                    )}
 
                     {/* Variety pill — top right */}
                     <div className="absolute top-3 right-3 z-20">
@@ -105,7 +99,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                     {/* Out of stock overlay */}
                     {isOutOfStock && (
                         <div className="absolute inset-0 bg-foreground/50 backdrop-blur-[2px] z-20 flex items-center justify-center">
-                            <span className="bg-background/90 text-foreground text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full border border-border shadow">
+                            <span className="bg-background/90 text-foreground text-[10px] font-black uppercase tracking-widest px-4 py-2 border border-border shadow">
                                 Out of Stock
                             </span>
                         </div>

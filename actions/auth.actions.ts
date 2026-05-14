@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 import { authAj, signupAj } from "@/lib/arcjet";
 
 type SignInState = ActionState<SignInFields>;
-type SignUpState = ActionState<SignUpFields> & { success?: boolean };
+type SignUpState = ActionState<SignUpFields> & { success?: boolean; hasSession?: boolean };
 
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "http://localhost:3000";
@@ -94,6 +94,8 @@ export async function registerUser(
         };
     }
 
+    const redirectTo = (formData.get("redirectTo") as string) || "/";
+
     const raw = {
         fullName: formData.get("fullName") as string,
         email: formData.get("email") as string,
@@ -116,7 +118,7 @@ export async function registerUser(
         email: parsed.data.email,
         password: parsed.data.password,
         options: {
-            emailRedirectTo: `${baseUrl}/auth/callback`,
+            emailRedirectTo: `${baseUrl}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
             data: {
                 full_name: parsed.data.fullName,
                 phone: parsed.data.phone,
@@ -135,12 +137,12 @@ export async function registerUser(
 
 
     if (data.session) {
-        // Auto-confirmed or already signed in
+        // Auto-confirmed — session exists, client can redirect immediately
         revalidatePath("/", "layout");
-        return { success: true, values: raw };
+        return { success: true, hasSession: true, values: raw };
     } else {
-        // Confirmation email sent
-        return { success: true, values: raw };
+        // Confirmation email sent — client should show verify screen
+        return { success: true, hasSession: false, values: raw };
     }
 }
 /**
@@ -165,7 +167,7 @@ export async function requestPasswordReset(
     const supabase = await getSupabaseServer();
 
     const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-        redirectTo: `${baseUrl}/auth/reset-password`,
+        redirectTo: `${baseUrl}/auth/callback?next=/auth/reset-password`,
     });
 
     if (error) {

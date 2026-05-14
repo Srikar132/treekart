@@ -6,6 +6,7 @@ import { CheckCircle, Info, Scale, Tag, Sparkles, Share2 } from "lucide-react";
 import { useMangoCart } from "@/store/use-mango-cart";
 import { useState } from "react";
 import { AnimatedButton } from "@/components/shared/animated-button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { ShareDialog } from "@/components/shared/share-dialog";
@@ -18,12 +19,28 @@ interface ProductInfoProps {
   product: MangoProduct;
 }
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
+
 export function ProductInfo({ product }: ProductInfoProps) {
   const router = useRouter();
-  const { add } = useMangoCart();
+  const { add, closeCart } = useMangoCart();
   const { openLoginPrompt } = useLoginPrompt();
   const [isAdding, setIsAdding] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [descExpanded, setDescExpanded] = useState(false);
   const [selectedWeight, setSelectedWeight] = useState<number>(
     Array.isArray(product.weight_kg) && product.weight_kg.length > 0
       ? product.weight_kg[0]
@@ -36,6 +53,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0;
 
+  const boxPrice = product.price * selectedWeight;
+
   const handleAddToCart = async () => {
     setIsAdding(true);
 
@@ -43,7 +62,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       id: product.id,
       name: product.name,
       variety: product.variety,
-      price: product.price,
+      price: boxPrice,        // per-box total (pricePerKg * weightKg)
       pricePerKg: product.price,
       imageUrl: (product.image_url && product.image_url.length > 0) ? product.image_url[0] : "/placeholder-mango.png",
       badge: product.badge,
@@ -56,6 +75,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
   const handleBuyNow = async () => {
     handleAddToCart();
+    closeCart();
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -70,20 +90,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const increment = () => setQuantity(prev => prev + 1);
   const decrement = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
 
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
-  };
 
   return (
     <motion.div
@@ -128,11 +135,18 @@ export function ProductInfo({ product }: ProductInfoProps) {
           {product.name}
         </h1>
 
-        <div className="flex items-baseline gap-4">
-          <span className="text-3xl font-bold text-primary">₹{product.price.toLocaleString()}</span>
+        <div className="flex items-baseline gap-4 flex-wrap">
+          <span className="text-3xl font-bold text-primary">
+            ₹{boxPrice.toLocaleString()}
+          </span>
           {product.original_price && product.original_price > product.price && (
-            <span className="text-xl text-muted-foreground line-through">₹{product.original_price.toLocaleString()}</span>
+            <span className="text-xl text-muted-foreground line-through">
+              ₹{(product.original_price * selectedWeight).toLocaleString()}
+            </span>
           )}
+          <span className="text-sm text-muted-foreground font-medium">
+            ₹{product.price.toLocaleString()}/kg × {selectedWeight}kg
+          </span>
         </div>
       </motion.div>
 
@@ -179,9 +193,17 @@ export function ProductInfo({ product }: ProductInfoProps) {
       {product.description && (
         <motion.div variants={item} className="mb-10 space-y-3">
           <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Product Description</h3>
-          <p className="text-muted-foreground leading-relaxed">
+          <p className={cn("text-muted-foreground leading-relaxed", !descExpanded && "line-clamp-3")}>
             {product.description}
           </p>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setDescExpanded((v) => !v)}
+            className="h-auto px-0 text-primary text-xs font-bold uppercase tracking-widest hover:bg-transparent hover:text-primary/70"
+          >
+            {descExpanded ? "Show Less ↑" : "Show More ↓"}
+          </Button>
         </motion.div>
       )}
 

@@ -6,9 +6,64 @@ import { RelatedProducts } from "@/components/storefront/shop/related-products";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 
+import { Metadata } from "next";
+
 type Props = {
   params: Promise<{ id: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const product = await getProductById(id);
+
+  if (!product) return {};
+
+  const title = `${product.name} — Premium Organic Mangoes`;
+  const description = `${product.description} Freshly picked ${product.variety} mangoes from TreeKart orchards. Available in ${product.weight_kg?.join(", ")}kg boxes.`;
+  const ogImage = product.image_url?.[0] || "/og-image.png";
+
+  return {
+    title,
+    description,
+    keywords: [
+      "buy mangoes online",
+      `${product.name}`,
+      `${product.variety} mangoes`,
+      "organic alphonso",
+      "fresh fruit delivery",
+      "premium mango boxes",
+    ],
+    alternates: {
+      canonical: `/store/${id}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://www.treekart.in/store/${id}`,
+      siteName: "TreeKart",
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+      locale: "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default async function ProductDetailsPage({ params }: Props) {
   const { id } = await params;
@@ -20,6 +75,28 @@ export default async function ProductDetailsPage({ params }: Props) {
 
     return (
       <main className="container py-10 lg:py-16 space-y-20">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Product",
+              "name": product.name,
+              "description": product.description,
+              "image": product.image_url,
+              "offers": {
+                "@type": "Offer",
+                "price": product.price,
+                "priceCurrency": "INR",
+                "availability": product.status === "available" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+              },
+              "brand": {
+                "@type": "Brand",
+                "name": "TreeKart"
+              }
+            })
+          }}
+        />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
           <ProductMedia image={product.image_url} name={product.name} />
           <ProductInfo product={product as any} />
