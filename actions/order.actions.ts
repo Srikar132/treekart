@@ -137,8 +137,8 @@ export async function createMangoOrder(
       throw new Error(`Product "${dbProduct.name}" is currently out of stock`);
     }
 
-    // Verify weight variant exists
-    if (item.weightKg && !dbProduct.weight_kg.includes(item.weightKg)) {
+    // Verify weight variant exists (allow 1kg by default as per new pricing logic)
+    if (item.weightKg && item.weightKg !== 1 && !dbProduct.weight_kg.includes(item.weightKg)) {
       throw new Error(`Weight variant ${item.weightKg}kg for "${dbProduct.name}" is no longer available`);
     }
   }

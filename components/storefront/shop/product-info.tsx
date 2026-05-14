@@ -24,12 +24,12 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const { openLoginPrompt } = useLoginPrompt();
   const [isAdding, setIsAdding] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const weightVariants = Array.isArray(product.weight_kg)
+    ? Array.from(new Set([1, ...product.weight_kg])).sort((a, b) => a - b)
+    : [1];
+
   const [selectedWeight, setSelectedWeight] = useState<number>(
-    Array.isArray(product.weight_kg) && product.weight_kg.length > 0
-      ? product.weight_kg[0]
-      : typeof product.weight_kg === 'number'
-        ? product.weight_kg
-        : 1
+    weightVariants.includes(5) ? 5 : weightVariants[0]
   );
 
   const discount = product.original_price && product.original_price > product.price
@@ -43,7 +43,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
       id: product.id,
       name: product.name,
       variety: product.variety,
-      price: product.price,
+      price: product.price * selectedWeight,
       pricePerKg: product.price,
       imageUrl: (product.image_url && product.image_url.length > 0) ? product.image_url[0] : "/placeholder-mango.png",
       badge: product.badge,
@@ -129,9 +129,9 @@ export function ProductInfo({ product }: ProductInfoProps) {
         </h1>
 
         <div className="flex items-baseline gap-4">
-          <span className="text-3xl font-bold text-primary">₹{product.price.toLocaleString()}</span>
+          <span className="text-3xl font-bold text-primary">₹{(product.price * selectedWeight).toLocaleString()}</span>
           {product.original_price && product.original_price > product.price && (
-            <span className="text-xl text-muted-foreground line-through">₹{product.original_price.toLocaleString()}</span>
+            <span className="text-xl text-muted-foreground line-through">₹{(product.original_price * selectedWeight).toLocaleString()}</span>
           )}
         </div>
       </motion.div>
@@ -143,26 +143,20 @@ export function ProductInfo({ product }: ProductInfoProps) {
             <div>
               <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Select Weight Variant</p>
               <div className="flex flex-wrap gap-2 mt-2">
-                {Array.isArray(product.weight_kg) ? (
-                  product.weight_kg.map((w) => (
-                    <button
-                      key={w}
-                      onClick={() => setSelectedWeight(w)}
-                      className={cn(
-                        "px-4 py-2 rounded-lg text-sm font-bold border transition-all",
-                        selectedWeight === w
-                          ? "bg-primary text-white border-primary shadow-md shadow-primary/20 scale-105"
-                          : "bg-white text-muted-foreground border-border hover:border-primary/50"
-                      )}
-                    >
-                      {w} Kg
-                    </button>
-                  ))
-                ) : (
-                  <div className="px-4 py-2 rounded-lg text-sm font-bold border bg-primary text-white border-primary">
-                    {product.weight_kg} Kg
-                  </div>
-                )}
+                {weightVariants.map((w) => (
+                  <button
+                    key={w}
+                    onClick={() => setSelectedWeight(w)}
+                    className={cn(
+                      "px-4 py-2 rounded-lg text-sm font-bold border transition-all",
+                      selectedWeight === w
+                        ? "bg-primary text-white border-primary shadow-md shadow-primary/20 scale-105"
+                        : "bg-white text-muted-foreground border-border hover:border-primary/50"
+                    )}
+                  >
+                    {w} Kg
+                  </button>
+                ))}
               </div>
             </div>
           </div>
