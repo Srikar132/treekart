@@ -82,6 +82,8 @@ function computeTotals(items: CartItem[]) {
   return { subtotal, deliveryFee, grandTotal, grandTotalPaise };
 }
 
+// FIX: This is the correct Razorpay signature verification.
+// Razorpay signs: HMAC-SHA256(rzpOrderId + "|" + rzpPaymentId, KEY_SECRET)
 function verifyRazorpaySignature(
   rzpOrderId: string,
   rzpPaymentId: string,
@@ -158,7 +160,9 @@ export async function createMangoOrder(
     },
   });
 
-  // Write pending order to DB — stores rzpOrderId as payment_id temporarily
+  // Write pending order to DB
+  // payment_id temporarily holds the Razorpay order ID until payment is confirmed,
+  // at which point it gets overwritten with the actual Razorpay payment ID.
   const { data: order, error } = await supabase
     .from("orders")
     .insert({
@@ -166,7 +170,7 @@ export async function createMangoOrder(
       items: orderItems as unknown as Database["public"]["Tables"]["orders"]["Insert"]["items"],
       total_amount: grandTotal,
       delivery_address: deliveryAddress as unknown as Database["public"]["Tables"]["orders"]["Insert"]["delivery_address"],
-      payment_id: rzpOrder.id,  // Razorpay order id — overwritten with payment id on confirm
+      payment_id: rzpOrder.id,
       status: "pending",
     })
     .select("id")
@@ -206,7 +210,6 @@ export async function verifyAndFulfilOrder(payload: {
   );
 
   if (!isValid) {
-    // Log suspicious activity — don't expose detail to client
     console.error("[PAYMENT] Invalid signature", {
       orderId: payload.orderId,
       userId: user.id,
@@ -216,28 +219,36 @@ export async function verifyAndFulfilOrder(payload: {
     );
   }
 
-  // Fetch the pending order — ensures user owns it
+  // FIX: Fetch the pending order by our DB id + user_id.
+  // Added detailed error logging so we can see exactly why a lookup fails
+  // (e.g. user session mismatch, wrong orderId, already confirmed).
   const { data: existing, error: fetchError } = await supabase
     .from("orders")
     .select(`
-      id, 
-      status, 
-      user_id, 
-      total_amount, 
+      id,
+      status,
+      user_id,
+      total_amount,
       profiles (
-        email, 
+        email,
         full_name
       )
     `)
     .eq("id", payload.orderId)
-    .eq("user_id", user.id)  // user can only confirm their own order
+    .eq("user_id", user.id)
     .single();
 
   if (fetchError || !existing) {
-    throw new Error("Order not found");
+    // Log the full detail server-side so you can debug without exposing to client
+    console.error("[verifyAndFulfilOrder] Order fetch failed", {
+      fetchError,
+      orderId: payload.orderId,
+      requestingUserId: user.id,
+    });
+    throw new Error("Order not found. Please contact support if payment was deducted.");
   }
 
-  // Idempotency — if already confirmed (webhook beat us), just return
+  // Idempotency — if already confirmed (e.g. webhook beat us here), just return success
   if (existing.status === "confirmed") {
     return { success: true, orderId: existing.id, status: "confirmed" };
   }
@@ -246,21 +257,25 @@ export async function verifyAndFulfilOrder(payload: {
     throw new Error(`Order is in unexpected state: ${existing.status}`);
   }
 
-  // Confirm the order — overwrite payment_id with actual Razorpay payment id
+  // Confirm the order — overwrite payment_id with the actual Razorpay payment ID
   const { error: updateError } = await supabase
     .from("orders")
     .update({
       status: "confirmed",
-      payment_id: payload.rzpPaymentId, // real payment id replaces rzp order id
+      payment_id: payload.rzpPaymentId,
     })
     .eq("id", payload.orderId)
     .eq("user_id", user.id);
 
   if (updateError) {
+    console.error("[verifyAndFulfilOrder] Order update failed", {
+      updateError,
+      orderId: payload.orderId,
+    });
     throw new Error(`Failed to confirm order: ${updateError.message}`);
   }
 
-  // 4. Send Confirmation Email
+  // Send confirmation email (non-fatal — a failure here must not break the order)
   const profile = existing.profiles as any;
   if (profile?.email) {
     try {
@@ -271,84 +286,19 @@ export async function verifyAndFulfilOrder(payload: {
         existing.total_amount
       );
     } catch (err) {
-      console.error("[OrderAction] Failed to send confirmation email:", err);
+      console.error("[verifyAndFulfilOrder] Failed to send confirmation email:", err);
     }
   }
 
   revalidatePath("/dashboard");
   revalidatePath("/orders");
   revalidatePath("/admin/orders");
+  revalidatePath("/account");
 
   return { success: true, orderId: payload.orderId, status: "confirmed" };
 }
 
-// ── 3. Razorpay webhook handler (called from /api/webhooks/razorpay) ─
-
-export async function handleRazorpayWebhook(payload: {
-  event: string;
-  paymentId: string;
-  rzpOrderId: string;
-  signature: string;
-  webhookSecret: string;
-}) {
-  // Webhook has its own signature format using webhook secret
-  const expectedSig = crypto
-    .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET!)
-    .update(payload.webhookSecret)
-    .digest("hex");
-
-  if (expectedSig !== payload.signature) {
-    throw new Error("Invalid webhook signature");
-  }
-
-  if (payload.event !== "payment.captured") return;
-
-  const supabase = await getSupabaseServer();
-
-  // Find the pending order by rzp order id (stored in payment_id column)
-  const { data: order } = await supabase
-    .from("orders")
-    .select(`
-      id, 
-      status, 
-      total_amount, 
-      profiles (
-        email, 
-        full_name
-      )
-    `)
-    .eq("payment_id", payload.rzpOrderId)
-    .single();
-
-  if (!order || order.status === "confirmed") return; // already handled
-
-  await supabase
-    .from("orders")
-    .update({
-      status: "confirmed",
-      payment_id: payload.paymentId,
-    })
-    .eq("id", order.id);
-
-  // Send Confirmation Email
-  const profile = order.profiles as any;
-  if (profile?.email) {
-    try {
-      await sendOrderConfirmedEmail(
-        profile.email,
-        profile.full_name || "Valued Customer",
-        order.id,
-        order.total_amount
-      );
-    } catch (err) {
-      console.error("[Webhook] Failed to send confirmation email:", err);
-    }
-  }
-
-  revalidatePath("/dashboard");
-}
-
-// ── 4. Get user's orders ────────────────────────────────────────────
+// ── 3. Get user's orders ────────────────────────────────────────────
 
 export async function getUserOrders() {
   const user = await requireUser();
@@ -372,10 +322,72 @@ export async function getOrderById(orderId: string) {
     .from("orders")
     .select("*")
     .eq("id", orderId)
-    .eq("user_id", user.id) // user can only view their own
+    .eq("user_id", user.id)
     .single();
 
   if (error) throw new Error("Order not found");
   return data;
 }
 
+// ── 4. Refresh Razorpay Order (for payment retries) ────────────────
+//
+// Creates a FRESH Razorpay order for an existing pending DB order.
+// The new Razorpay order ID is stored back in payment_id so that
+// verifyAndFulfilOrder can confirm the order after successful payment.
+
+export async function refreshRazorpayOrder(orderId: string) {
+  const user = await requireUser();
+  const supabase = await getSupabaseServer();
+  const razorpay = getRazorpay();
+
+  // FIX: Fetch by DB order id + user_id (not by payment_id).
+  // This is safe and unambiguous — the DB id never changes.
+  const { data: order, error } = await supabase
+    .from("orders")
+    .select("id, status, total_amount, user_id")
+    .eq("id", orderId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (error || !order) {
+    console.error("[refreshRazorpayOrder] Order not found", { orderId, userId: user.id, error });
+    throw new Error("Order not found");
+  }
+
+  if (order.status !== "pending") {
+    throw new Error("Order is already processed — no retry needed");
+  }
+
+  // Create a fresh Razorpay order (old ones can expire or error if reused)
+  const rzpOrder = await razorpay.orders.create({
+    amount: Math.round(order.total_amount * 100),
+    currency: "INR",
+    receipt: `retry_${order.id.slice(0, 8)}_${Date.now().toString().slice(-6)}`,
+    notes: {
+      user_id: user.id,
+      order_id: order.id,
+      type: "mango_store_retry",
+    },
+  });
+
+  // FIX: Update payment_id with the NEW Razorpay order ID so that
+  // verifyAndFulfilOrder can find this order after the webhook fires
+  // (webhook looks up orders by payment_id = rzpOrderId).
+  const { error: updateError } = await supabase
+    .from("orders")
+    .update({ payment_id: rzpOrder.id })
+    .eq("id", order.id)
+    .eq("user_id", user.id); // extra guard: only update own order
+
+  if (updateError) {
+    console.error("[refreshRazorpayOrder] Failed to update payment_id", { updateError, orderId });
+    throw new Error("Failed to update order reference");
+  }
+
+  return {
+    rzpOrderId: rzpOrder.id,
+    amount: rzpOrder.amount as number,
+    currency: rzpOrder.currency,
+    keyId: process.env.RAZORPAY_KEY_ID!,
+  };
+}

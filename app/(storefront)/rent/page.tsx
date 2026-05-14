@@ -1,3 +1,5 @@
+export const revalidate = 3600;
+
 import { getAvailableTrees, getTreePlans, type TreeSortOption } from "@/actions/tree.actions";
 import { TreeGrid } from "@/components/storefront/rent/tree-grid";
 import { TreeFilters } from "@/components/storefront/rent/tree-filters";

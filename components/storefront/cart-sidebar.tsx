@@ -11,6 +11,17 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
     ShoppingCart,
     Minus,
     Plus,
@@ -123,19 +134,41 @@ export function CartSidebar() {
                                     variant="secondary"
                                     className="bg-primary/10 text-primary border-0 font-mono text-xs ml-1"
                                 >
-                                    {totalItems()} kg
+                                    {Number(totalItems().toFixed(2))} kg
                                 </Badge>
                             )}
                             {isValidating && <Loader2 size={12} className="animate-spin text-muted-foreground ml-2" />}
                         </span>
                         {items.length > 0 && (
-                            <button
-                                onClick={clear}
-                                className="h-8 px-2 text-xs text-muted-foreground hover:text-destructive flex items-center gap-1 transition-colors mr-7"
-                            >
-                                <Trash2 size={12} />
-                                Clear all
-                            </button>
+                            <AlertDialog>
+                                <AlertDialogTrigger
+                                    render={
+                                        <button
+                                            className="h-8 px-2 text-xs text-muted-foreground hover:text-destructive flex items-center gap-1 transition-colors mr-7"
+                                        >
+                                            <Trash2 size={12} />
+                                            Clear all
+                                        </button>
+                                    }
+                                />
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This will remove all items from your cart. This action cannot be undone.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction 
+                                            onClick={clear}
+                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        >
+                                            Clear Cart
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         )}
                     </SheetTitle>
                 </SheetHeader>
@@ -189,6 +222,7 @@ export function CartSidebar() {
                                                     src={item.imageUrl}
                                                     alt={item.name}
                                                     fill
+                                                    sizes="80px"
                                                     className="object-cover"
                                                 />
                                             ) : (
@@ -218,7 +252,7 @@ export function CartSidebar() {
                                                     </p>
                                                     <div className="flex items-center gap-2 mt-1.5">
                                                         <p className="text-xs font-mono bg-secondary inline-block px-1.5 py-0.5 rounded text-primary">
-                                                            {item.weightKg}kg • ₹{item.pricePerKg}/kg
+                                                            {Number(item.weightKg?.toFixed(2))}kg • ₹{item.pricePerKg}/kg
                                                         </p>
                                                         {isOutOfStock && (
                                                             <span className="text-[10px] font-bold text-destructive uppercase">Unavailable</span>
@@ -305,7 +339,7 @@ export function CartSidebar() {
                         {/* Price breakdown */}
                         <div className="flex flex-col gap-2">
                             <div className="flex justify-between text-sm text-muted-foreground">
-                                <span>Subtotal ({totalItems()} kg)</span>
+                                <span>Subtotal ({Number(totalItems().toFixed(2))} kg)</span>
                                 <span className="font-mono">
                                     ₹{totalPrice().toLocaleString("en-IN")}
                                 </span>

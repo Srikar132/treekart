@@ -8,7 +8,7 @@ export const FEATURED_CATEGORIES = [
     {
         title: "Premium Tree Leasing",
         image: "/images/featured_mango_orchard.webp",
-        link: "/plans",
+        link: "#plans",
         cta: "View Plans",
     },
 ];

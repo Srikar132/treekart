@@ -1,3 +1,5 @@
+export const revalidate = 3600;
+
 import { getMangoProducts, type ProductSortOption } from "@/actions/products.actions";
 import { ProductGrid } from "@/components/storefront/shop/product-grid";
 import { ProductFilters } from "@/components/storefront/shop/product-filters";

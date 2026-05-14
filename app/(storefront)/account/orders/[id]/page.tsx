@@ -82,7 +82,10 @@ export default async function OrderPage({ params }: OrderPageProps) {
         </div>
       </div>
 
-      <OrderDetails order={order as Order} />
+      <OrderDetails 
+        order={order as Order} 
+        rzpKey={process.env.RAZORPAY_KEY_ID} 
+      />
     </main>
   );
 }

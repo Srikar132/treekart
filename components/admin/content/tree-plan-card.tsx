@@ -28,7 +28,7 @@ export function TreePlanCard({ plan }: { plan: TreePlan }) {
 
   return (
     <div className={cn("group relative flex flex-col bg-card border border-border rounded-3xl p-6 shadow-sm overflow-hidden", !plan.is_active && "opacity-60 grayscale")}>
-      <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+      <div className="absolute top-4 right-4 flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger 
             render={

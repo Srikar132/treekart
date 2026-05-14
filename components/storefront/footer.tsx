@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Phone, Mail, MapPin, CreditCard } from "lucide-react";
-import { BsInstagram, BsTwitter, BsFacebook } from "react-icons/bs";
+import Image from "next/image";
+import { Phone, Mail, MapPin, CreditCard, ArrowRight } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
 import settings from "@/constants/settings";
 
@@ -28,110 +28,84 @@ const itemVariants: Variants = {
 
 export function Footer() {
     return (
-        <footer className="bg-muted/30 pt-16 pb-8 border-t border-border mt-auto overflow-hidden">
-            <div className="container">
+        <footer className="bg-muted pt-20 pb-10 border-t border-slate-200 mt-auto overflow-hidden">
+            <div className="max-w-7xl mx-auto px-6">
                 <motion.div
                     variants={containerVariants}
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, amount: 0.2 }}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-16"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-20 mb-20"
                 >
                     {/* Explore */}
-                    <motion.div variants={itemVariants}>
-                        <h4 className="mb-6">Explore</h4>
-                        <ul className="space-y-4 p-sm">
-                            <li><Link href="/rent" className="hover:text-primary transition-colors font-medium">Rent a Tree</Link></li>
-                            <li><Link href="/store" className="hover:text-primary transition-colors font-medium">Shop Mangoes</Link></li>
-                            <li><Link href="/trees" className="hover:text-primary transition-colors">Our Farms & Trees</Link></li>
+                    <motion.div variants={itemVariants} className="space-y-8">
+                        <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary">Explore</h4>
+                        <ul className="space-y-5">
+                            <li><Link href="/rent" className="group flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-primary transition-colors uppercase tracking-widest"><ArrowRight size={12} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" /> Rent a Tree</Link></li>
+                            <li><Link href="/store" className="group flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-primary transition-colors uppercase tracking-widest"><ArrowRight size={12} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" /> Shop Mangoes</Link></li>
                         </ul>
                     </motion.div>
 
                     {/* Information */}
-                    <motion.div variants={itemVariants}>
-                        <h4 className="mb-6">Information</h4>
-                        <ul className="space-y-4 p-sm">
-                            <li><Link href="/about" className="hover:text-primary transition-colors">About Us</Link></li>
-                            <li><Link href="/blog" className="hover:text-primary transition-colors">Our Blog</Link></li>
-                            <li><Link href="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>
+                    <motion.div variants={itemVariants} className="space-y-8">
+                        <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary">Information</h4>
+                        <ul className="space-y-5">
+                            <li><Link href="/about" className="group flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-primary transition-colors uppercase tracking-widest"><ArrowRight size={12} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" /> About Us</Link></li>
+                            <li><Link href="/blog" className="group flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-primary transition-colors uppercase tracking-widest"><ArrowRight size={12} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" /> Our Blog</Link></li>
+                            <li><Link href="/contact" className="group flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-primary transition-colors uppercase tracking-widest"><ArrowRight size={12} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" /> Contact Us</Link></li>
                         </ul>
                     </motion.div>
 
-                    {/* Support & Account */}
-                    <motion.div variants={itemVariants}>
-                        <h4 className="mb-6">Support</h4>
-                        <ul className="space-y-4 p-sm">
-                            <li><Link href="/auth/signin" className="hover:text-primary transition-colors">Your Account</Link></li>
-                            <li><Link href="/delivery" className="hover:text-primary transition-colors">Delivery Information</Link></li>
-                            <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
-                            <li><Link href="/terms" className="hover:text-primary transition-colors">Terms & Conditions</Link></li>
+                    {/* Legal */}
+                    <motion.div variants={itemVariants} className="space-y-8">
+                        <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary">Trust & Privacy</h4>
+                        <ul className="space-y-5">
+                            <li><Link href="/privacy" className="group flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-primary transition-colors uppercase tracking-widest"><ArrowRight size={12} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" /> Privacy Policy</Link></li>
+                            <li><Link href="/terms" className="group flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-primary transition-colors uppercase tracking-widest"><ArrowRight size={12} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" /> Terms of Service</Link></li>
+                            <li><Link href="/delivery" className="group flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-primary transition-colors uppercase tracking-widest"><ArrowRight size={12} className="opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" /> Shipping Policy</Link></li>
                         </ul>
                     </motion.div>
 
-                    {/* Follow Us */}
-                    <motion.div variants={itemVariants}>
-                        <h4 className="mb-6">Follow Us</h4>
-                        <ul className="space-y-4 p-sm mb-6">
-                            <li className="flex items-start gap-3">
-                                <Phone className="w-4 h-4 shrink-0 text-primary mt-1" />
+                    {/* Get In Touch */}
+                    <motion.div variants={itemVariants} className="space-y-8">
+                        <h4 className="text-xs font-black uppercase tracking-[0.3em] text-primary">Get In Touch</h4>
+                        <ul className="space-y-6">
+                            <li className="flex items-start gap-4 group">
+                                <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 transition-all group-hover:bg-primary group-hover:text-white shadow-sm">
+                                    <Mail size={16} />
+                                </div>
                                 <div className="flex flex-col space-y-1">
-                                    {settings.PHONE.split("/").map((phone) => {
-                                        const cleanPhone = phone.trim();
-                                        return (
-                                            <Link
-                                                key={cleanPhone}
-                                                href={`tel:${cleanPhone.replace(/\s+/g, "")}`}
-                                                className="hover:text-primary transition-colors"
-                                            >
-                                                {cleanPhone}
-                                            </Link>
-                                        );
-                                    })}
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Concierge Email</p>
+                                    <Link href={`mailto:${settings.EMAIL}`} className="text-sm font-bold text-slate-900 hover:text-primary transition-colors">{settings.EMAIL}</Link>
                                 </div>
                             </li>
-                            <li className="flex items-center gap-3">
-                                <Mail className="w-4 h-4 shrink-0 text-primary" />
-                                <Link href={`mailto:${settings.EMAIL}`}>{settings.EMAIL}</Link>
+                            <li className="flex items-start gap-4 group">
+                                <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 transition-all group-hover:bg-primary group-hover:text-white shadow-sm">
+                                    <Phone size={16} />
+                                </div>
+                                <div className="flex flex-col space-y-1">
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Customer Support</p>
+                                    <Link href={`tel:${settings.PHONE.split('/')[0].trim().replace(/\s+/g, '')}`} className="text-sm font-bold text-slate-900 hover:text-primary transition-colors">{settings.PHONE}</Link>
+                                </div>
                             </li>
-                            <li className="flex items-start gap-3">
-                                <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
-                                <span>{settings.ADDRESS}</span>
+                            <li className="flex items-start gap-4 group">
+                                <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 transition-all group-hover:bg-primary group-hover:text-white shadow-sm">
+                                    <MapPin size={16} />
+                                </div>
+                                <div className="flex flex-col space-y-1">
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">The Headquarters</p>
+                                    <a
+                                        href="https://maps.google.com/?q=Raja+Mahindra+Varam+Rajamahindra+yJunction+Mark+point"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-sm font-bold text-slate-900 hover:text-primary transition-colors"
+                                    >
+                                        {settings.ADDRESS}
+                                    </a>
+                                </div>
                             </li>
                         </ul>
-                        <div className="flex gap-3">
-                            <Link href="#" className="flex items-center justify-center w-10 h-10 rounded-full border border-border hover:border-primary hover:text-primary transition-colors">
-                                <BsTwitter className="w-4 h-4" />
-                            </Link>
-                            <Link href="#" className="flex items-center justify-center w-10 h-10 rounded-full border border-border hover:border-primary hover:text-primary transition-colors">
-                                <BsFacebook className="w-4 h-4" />
-                            </Link>
-                            <Link href="#" className="flex items-center justify-center w-10 h-10 rounded-full border border-border hover:border-primary hover:text-primary transition-colors">
-                                <BsInstagram className="w-4 h-4" />
-                            </Link>
-                        </div>
                     </motion.div>
-
-                    {/* Newsletters */}
-                    {/* <motion.div variants={itemVariants}>
-                        <h4 className="mb-6">Newsletters</h4>
-                        <p className="p-sm mb-4">
-                            Be the first who learns about our great promotions!
-                        </p>
-                        <form className="flex w-full mt-2" onSubmit={(e) => e.preventDefault()}>
-                            <input
-                                type="email"
-                                placeholder="Enter your email..."
-                                className="flex-1 min-w-0 bg-background border border-border focus:border-primary outline-none px-4 py-3 text-sm rounded-l-md transition-colors"
-                                required
-                            />
-                            <button
-                                type="submit"
-                                className="bg-foreground text-background px-6 py-3 text-xs font-bold uppercase tracking-wider hover:bg-foreground/90 transition-colors rounded-r-md"
-                            >
-                                Submit
-                            </button>
-                        </form>
-                    </motion.div> */}
                 </motion.div>
 
                 {/* Bottom Bar */}
@@ -140,21 +114,33 @@ export function Footer() {
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}
-                    className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4"
+                    className="pt-10 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-8"
                 >
-                    <div className="flex items-center gap-2">
-                        {/* Dummy Logo for footer */}
-                        <span className="text-xl font-black tracking-tighter text-primary">
-                            TreeKart.
-                        </span>
+                    <Link href="/" className="transition-transform hover:scale-105">
+                        <Image
+                            src="/logo.webp"
+                            alt="TreeKart Logo"
+                            width={120}
+                            height={40}
+                            className="h-10 w-auto object-contain"
+                            style={{ width: "auto" }}
+                        />
+                    </Link>
+
+                    <div className="flex items-center gap-3">
+                        <div className="h-8 w-12 rounded bg-white border border-slate-100 flex items-center justify-center shadow-sm">
+                            <CreditCard size={18} className="text-slate-400" />
+                        </div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Secure Payments</p>
                     </div>
 
-                    <div className="flex gap-4 text-muted-foreground">
-                        <CreditCard className="w-8 h-6" />
-                    </div>
-
-                    <div className="p-xs text-center md:text-right">
-                        &copy; Copyright {new Date().getFullYear()} | <span className="font-semibold text-foreground">TreeKart</span>. Powered by Next.js.
+                    <div className="text-center md:text-right space-y-1">
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.1em]">
+                            &copy; {new Date().getFullYear()} <span className="text-slate-900">TreeKart.in</span> — Cultivating Sustainable Futures
+                        </p>
+                        <p className="text-[9px] font-medium text-slate-300 uppercase tracking-widest">
+                            Crafted with passion for the planet
+                        </p>
                     </div>
                 </motion.div>
             </div>

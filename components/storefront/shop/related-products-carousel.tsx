@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { MangoProduct } from "@/types/database.types";
+import { useMangoCart } from "@/store/use-mango-cart";
 
 interface RelatedProductsCarouselProps {
     products: MangoProduct[];
@@ -21,6 +22,26 @@ export function RelatedProductsCarousel({ products }: RelatedProductsCarouselPro
     const [api, setApi] = React.useState<CarouselApi>();
     const [current, setCurrent] = React.useState(0);
     const [count, setCount] = React.useState(0);
+    const { add, openCart } = useMangoCart();
+
+    const handleAddToCart = React.useCallback((product: MangoProduct) => {
+        const firstImage = product.image_url?.[0] || "/placeholder-mango.png";
+        const firstWeight = product.weight_kg?.[0] || 1;
+
+        add({
+            id: product.id,
+            name: product.name,
+            variety: product.variety,
+            price: product.price,
+            pricePerKg: product.price,
+            imageUrl: firstImage,
+            badge: product.badge,
+            weightKg: firstWeight,
+            qty: 1
+        });
+
+        openCart();
+    }, [add, openCart]);
 
     React.useEffect(() => {
         if (!api) return;
@@ -67,7 +88,10 @@ export function RelatedProductsCarousel({ products }: RelatedProductsCarouselPro
                 <CarouselContent className="-ml-6">
                     {products.map((product) => (
                         <CarouselItem key={product.id} className="pl-6 md:basis-1/2 lg:basis-1/4">
-                            <ProductCard product={product} />
+                            <ProductCard 
+                                product={product} 
+                                onAddToCart={() => handleAddToCart(product)}
+                            />
                         </CarouselItem>
                     ))}
                 </CarouselContent>

@@ -7,6 +7,7 @@ import { adminGetRentalById } from "@/actions/admin.actions";
 import { DeleteUpdateBtn } from "@/components/admin/trees/delete-update-btn";
 import { requireAdmin } from "@/lib/auth";
 import { TreeUpdate } from "@/types/database.types";
+import { YouTubePlayer } from "@/components/shared/youtube-player";
 
 interface TreeUpdatesPageProps {
   params: Promise<{ id: string }>;
@@ -97,11 +98,13 @@ function GrowthUpdateCard({ update, rentalId }: { update: TreeUpdate; rentalId: 
 
         <p className="text-xs text-muted-foreground leading-relaxed mb-6 font-medium">{update.description}</p>
 
-
         {update.video_url && (
-          <div className="h-20 w-36 rounded-xl bg-card flex items-center justify-center text-foreground gap-2 border border-border shadow-xl group/video cursor-pointer hover:bg-muted transition-colors">
-            <Video size={16} className="text-primary group-hover/video:scale-110 transition-transform" />
-            <span className="text-[9px] font-black uppercase tracking-widest">Stream Log</span>
+          <div className="max-w-md">
+            <YouTubePlayer 
+              url={update.video_url} 
+              title={update.title || "Growth Update"} 
+              showBadge={false}
+            />
           </div>
         )}
       </div>
