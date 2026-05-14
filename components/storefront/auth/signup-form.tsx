@@ -10,7 +10,7 @@ import { Leaf, Loader2, Eye, EyeOff, TreePine, CheckCircle2 } from "lucide-react
 import { AnimatedButton } from "@/components/shared/animated-button";
 import { type ActionState, type SignUpFields } from "@/lib/validations";
 
-type SignUpState = ActionState<SignUpFields>;
+type SignUpState = ActionState<SignUpFields> & { success?: boolean; hasSession?: boolean };
 
 export function SignupForm({ redirectTo }: { redirectTo: string }) {
     const router = useRouter();
@@ -20,16 +20,18 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
     const [state, action, pending] = useActionState(registerUser, {});
 
     useEffect(() => {
-        if ((state as SignUpState).success) {
-            // Check if we have a session (auto-confirmed)
-            // Note: with server actions, we might just check success
-            // In registerUser, we return success: true for both cases
-            // But if it's not a background verification, we redirect
-            // Actually, let's look at the registerUser logic again
-            // It returns success: true. We'll show the success screen if there's no session
-            setIsSuccess(true);
+        const s = state as SignUpState;
+        if (s.success) {
+            if (s.hasSession) {
+                // Auto-confirmed — session ready, go to destination
+                router.push(redirectTo);
+                router.refresh();
+            } else {
+                // Email confirmation required — show verify screen
+                setIsSuccess(true);
+            }
         }
-    }, [state]);
+    }, [state, router, redirectTo]);
 
     if (isSuccess) {
         return (
@@ -77,6 +79,7 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
 
                 <div className="border border-border bg-card p-8 md:p-10">
                     <form action={action} className="space-y-6">
+                        <input type="hidden" name="redirectTo" value={redirectTo} />
                         {/* Full Name */}
                         <div className="space-y-2">
                             <Label htmlFor="fullName" className="text-xs font-bold uppercase tracking-widest text-foreground">

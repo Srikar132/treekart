@@ -6,6 +6,8 @@ import { Database, OrderStatus, PlanType, TreeStatus } from "@/types/database.ty
 import {
   sendOrderShippedEmail,
   sendOrderDeliveredEmail,
+  sendRentalStatusUpdateEmail,
+  sendTreeUpdatePostedEmail,
 } from "@/lib/email";
 
 type UserRole = Database["public"]["Enums"]["user_role"];
@@ -194,10 +196,15 @@ export async function adminUpdateRentalStatus(id: string, status: RentalStatus) 
   await requireAdmin();
   const supabase = await getSupabaseServer();
 
-  // 1. Fetch rental to get tree_id
+  // 1. Fetch rental with renter profile and tree info
   const { data: rental, error: fetchErr } = await supabase
     .from("rentals")
-    .select("tree_id, status")
+    .select(`
+      tree_id,
+      status,
+      profiles (full_name, email),
+      trees (variety)
+    `)
     .eq("id", id)
     .single();
 
@@ -224,6 +231,21 @@ export async function adminUpdateRentalStatus(id: string, status: RentalStatus) 
   revalidatePath("/admin/rentals");
   revalidatePath("/admin/trees");
   revalidateTag("trees", "max");
+
+  // 3. Send email for completed/cancelled transitions
+  if (status === "completed" || status === "cancelled") {
+    const profile = rental?.profiles as any;
+    const tree = rental?.trees as any;
+    if (profile?.email) {
+      sendRentalStatusUpdateEmail(
+        profile.email,
+        profile.full_name || "Valued Customer",
+        id,
+        tree?.variety || "Mango Tree",
+        status
+      ).catch((err) => console.error("[Rental Status Email] Failed:", err));
+    }
+  }
 }
 
 export async function adminDeleteRental(id: string) {
@@ -267,11 +289,34 @@ export async function adminCreateTreeUpdate(input: TreeUpdateInsert) {
   if (error) throw new Error(error.message);
 
   if (input.tree_id) {
-    revalidatePath(`/trees/${input.tree_id}`, "page"); // ✅ correct path
+    revalidatePath(`/trees/${input.tree_id}`, "page");
     revalidatePath(`/admin/trees/${input.tree_id}/updates`, "page");
   }
   if (input.rental_id) {
     revalidatePath(`/admin/rentals/${input.rental_id}/updates`, "page");
+
+    // Email the renter about the new tree update
+    const { data: rental } = await supabase
+      .from("rentals")
+      .select(`
+        profiles (full_name, email),
+        trees (variety)
+      `)
+      .eq("id", input.rental_id)
+      .single();
+
+    const profile = (rental?.profiles) as any;
+    const tree = (rental?.trees) as any;
+    if (profile?.email && input.title) {
+      sendTreeUpdatePostedEmail(
+        profile.email,
+        profile.full_name || "Valued Customer",
+        tree?.variety || "Mango Tree",
+        input.title,
+        input.description || null,
+        input.rental_id
+      ).catch((err) => console.error("[Tree Update Email] Failed:", err));
+    }
   }
 
   return data;

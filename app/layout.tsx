@@ -3,6 +3,13 @@ import { DM_Sans, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
+import { QueryProvider } from "@/components/providers/query-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import Script from "next/script";
+import { Toaster } from "sonner";
+import NextTopLoader from "nextjs-toploader";
+import { LoginPromptDialog } from "@/components/shared/login-prompt-dialog";
+
 const dmSans = DM_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
@@ -17,63 +24,10 @@ const dmMono = Bricolage_Grotesque({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.treekart.in"),
-  title: {
-    default: "TreeKart — Rent a Mango Tree & Buy Fresh Alphonso Mangoes",
-    template: "%s | TreeKart"
-  },
-  description: "Experience the joy of owning a mango tree. Rent a real Alphonso mango tree, track its growth, and get fresh organic mangoes delivered to your doorstep.",
-  keywords: [
-    "TreeKart",
-    "rent mango tree",
-    "Alphonso mangoes",
-    "organic mangoes",
-    "mango tree rental",
-    "fresh mango delivery",
-    "buy mangoes online",
-  ],
-  authors: [{ name: "TreeKart Team" }],
-  creator: "TreeKart",
-  publisher: "TreeKart",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
-  },
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    title: "TreeKart — Rent a Mango Tree & Buy Fresh Alphonso Mangoes",
-    description: "Rent a real Alphonso mango tree and enjoy fresh organic mangoes delivered to your doorstep.",
-    url: "https://www.treekart.in",
-    siteName: "TreeKart",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "TreeKart",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "TreeKart — Rent a Mango Tree & Buy Fresh Alphonso Mangoes",
-    description: "Rent a real Alphonso mango tree and enjoy fresh organic mangoes delivered to your doorstep.",
-    images: ["/og-image.png"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
   },
   icons: {
     icon: [
@@ -84,18 +38,9 @@ export const metadata: Metadata = {
     apple: [
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
-    other: [
-    ],
   },
   manifest: '/manifest.json',
 };
-
-import { QueryProvider } from "@/components/providers/query-provider";
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import Script from "next/script";
-import { Toaster } from "sonner";
-import NextTopLoader from "nextjs-toploader";
-import { LoginPromptDialog } from "@/components/shared/login-prompt-dialog";
 
 export default function RootLayout({
   children,
@@ -122,7 +67,7 @@ export default function RootLayout({
                     "logo": "https://www.treekart.in/logo.webp",
                     "contactPoint": {
                       "@type": "ContactPoint",
-                      "telephone": "+91-XXXXXXXXXX",
+                      "telephone": "+91-7981365932",
                       "contactType": "customer service"
                     },
                     "sameAs": [

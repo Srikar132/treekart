@@ -292,7 +292,7 @@ export function CartSidebar() {
                                                         </button>
                                                     </div>
                                                     <p className="text-sm font-semibold font-mono text-foreground">
-                                                        ₹{(item.pricePerKg * item.qty).toLocaleString("en-IN")}
+                                                        ₹{(item.price * item.qty).toLocaleString("en-IN")}
                                                     </p>
                                                 </div>
                                             )}

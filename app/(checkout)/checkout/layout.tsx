@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingBag, ArrowLeft, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 export default function CheckoutLayout({
     children,

@@ -52,12 +52,13 @@ export default function StoreCheckoutClient({ user }: StoreCheckoutClientProps) 
   const { address, setAddress: updateStoreAddress, _hasHydrated } = useDeliveryAddress();
   const [addressErrors, setAddressErrors] = useState<Partial<Record<keyof DeliveryAddress, string>>>();
 
-  // Sync user profile data to address store if not already set
+  // Always sync name/phone from current user's profile — prevents stale data from a previous account
   useEffect(() => {
-    if (_hasHydrated && !address.name && user.full_name) {
-      updateStoreAddress({ name: user.full_name, phone: user.phone });
+    if (_hasHydrated) {
+      updateStoreAddress({ name: user.full_name || "", phone: user.phone || "" });
     }
-  }, [_hasHydrated, user.full_name, user.phone, address.name, updateStoreAddress]);
+  }, [_hasHydrated, user.full_name, user.phone, updateStoreAddress]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successOrderId, setSuccessOrderId] = useState<string | null>(null);
@@ -264,7 +265,7 @@ export default function StoreCheckoutClient({ user }: StoreCheckoutClientProps) 
                     </div>
                     <div className="text-right">
                       <p className="text-xs font-bold text-foreground">
-                        ₹{(item.pricePerKg * item.qty).toLocaleString()}
+                        ₹{(item.price * item.qty).toLocaleString()}
                       </p>
                     </div>
                   </div>

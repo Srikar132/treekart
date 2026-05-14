@@ -1,6 +1,18 @@
+import type { Metadata } from "next";
 import "./admin.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import NextTopLoader from "nextjs-toploader";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Admin — TreeKart",
+    template: "%s | Admin",
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     return (
