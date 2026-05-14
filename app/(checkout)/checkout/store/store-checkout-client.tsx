@@ -62,10 +62,14 @@ export default function StoreCheckoutClient({ user }: StoreCheckoutClientProps) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successOrderId, setSuccessOrderId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
-  const cartTotal = totalPrice();
+  const cartTotal = mounted ? totalPrice() : 0;
   const deliveryFee = cartTotal >= 999 ? 0 : 99;
   const grandTotal = cartTotal + deliveryFee;
+  const displayItems = mounted ? items : [];
+  const displayTotalItems = mounted ? totalItems() : 0;
 
   // Redirect if cart is empty and not on success screen
   useEffect(() => {
@@ -239,7 +243,7 @@ export default function StoreCheckoutClient({ user }: StoreCheckoutClientProps) 
 
               {/* Items */}
               <div className="max-h-[300px] overflow-y-auto divide-y divide-border/40">
-                {items.map((item) => (
+                {displayItems.map((item) => (
                   <div key={`${item.id}-${item.weightKg}`} className="p-6 flex items-center gap-4 group">
                     <div className="relative h-16 w-16 bg-secondary overflow-hidden border border-border/50 flex-shrink-0">
                       {item.imageUrl ? (
