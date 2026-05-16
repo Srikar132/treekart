@@ -49,7 +49,7 @@ export function ProductGrid({ initialData, options }: Props) {
       id: product.id,
       name: product.name,
       variety: product.variety,
-      price: product.price,
+      price: product.price * firstWeight,
       pricePerKg: product.price,
       imageUrl: firstImage,
       badge: product.badge,
