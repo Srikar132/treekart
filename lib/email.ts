@@ -387,7 +387,7 @@ export async function sendTreeUpdatePostedEmail(
       ${safeDesc ? `<p style="margin: 8px 0 0; font-size: 14px; color: #527a41;">${safeDesc}</p>` : ""}
     </div>
     <p style="font-size: 13px; color: #527a41;">View photos and videos from your tree in your account dashboard.</p>
-    <a href="${BASE_URL}/account/rentals/${escapeHtml(rentalId)}" class="button">View Tree Update</a>
+    <a href="${BASE_URL}/account" class="button">View Tree Update</a>
   `;
 
   return sendEmail({
