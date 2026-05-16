@@ -2,18 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag, Loader2, Leaf, Scale } from "lucide-react";
+import { ShoppingBag, Loader2, Scale, Leaf } from "lucide-react";
 import type { Database } from "@/types/database.types";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 export type MangoProduct = Database["public"]["Tables"]["mango_products"]["Row"];
@@ -37,25 +30,21 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
     const discount =
         product.original_price && product.original_price > product.price
-            ? Math.round(
-                ((product.original_price - product.price) / product.original_price) * 100
-            )
+            ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
             : 0;
 
     const isOutOfStock = product.status === "out_of_stock";
     const isPreOrder = product.status === "pre_order";
 
-    const weightLabel = Array.isArray(product.weight_kg) && product.weight_kg.length > 0
-        ? product.weight_kg.length > 1
-            ? `${Math.min(...product.weight_kg)}–${Math.max(...product.weight_kg)} kg`
-            : `${product.weight_kg[0]} kg`
-        : null;
+    const weights: number[] = Array.isArray(product.weight_kg) && product.weight_kg.length > 0
+        ? product.weight_kg
+        : [];
+    const firstWeight = weights[0] ?? 1;
 
-    const savings = product.original_price && product.original_price > product.price
-        ? product.original_price - product.price
-        : null;
+    const boxPrice = product.price * firstWeight;
+    const originalBoxPrice = product.original_price ? product.original_price * firstWeight : null;
+    const savings = originalBoxPrice && originalBoxPrice > boxPrice ? originalBoxPrice - boxPrice : null;
 
-    // Single priority badge: pre-order > discount > custom badge
     const primaryBadge = isPreOrder
         ? { label: "Pre-Order", style: "bg-blue-600 text-white" }
         : discount > 0 && !isOutOfStock
@@ -77,7 +66,6 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                 {/* ── Image ── */}
                 <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted/30">
 
-                    {/* Single priority badge */}
                     {primaryBadge && (
                         <div className="absolute top-3 left-3 z-20">
                             <span className={cn(
@@ -89,14 +77,12 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                         </div>
                     )}
 
-                    {/* Variety pill — top right */}
                     <div className="absolute top-3 right-3 z-20">
                         <span className="bg-black/40 backdrop-blur-sm text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full">
                             {product.variety}
                         </span>
                     </div>
 
-                    {/* Out of stock overlay */}
                     {isOutOfStock && (
                         <div className="absolute inset-0 bg-foreground/50 backdrop-blur-[2px] z-20 flex items-center justify-center">
                             <span className="bg-background/90 text-foreground text-[10px] font-black uppercase tracking-widest px-4 py-2 border border-border shadow">
@@ -105,7 +91,6 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                         </div>
                     )}
 
-                    {/* Image */}
                     <Link href={`/store/${product.id}`} className="absolute inset-0 block">
                         <Image
                             src={product.image_url?.[0] || "/placeholder-mango.png"}
@@ -118,6 +103,9 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         />
                     </Link>
+
+                    {/* Bottom gradient */}
+                    <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/30 to-transparent z-[5] pointer-events-none group-hover:opacity-0 transition-opacity duration-300" />
 
                     {/* Desktop hover CTA */}
                     <div className="absolute inset-x-0 bottom-0 z-10 hidden lg:block translate-y-full group-hover:translate-y-0 transition-transform duration-300">
@@ -141,58 +129,54 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                 </div>
 
                 {/* ── Info ── */}
-                <CardContent className="flex-1 px-5 pt-4 pb-2 space-y-3">
-                    {/* Name */}
+                <CardContent className="flex-1 px-5 pt-4 pb-3 space-y-3">
                     <Link href={`/store/${product.id}`} className="block">
                         <h3 className={cn(
-                            "text-sm font-bold leading-snug line-clamp-1 group-hover:text-primary transition-colors",
+                            "text-sm font-bold leading-snug line-clamp-2 group-hover:text-primary transition-colors",
                             isOutOfStock && "text-muted-foreground"
                         )}>
                             {product.name}
                         </h3>
                     </Link>
 
-                    <Separator className="bg-border/60" />
-
-                    {/* Stats row */}
-                    <div className="flex items-center justify-between gap-2 text-[10px]">
-                        {weightLabel && (
-                            <div className="flex items-center gap-1 text-muted-foreground">
-                                <Scale className="w-3 h-3 text-primary/70 flex-shrink-0" />
-                                <span className="font-semibold">{weightLabel}</span>
-                            </div>
-                        )}
-                        <div className="flex items-center gap-1 text-muted-foreground ml-auto">
-                            <Leaf className="w-3 h-3 text-primary/70 flex-shrink-0" />
-                            <span className="font-semibold">Carbide-free</span>
-                        </div>
+                    {/* Quality tag */}
+                    <div className="flex items-center gap-1">
+                        <Leaf className="w-3 h-3 text-emerald-600 flex-shrink-0" />
+                        <span className="text-[9px] font-bold text-emerald-700 uppercase tracking-wide">
+                            Carbide-free · Farm Fresh
+                        </span>
                     </div>
 
-                    {/* Price row */}
-                    <div className="flex items-end justify-between gap-2">
+                    {/* Price block */}
+                    <div className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-xl px-3 py-2.5">
                         <div>
                             <div className="flex items-baseline gap-1.5">
                                 <span className={cn(
                                     "text-xl font-black text-primary",
                                     isOutOfStock && "text-muted-foreground"
                                 )}>
-                                    ₹{product.price}
+                                    ₹{boxPrice.toLocaleString("en-IN")}
                                 </span>
-                                {product.original_price && product.original_price > product.price && (
+                                {originalBoxPrice && originalBoxPrice > boxPrice && (
                                     <span className="text-xs text-muted-foreground line-through">
-                                        ₹{product.original_price}
+                                        ₹{originalBoxPrice.toLocaleString("en-IN")}
                                     </span>
                                 )}
                             </div>
-                            {savings && (
+                            {savings ? (
                                 <p className="text-[9px] text-emerald-600 font-bold uppercase tracking-wide">
-                                    Save ₹{savings}
+                                    Save ₹{savings.toLocaleString("en-IN")}
+                                </p>
+                            ) : (
+                                <p className="text-[9px] text-muted-foreground/70 font-medium">
+                                    ₹{product.price.toLocaleString("en-IN")}/kg
                                 </p>
                             )}
                         </div>
-                        <span className="text-[9px] text-muted-foreground font-medium bg-muted px-2 py-1 rounded-md">
-                            per box
-                        </span>
+                        <div className="flex items-center gap-1 bg-white rounded-lg px-2.5 py-1.5 border border-border/50 shadow-sm">
+                            <Scale className="w-3 h-3 text-primary/70" />
+                            <span className="text-[10px] font-black text-foreground">{firstWeight} kg</span>
+                        </div>
                     </div>
                 </CardContent>
 

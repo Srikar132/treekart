@@ -1,7 +1,9 @@
 "use server";
 
 import { requireAdmin, getSupabaseServer } from "@/lib/auth";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { cache } from "react";
+import { getSupabasePublic } from "@/utils/supabase/public";
 import { Database, OrderStatus, PlanType, TreeStatus } from "@/types/database.types";
 import {
   sendOrderShippedEmail,
@@ -626,6 +628,54 @@ export async function adminCreateTestimonial(input: any) {
   revalidatePath("/admin/content");
   revalidateTag("testimonials", "max");
 }
+
+// ============================================
+// APP SETTINGS
+// ============================================
+
+const DEFAULT_SETTINGS = {
+  store_delivery_fee: 99,
+  store_free_delivery_threshold: 999,
+  rental_delivery_fee: 0,
+};
+
+const _getCachedSettings = unstable_cache(
+  async () => {
+    const supabase = getSupabasePublic();
+    const { data } = await supabase
+      .from("app_settings")
+      .select("store_delivery_fee, store_free_delivery_threshold, rental_delivery_fee")
+      .eq("id", 1)
+      .single();
+    return (data as typeof DEFAULT_SETTINGS | null) ?? DEFAULT_SETTINGS;
+  },
+  ["app-settings"],
+  { tags: ["app-settings"], revalidate: 3600 }
+);
+
+export const getAppSettings = cache(_getCachedSettings);
+
+export async function adminUpdateDeliverySettings(input: {
+  store_delivery_fee: number;
+  store_free_delivery_threshold: number;
+  rental_delivery_fee: number;
+}) {
+  await requireAdmin();
+  const supabase = await getSupabaseServer();
+
+  const { error } = await supabase
+    .from("app_settings")
+    .update({ ...input, updated_at: new Date().toISOString() })
+    .eq("id", 1);
+
+  if (error) throw new Error(error.message);
+
+  revalidateTag("app-settings", "max");
+  revalidatePath("/admin/settings");
+}
+
+// ==============================================
+
 
 export async function adminDeleteTestimonial(id: string) {
   await requireAdmin();

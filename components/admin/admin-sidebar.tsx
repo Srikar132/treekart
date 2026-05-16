@@ -4,16 +4,17 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { 
-  LayoutDashboard, 
-  TreePine, 
-  ShoppingBag, 
-  Users, 
-  BookOpen, 
-  Image as ImageIcon, 
+  LayoutDashboard,
+  TreePine,
+  ShoppingBag,
+  Users,
+  BookOpen,
+  Image as ImageIcon,
   TrendingUp,
   PackageCheck,
   History,
-  LogOut
+  LogOut,
+  Settings2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -51,6 +52,7 @@ const NAV_ITEMS = [
   { label: "Users", href: "/admin/users", icon: Users },
   { label: "Journal", href: "/admin/blogs", icon: BookOpen },
   { label: "Landing Content", href: "/admin/content", icon: ImageIcon },
+  { label: "Settings", href: "/admin/settings", icon: Settings2 },
 ];
 
 export function AdminSidebar() {

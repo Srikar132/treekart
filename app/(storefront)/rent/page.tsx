@@ -1,6 +1,7 @@
 export const revalidate = 3600;
 
 import { getAvailableTrees, getTreePlans, type TreeSortOption } from "@/actions/tree.actions";
+import { getAppSettings } from "@/actions/admin.actions";
 import { TreeGrid } from "@/components/storefront/rent/tree-grid";
 import { TreeFilters } from "@/components/storefront/rent/tree-filters";
 import { TreeSort } from "@/components/storefront/rent/tree-sort";
@@ -77,9 +78,10 @@ export default async function RentPage({ searchParams }: Props) {
     limit: 12,
   };
 
-  const [initialData, treePlans] = await Promise.all([
+  const [initialData, treePlans, settings] = await Promise.all([
     getAvailableTrees(options),
-    getTreePlans()
+    getTreePlans(),
+    getAppSettings(),
   ]);
 
   return (
@@ -112,7 +114,7 @@ export default async function RentPage({ searchParams }: Props) {
         </div>
 
         {/* Grid and Infinite Scroll */}
-        <TreeGrid initialData={initialData} options={options} />
+        <TreeGrid initialData={initialData} options={options} rentalDeliveryFee={settings.rental_delivery_fee} />
       </div>
     </main>
   );

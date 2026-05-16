@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          id: number
+          store_delivery_fee: number
+          store_free_delivery_threshold: number
+          rental_delivery_fee: number
+          updated_at: string | null
+        }
+        Insert: {
+          id?: number
+          store_delivery_fee?: number
+          store_free_delivery_threshold?: number
+          rental_delivery_fee?: number
+          updated_at?: string | null
+        }
+        Update: {
+          id?: number
+          store_delivery_fee?: number
+          store_free_delivery_threshold?: number
+          rental_delivery_fee?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       mango_products: {
         Row: {
           badge: Database["public"]["Enums"]["product_badge"] | null
@@ -729,6 +753,7 @@ export type Rental = Database['public']['Tables']['rentals']['Row']
 export type TreeUpdate = Database['public']['Tables']['tree_updates']['Row']
 export type TreePlan = Database['public']['Tables']['tree_plans']['Row']
 export type Tree = Database['public']['Tables']['trees']['Row']
+export type AppSettings = Database['public']['Tables']['app_settings']['Row']
 
 // ========================================
 // TABLE INSERT TYPES

@@ -7,6 +7,7 @@ import crypto from "crypto";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getSupabasePublic } from "@/utils/supabase/public";
 import { sendRentalConfirmedEmail } from "@/lib/email";
+import { getAppSettings } from "@/actions/admin.actions";
 
 
 export type TreeSortOption = "newest" | "price_asc" | "price_desc" | "age_asc" | "age_desc";
@@ -247,6 +248,7 @@ export async function reserveTree(treeId: string) {
 
 
 export async function releaseTreeReservation(treeId: string) {
+    await requireUser();
     const supabase = await getSupabaseServer();
     await supabase
         .from("trees")
@@ -279,7 +281,9 @@ export async function createRentalOrder(input: {
 
     if (!tree) throw new Error("Tree not found");
 
-    const totalPaise = Math.round((tree.price ?? 0) * 100);
+    const settings = await getAppSettings();
+    const rentalDeliveryFee = settings.rental_delivery_fee;
+    const totalPaise = Math.round(((tree.price ?? 0) + rentalDeliveryFee) * 100);
 
     // Create Razorpay order
     const rzpOrder = await razorpay.orders.create({
@@ -298,6 +302,7 @@ export async function createRentalOrder(input: {
         amount: totalPaise,
         currency: "INR",
         keyId: process.env.RAZORPAY_KEY_ID!,
+        rentalDeliveryFee,
         treeDetails: tree,
         deliveryAddress: input.deliveryAddress,
         visitRequested: input.visitRequested,
@@ -356,6 +361,9 @@ export async function verifyAndFulfilRental(payload: {
 
     if (!tree) throw new Error("Tree details not found for finalization");
 
+    const settings = await getAppSettings();
+    const rentalDeliveryFee = settings.rental_delivery_fee;
+
     // Compute the reservation expiry — 1 year from today (end of mango season: May 31 of next year)
     const rentalStart = new Date();
     const reservedUntil = new Date(rentalStart);
@@ -374,7 +382,7 @@ export async function verifyAndFulfilRental(payload: {
             season,
             status: "active",
             payment_id: payload.rzpPaymentId,
-            amount_paid: tree.price, // keep as-is; type should match column type
+            amount_paid: (tree.price ?? 0) + rentalDeliveryFee,
             delivery_address: payload.deliveryAddress, // remove `as any`
             visit_requested: payload.visitRequested,
         })
@@ -405,7 +413,7 @@ export async function verifyAndFulfilRental(payload: {
         user.full_name || "Valued Customer",
         rental.id,
         tree.variety || "Mango Tree",
-        tree.price ?? 0,
+        (tree.price ?? 0) + rentalDeliveryFee,
         season
     ).catch((err) => console.error("[Rental Email] Failed to send confirmation:", err));
 

@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { getAvailableTrees, getTreeById, getActiveRental, getTreeUpdates } from "@/actions/tree.actions";
+import { getAppSettings } from "@/actions/admin.actions";
 import { getUser } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { TreeMedia } from "@/components/storefront/trees/tree-media";
@@ -82,9 +83,10 @@ export default async function TreeDetailsPage({ params }: Props) {
   const { id } = await params;
 
   // Only block on critical above-the-fold data
-  const [tree, currentUser] = await Promise.all([
+  const [tree, currentUser, settings] = await Promise.all([
     getTreeById(id),
-    getUser()
+    getUser(),
+    getAppSettings(),
   ]);
 
   if (!tree) return notFound();
@@ -121,7 +123,7 @@ export default async function TreeDetailsPage({ params }: Props) {
           title={tree.variety || "Mango Tree"}
         />
         <Suspense fallback={<TreeInfoSkeleton />}>
-          <TreeInfoStream treeId={id} currentUserId={currentUser?.id ?? null} tree={tree as any} />
+          <TreeInfoStream treeId={id} currentUserId={currentUser?.id ?? null} tree={tree as any} rentalDeliveryFee={settings.rental_delivery_fee} />
         </Suspense>
       </div>
 
@@ -142,10 +144,11 @@ export default async function TreeDetailsPage({ params }: Props) {
 
 // ── Stream resolvers (co-located, not exported) ───────────────────────────────
 
-async function TreeInfoStream({ tree, treeId, currentUserId }: {
+async function TreeInfoStream({ tree, treeId, currentUserId, rentalDeliveryFee }: {
   tree: NonNullable<Awaited<ReturnType<typeof getTreeById>>>;
   treeId: string;
   currentUserId: string | null;
+  rentalDeliveryFee: number;
 }) {
   const isRented = tree.status === "rented";
   const activeRental = isRented ? await getActiveRental(treeId) : null;
@@ -154,6 +157,7 @@ async function TreeInfoStream({ tree, treeId, currentUserId }: {
     <TreeInfo
       tree={tree as any}
       activeRental={activeRental}
+      rentalDeliveryFee={rentalDeliveryFee}
     />
   );
 }

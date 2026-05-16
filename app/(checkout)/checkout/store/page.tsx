@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { requireUser } from "@/lib/auth";
+import { getAppSettings } from "@/actions/admin.actions";
 import StoreCheckoutClient from "./store-checkout-client";
 
 export const metadata: Metadata = {
@@ -38,15 +39,17 @@ export const metadata: Metadata = {
 };
 
 export default async function StoreCheckoutPage() {
-  const user = await requireUser();
+  const [user, settings] = await Promise.all([requireUser(), getAppSettings()]);
 
   return (
-    <StoreCheckoutClient 
+    <StoreCheckoutClient
       user={{
         full_name: user.full_name || "",
         phone: user.phone || "",
         email: user.email || "",
-      }} 
+      }}
+      storeDeliveryFee={settings.store_delivery_fee}
+      storeFreeDeliveryThreshold={settings.store_free_delivery_threshold}
     />
   );
 }

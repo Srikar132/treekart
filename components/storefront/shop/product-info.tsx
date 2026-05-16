@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Info, Scale, Tag, Sparkles, Share2 } from "lucide-react";
 import { useMangoCart } from "@/store/use-mango-cart";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { AnimatedButton } from "@/components/shared/animated-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -41,6 +41,19 @@ export function ProductInfo({ product }: ProductInfoProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [descExpanded, setDescExpanded] = useState(false);
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const [isClamped, setIsClamped] = useState(false);
+
+  useEffect(() => {
+    if (descExpanded) return;
+    const el = descRef.current;
+    if (!el) return;
+    const check = () => setIsClamped(el.scrollHeight > el.clientHeight);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [descExpanded]);
   const [selectedWeight, setSelectedWeight] = useState<number>(
     Array.isArray(product.weight_kg) && product.weight_kg.length > 0
       ? product.weight_kg[0]
@@ -193,17 +206,19 @@ export function ProductInfo({ product }: ProductInfoProps) {
       {product.description && (
         <motion.div variants={item} className="mb-10 space-y-3">
           <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Product Description</h3>
-          <p className={cn("text-muted-foreground leading-relaxed", !descExpanded && "line-clamp-3")}>
+          <p ref={descRef} className={cn("text-muted-foreground leading-relaxed", !descExpanded && "line-clamp-3")}>
             {product.description}
           </p>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setDescExpanded((v) => !v)}
-            className="h-auto px-0 text-primary text-xs font-bold uppercase tracking-widest hover:bg-transparent hover:text-primary/70"
-          >
-            {descExpanded ? "Show Less ↑" : "Show More ↓"}
-          </Button>
+          {(isClamped || descExpanded) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setDescExpanded((v) => !v)}
+              className="h-auto px-0 text-primary text-xs font-bold uppercase tracking-widest hover:bg-transparent hover:text-primary/70"
+            >
+              {descExpanded ? "Show Less ↑" : "Show More ↓"}
+            </Button>
+          )}
         </motion.div>
       )}
 
