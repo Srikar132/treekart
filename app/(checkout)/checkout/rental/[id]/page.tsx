@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getTreeById, getActiveRental } from "@/actions/tree.actions";
+import { getAppSettings } from "@/actions/admin.actions";
 import RentalCheckoutClient from "./rental-checkout-client";
 
 interface Props {
@@ -45,7 +46,8 @@ export const metadata: Metadata = {
 
 export default async function RentalCheckoutPage({ params }: Props) {
   const { id } = await params;
-  const user = await requireUser();
+  const [user, settings] = await Promise.all([requireUser(), getAppSettings()]);
+  const rentalDeliveryFee = settings.rental_delivery_fee;
 
   let tree;
   try {
@@ -63,7 +65,7 @@ export default async function RentalCheckoutPage({ params }: Props) {
 
   // 1. Current user already holds the active rental → drop them into success
   if (activeRental?.user_id === user.id) {
-    return <RentalCheckoutClient tree={tree as any} user={user as any} initialStep="success" />;
+    return <RentalCheckoutClient tree={tree as any} user={user as any} rentalDeliveryFee={rentalDeliveryFee} initialStep="success" />;
   }
 
   // 2. Rented by someone else → nothing to checkout
@@ -72,5 +74,5 @@ export default async function RentalCheckoutPage({ params }: Props) {
   // 3. Not available for checkout (e.g. some other inactive state)
   if (tree.status !== "available" && tree.status !== "inactive") return notFound();
 
-  return <RentalCheckoutClient tree={tree as any} user={user as any} />;
+  return <RentalCheckoutClient tree={tree as any} user={user as any} rentalDeliveryFee={rentalDeliveryFee} />;
 }

@@ -14,6 +14,7 @@ type OrderStatus = Database["public"]["Enums"]["order_status"];
 import { type DeliveryAddress } from "@/types/checkout";
 import { paymentAj } from "@/lib/arcjet";
 import { headers } from "next/headers";
+import { getAppSettings } from "@/actions/admin.actions";
 
 // Shape stored in orders.items (Json column)
 type OrderItemRecord = {
@@ -24,7 +25,7 @@ type OrderItemRecord = {
   qty: number;
   imageUrl: string;
   weightKg: number;
-  lineTotal: number; // pricePerKg * qty — stored for receipt immutability
+  lineTotal: number; // price (boxPrice) * qty — stored for receipt immutability
 };
 
 export type CreateOrderResult = {
@@ -55,30 +56,36 @@ function getRazorpay() {
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
-function buildOrderItems(items: CartItem[]): OrderItemRecord[] {
-  return items.map((item) => ({
-    id: item.id,
-    name: item.name,
-    variety: item.variety,
-    pricePerKg: item.pricePerKg,
-    qty: item.qty,
-    imageUrl: item.imageUrl,
-    weightKg: item.weightKg ?? 0,
-    lineTotal: item.pricePerKg * item.qty,
-  }));
+function buildOrderItems(items: CartItem[], dbPrices: Map<string, number>): OrderItemRecord[] {
+  return items.map((item) => {
+    const trustedPricePerKg = dbPrices.get(item.id) ?? item.pricePerKg;
+    const trustedBoxPrice = trustedPricePerKg * (item.weightKg ?? 1);
+    return {
+      id: item.id,
+      name: item.name,
+      variety: item.variety,
+      pricePerKg: trustedPricePerKg,
+      qty: item.qty,
+      imageUrl: item.imageUrl,
+      weightKg: item.weightKg ?? 0,
+      lineTotal: trustedBoxPrice * item.qty,
+    };
+  });
 }
 
-const DELIVER_CHARGES = 99;
-const MINIMUM_ORDER_AMOUNT = 999;
-
-function computeTotals(items: CartItem[]) {
-  const subtotal = items.reduce(
-    (sum, i) => sum + i.pricePerKg * i.qty,
-    0
-  );
-  const deliveryFee = subtotal >= MINIMUM_ORDER_AMOUNT ? 0 : DELIVER_CHARGES;
+function computeTotals(
+  items: CartItem[],
+  settings: { store_delivery_fee: number; store_free_delivery_threshold: number },
+  dbPrices: Map<string, number>
+) {
+  const subtotal = items.reduce((sum, i) => {
+    const trustedPricePerKg = dbPrices.get(i.id) ?? i.pricePerKg;
+    const trustedBoxPrice = trustedPricePerKg * (i.weightKg ?? 1);
+    return sum + trustedBoxPrice * i.qty;
+  }, 0);
+  const deliveryFee = subtotal >= settings.store_free_delivery_threshold ? 0 : settings.store_delivery_fee;
   const grandTotal = subtotal + deliveryFee;
-  const grandTotalPaise = Math.round(grandTotal * 100); // Razorpay works in paise
+  const grandTotalPaise = Math.round(grandTotal * 100);
   return { subtotal, deliveryFee, grandTotal, grandTotalPaise };
 }
 
@@ -117,14 +124,15 @@ export async function createMangoOrder(
   const supabase = await getSupabaseServer();
   const razorpay = getRazorpay();
 
-  const { grandTotalPaise, grandTotal } = computeTotals(items);
-
-  // Verify product availability
+  // Verify product availability and fetch authoritative prices from DB
   const productIds = items.map(i => i.id);
-  const { data: dbProducts, error: productError } = await supabase
-    .from("mango_products")
-    .select("id, status, name, weight_kg")
-    .in("id", productIds);
+  const [{ data: dbProducts, error: productError }, settings] = await Promise.all([
+    supabase
+      .from("mango_products")
+      .select("id, status, name, weight_kg, price")
+      .in("id", productIds),
+    getAppSettings(),
+  ]);
 
   if (productError) {
     throw new Error(`Failed to verify products: ${productError.message}`);
@@ -143,7 +151,13 @@ export async function createMangoOrder(
     }
   }
 
-  const orderItems = buildOrderItems(items);
+  // Build trusted price map from DB — never trust client-supplied prices
+  const dbPrices = new Map<string, number>(
+    (dbProducts ?? []).map(p => [p.id, p.price])
+  );
+
+  const { grandTotalPaise, grandTotal } = computeTotals(items, settings, dbPrices);
+  const orderItems = buildOrderItems(items, dbPrices);
   const receiptId = `mango_${user.id.slice(0, 8)}_${Date.now()}`;
 
   // Create Razorpay order first (if this fails, nothing is written to DB)

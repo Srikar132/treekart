@@ -33,28 +33,31 @@ export function TreeMedia({ images, title }: TreeMediaProps) {
   }, [api]);
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: -30 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="space-y-4"
+      className="space-y-6"
     >
-      <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted/20 border">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-muted/10 border shadow-sm group">
         <Carousel setApi={setApi} className="w-full h-full" opts={{ loop: true }}>
           <CarouselContent className="h-full">
-            {displayImages.map((img, index) => (
-              <CarouselItem key={index} className="relative h-full aspect-square">
-                <Image
-                  src={img}
-                  alt={`${title} - ${index + 1}`}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 600px"
-                  className="object-cover"
-                  priority={index === 0}
-                />
+            {displayImages.map((img, idx) => (
+              <CarouselItem key={idx} className="h-full">
+                <div className="relative h-full aspect-[4/3] overflow-hidden rounded-3xl">
+                  <Image
+                    src={img}
+                    alt={`${title} - Image ${idx + 1}`}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover"
+                    priority={idx === 0}
+                  />
+                </div>
               </CarouselItem>
             ))}
           </CarouselContent>
+
           {displayImages.length > 1 && (
             <>
               <CarouselPrevious className="left-4" />
@@ -66,22 +69,24 @@ export function TreeMedia({ images, title }: TreeMediaProps) {
 
       {/* Thumbnails */}
       {displayImages.length > 1 && (
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-          {displayImages.map((img, index) => (
+        <div className="flex flex-wrap gap-4">
+          {displayImages.map((img, idx) => (
             <button
-              key={index}
-              onClick={() => api?.scrollTo(index)}
+              key={idx}
+              onClick={() => api?.scrollTo(idx)}
               className={cn(
-                "relative flex-shrink-0 w-24 aspect-square rounded-lg overflow-hidden border-2 transition-all",
-                current === index ? "border-primary scale-105 shadow-md" : "border-transparent opacity-60 hover:opacity-100"
+                "relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all",
+                current === idx
+                  ? "border-primary ring-2 ring-primary/20 scale-105"
+                  : "border-transparent opacity-60 hover:opacity-100"
               )}
             >
-              <Image 
-                src={img} 
-                alt={`Thumbnail ${index + 1}`} 
-                fill 
-                sizes="96px"
-                className="object-cover" 
+              <Image
+                src={img}
+                alt={`${title} thumb ${idx + 1}`}
+                fill
+                sizes="80px"
+                className="object-cover"
               />
             </button>
           ))}

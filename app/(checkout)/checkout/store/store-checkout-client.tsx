@@ -41,9 +41,11 @@ interface StoreCheckoutClientProps {
     phone: string;
     email: string;
   };
+  storeDeliveryFee: number;
+  storeFreeDeliveryThreshold: number;
 }
 
-export default function StoreCheckoutClient({ user }: StoreCheckoutClientProps) {
+export default function StoreCheckoutClient({ user, storeDeliveryFee, storeFreeDeliveryThreshold }: StoreCheckoutClientProps) {
   const router = useRouter();
   const { items, totalPrice, totalItems, clear, closeCart } = useMangoCart();
   const { openRazorpay, loaded: razorpayLoaded } = useRazorpay();
@@ -66,7 +68,7 @@ export default function StoreCheckoutClient({ user }: StoreCheckoutClientProps) 
   useEffect(() => { setMounted(true); }, []);
 
   const cartTotal = mounted ? totalPrice() : 0;
-  const deliveryFee = cartTotal >= 999 ? 0 : 99;
+  const deliveryFee = cartTotal >= storeFreeDeliveryThreshold ? 0 : storeDeliveryFee;
   const grandTotal = cartTotal + deliveryFee;
   const displayItems = mounted ? items : [];
   const displayTotalItems = mounted ? totalItems() : 0;
@@ -237,7 +239,7 @@ export default function StoreCheckoutClient({ user }: StoreCheckoutClientProps) 
                   </span>
                 </div>
                 <Badge variant="outline" className="rounded-none border-border bg-white text-[9px] font-bold uppercase tracking-widest">
-                  {Number(totalItems().toFixed(2))} KG TOTAL
+                  {Number(displayTotalItems.toFixed(2))} KG TOTAL
                 </Badge>
               </div>
 

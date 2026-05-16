@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Leaf, TreePine, MapPin, Sprout } from "lucide-react";
+import { Search, Leaf, TreePine, MapPin, Sprout, Truck } from "lucide-react";
 import {
     Carousel,
     CarouselContent,
@@ -24,9 +24,10 @@ import { TreeListItem } from "@/types";
 
 interface TreeCardProps {
     tree: TreeListItem;
+    rentalDeliveryFee?: number;
 }
 
-export function TreeCard({ tree }: TreeCardProps) {
+export function TreeCard({ tree, rentalDeliveryFee }: TreeCardProps) {
     const images =
         Array.isArray(tree.photos) && tree.photos.length > 0
             ? (tree.photos as string[])
@@ -184,6 +185,16 @@ export function TreeCard({ tree }: TreeCardProps) {
                             </span>
                         )}
                     </div>
+
+                    {/* Delivery badge */}
+                    {rentalDeliveryFee !== undefined && (
+                        <div className="flex items-center gap-1.5">
+                            <Truck className={`w-3 h-3 flex-shrink-0 ${rentalDeliveryFee === 0 ? "text-emerald-600" : "text-muted-foreground"}`} />
+                            <span className={`text-[10px] font-semibold ${rentalDeliveryFee === 0 ? "text-emerald-600" : "text-muted-foreground"}`}>
+                                {rentalDeliveryFee === 0 ? "Free Harvest Delivery" : `+ ₹${rentalDeliveryFee.toLocaleString("en-IN")} Delivery`}
+                            </span>
+                        </div>
+                    )}
                 </CardContent>
 
                 {/* ── Mobile CTA ── */}

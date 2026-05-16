@@ -69,10 +69,11 @@ interface RentalCheckoutClientProps {
     phone: string;
     email: string;
   };
+  rentalDeliveryFee: number;
   initialStep?: CheckoutStep;
 }
 
-export default function RentalCheckoutClient({ tree, user, initialStep = "details" }: RentalCheckoutClientProps) {
+export default function RentalCheckoutClient({ tree, user, rentalDeliveryFee, initialStep = "details" }: RentalCheckoutClientProps) {
   const router = useRouter();
   const { openRazorpay, loaded: razorpayLoaded } = useRazorpay();
 
@@ -251,7 +252,7 @@ export default function RentalCheckoutClient({ tree, user, initialStep = "detail
             <AnimatedButton
               onClick={handleRentNow}
               disabled={loading || !razorpayLoaded}
-              label={loading ? "Processing..." : `Complete Rental • ₹${tree.price.toLocaleString("en-IN")}`}
+              label={loading ? "Processing..." : `Complete Rental • ₹${(tree.price + rentalDeliveryFee).toLocaleString("en-IN")}`}
               icon={loading ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}
               className="w-full h-16 bg-primary text-primary-foreground border-transparent text-lg shadow-xl shadow-primary/10"
               fillClassName="bg-white"
@@ -324,11 +325,14 @@ export default function RentalCheckoutClient({ tree, user, initialStep = "detail
                   </div>
                   <div className="flex justify-between items-center text-sm font-medium">
                     <span className="text-muted-foreground uppercase tracking-widest text-[10px]">Harvest Shipping</span>
-                    <span className="text-primary uppercase tracking-widest text-[10px] font-bold">Inclusive</span>
+                    {rentalDeliveryFee === 0
+                      ? <span className="text-primary uppercase tracking-widest text-[10px] font-bold">Free</span>
+                      : <span className="text-foreground text-[10px] font-bold">₹{rentalDeliveryFee.toLocaleString()}</span>
+                    }
                   </div>
                   <div className="flex justify-between items-center pt-4 border-t border-border/50">
                     <span className="text-foreground font-bold uppercase tracking-widest text-xs">Total Amount</span>
-                    <span className="text-2xl font-bold text-primary">₹{tree.price.toLocaleString()}</span>
+                    <span className="text-2xl font-bold text-primary">₹{(tree.price + rentalDeliveryFee).toLocaleString()}</span>
                   </div>
                 </div>
               </div>

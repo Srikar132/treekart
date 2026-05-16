@@ -29,7 +29,7 @@ export function AddressForm({ value, onChange, errors }: Props) {
         if (data && data.length > 0) setLocalities(data);
       });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const set = (key: keyof DeliveryAddress) =>
@@ -85,7 +85,7 @@ export function AddressForm({ value, onChange, errors }: Props) {
             placeholder="John Doe"
             value={value.name}
             onChange={set("name")}
-            disabled
+            // disabled
             className={cn(
               "h-12 rounded-none border-border bg-muted/50 text-sm focus-visible:ring-primary transition-all cursor-not-allowed",
               errors?.name && "border-destructive focus-visible:ring-destructive"
@@ -106,7 +106,7 @@ export function AddressForm({ value, onChange, errors }: Props) {
               placeholder="98765 43210"
               value={value.phone}
               onChange={set("phone")}
-              disabled
+              // disabled
               className={cn(
                 "h-12 rounded-none border-border bg-muted/50 text-sm focus-visible:ring-primary transition-all cursor-not-allowed",
                 errors?.phone && "border-destructive focus-visible:ring-destructive"

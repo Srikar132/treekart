@@ -43,12 +43,12 @@ export function ProductMedia({ image, name }: ProductMediaProps) {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="space-y-6"
     >
-      <div className="relative aspect-square overflow-hidden rounded-3xl bg-muted/10 border shadow-sm group">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-muted/10 border shadow-sm group">
         <Carousel setApi={setApi} className="w-full h-full" opts={{ loop: true }}>
           <CarouselContent className="h-full">
             {images.map((img, idx) => (
               <CarouselItem key={idx} className="h-full">
-                <div className="relative h-full aspect-square overflow-hidden rounded-3xl">
+                <div className="relative h-full aspect-[4/3] overflow-hidden rounded-3xl">
                 <Image
                   src={img}
                   alt={`${name} - Image ${idx + 1}`}

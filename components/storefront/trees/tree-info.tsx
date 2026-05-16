@@ -3,13 +3,13 @@
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Info, Leaf, MapPin, Calendar, Wheat, Share2, UserCircle } from "lucide-react";
+import { CheckCircle, Info, Leaf, MapPin, Calendar, Wheat, Share2, UserCircle, Truck } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AnimatedButton } from "@/components/shared/animated-button";
 import { ShareDialog } from "@/components/shared/share-dialog";
 import { useRentalStore } from "@/store/use-rental-store";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Database, Tree, Farmer } from "@/types/database.types";
 import { useLoginPrompt } from "@/store/use-login-prompt";
 import { createClient } from "@/utils/supabase/client";
@@ -33,6 +33,7 @@ export type ActiveRental = {
 interface TreeInfoProps {
   tree: TreeWithDetails;
   activeRental: ActiveRental;
+  rentalDeliveryFee?: number;
 }
 
 const container = {
@@ -45,11 +46,24 @@ const item = {
   show: { opacity: 1, y: 0 },
 };
 
-export function TreeInfo({ tree, activeRental }: TreeInfoProps) {
+export function TreeInfo({ tree, activeRental, rentalDeliveryFee }: TreeInfoProps) {
   const router = useRouter();
   const { setPlan } = useRentalStore();
   const { openLoginPrompt } = useLoginPrompt();
   const [descExpanded, setDescExpanded] = useState(false);
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const [isClamped, setIsClamped] = useState(false);
+
+  useEffect(() => {
+    if (descExpanded) return;
+    const el = descRef.current;
+    if (!el) return;
+    const check = () => setIsClamped(el.scrollHeight > el.clientHeight);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [descExpanded]);
 
   const handleRentNow = async () => {
     setPlan({
@@ -117,17 +131,19 @@ export function TreeInfo({ tree, activeRental }: TreeInfoProps) {
       {tree.description && (
         <motion.div variants={item} className="mb-8 space-y-2">
           <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">About this Tree</h3>
-          <p className={cn("text-muted-foreground leading-relaxed", !descExpanded && "line-clamp-3")}>
+          <p ref={descRef} className={cn("text-muted-foreground leading-relaxed", !descExpanded && "line-clamp-3")}>
             {tree.description}
           </p>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setDescExpanded((v) => !v)}
-            className="h-auto px-0 text-primary text-xs font-bold uppercase tracking-widest hover:bg-transparent hover:text-primary/70"
-          >
-            {descExpanded ? "Show Less ↑" : "Show More ↓"}
-          </Button>
+          {(isClamped || descExpanded) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setDescExpanded((v) => !v)}
+              className="h-auto px-0 text-primary text-xs font-bold uppercase tracking-widest hover:bg-transparent hover:text-primary/70"
+            >
+              {descExpanded ? "Show Less ↑" : "Show More ↓"}
+            </Button>
+          )}
         </motion.div>
       )}
 
@@ -147,6 +163,17 @@ export function TreeInfo({ tree, activeRental }: TreeInfoProps) {
             <p className="font-bold">{tree.yield_min_kg}-{tree.yield_max_kg} Kg</p>
           </div>
         </div>
+        {rentalDeliveryFee !== undefined && (
+          <div className={`flex items-center gap-3 p-4 rounded-xl border border-border/50 ${rentalDeliveryFee === 0 ? "bg-emerald-50/50" : "bg-secondary/30"}`}>
+            <Truck className={rentalDeliveryFee === 0 ? "text-emerald-600" : "text-primary"} size={24} />
+            <div>
+              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Delivery</p>
+              <p className={`font-bold ${rentalDeliveryFee === 0 ? "text-emerald-600" : ""}`}>
+                {rentalDeliveryFee === 0 ? "Free" : `₹${rentalDeliveryFee.toLocaleString()}`}
+              </p>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Farm info */}

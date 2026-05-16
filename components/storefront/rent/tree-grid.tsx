@@ -28,9 +28,10 @@ type Props = {
     totalPages: number;
   };
   options: GetTreesOptions;
+  rentalDeliveryFee: number;
 };
 
-export function TreeGrid({ initialData, options }: Props) {
+export function TreeGrid({ initialData, options, rentalDeliveryFee }: Props) {
   const { ref, inView } = useInView();
 
   const {
@@ -81,7 +82,7 @@ export function TreeGrid({ initialData, options }: Props) {
     <div className="space-y-10">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
         {allTrees.map((tree) => {
-          return <TreeCard key={tree.id} tree={tree} />;
+          return <TreeCard key={tree.id} tree={tree} rentalDeliveryFee={rentalDeliveryFee} />;
         })}
       </div>
 

@@ -88,7 +88,7 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
                             <Input
                                 id="fullName"
                                 name="fullName"
-                                placeholder="SRIKAR REDDY"
+                                placeholder="Enter your name"
                                 key={state.values?.fullName}
                                 defaultValue={state.values?.fullName ?? ""}
                                 className={`h-12 border-border bg-background px-4 text-sm focus-visible:ring-primary rounded-none ${state.errors?.fullName ? "border-destructive" : ""}`}
@@ -109,7 +109,7 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
                                 id="email"
                                 name="email"
                                 type="email"
-                                placeholder="YOUR@EMAIL.COM"
+                                placeholder="Enter your email"
                                 key={state.values?.email}
                                 defaultValue={state.values?.email ?? ""}
                                 className={`h-12 border-border bg-background px-4 text-sm focus-visible:ring-primary rounded-none ${state.errors?.email ? "border-destructive" : ""}`}
@@ -129,7 +129,7 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
                             <Input
                                 id="phone"
                                 name="phone"
-                                placeholder="9876543210"
+                                placeholder="Enter your phone number"
                                 key={state.values?.phone}
                                 defaultValue={state.values?.phone ?? ""}
                                 className={`h-12 border-border bg-background px-4 text-sm focus-visible:ring-primary rounded-none ${state.errors?.phone ? "border-destructive" : ""}`}
