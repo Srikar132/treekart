@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { TreeListItem } from "@/types";
 
 interface TreeCardProps {
@@ -123,7 +122,7 @@ export function TreeCard({ tree, rentalDeliveryFee }: TreeCardProps) {
                 </div>
 
                 {/* ── Info ── */}
-                <CardContent className="flex-1 px-5 pt-4 pb-2 space-y-3">
+                <CardContent className="flex-1 px-4 pt-3 pb-2 space-y-2">
                     {/* Variety & name */}
                     <Link href={`/trees/${tree.id}`} className="block">
                         <h3 className="text-sm font-bold leading-snug line-clamp-1 group-hover:text-primary transition-colors">
@@ -131,10 +130,8 @@ export function TreeCard({ tree, rentalDeliveryFee }: TreeCardProps) {
                         </h3>
                     </Link>
 
-                    <Separator className="bg-border/60" />
-
                     {/* Stats grid */}
-                    <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
                         {tree.age_years != null && (
                             <div className="flex items-center gap-1.5">
                                 <TreePine className="w-3 h-3 text-primary/70 flex-shrink-0" />
@@ -169,36 +166,31 @@ export function TreeCard({ tree, rentalDeliveryFee }: TreeCardProps) {
                         )}
                     </div>
 
-                    {/* Price */}
-                    <div className="flex items-end justify-between gap-2 pt-1">
+                    {/* Price + delivery */}
+                    <div className="flex items-center justify-between gap-2 bg-primary/5 border border-primary/10 rounded-xl px-3 py-2">
                         <div>
                             <p className="text-[9px] text-muted-foreground font-medium uppercase tracking-wide">
                                 Annual Rental
                             </p>
-                            <span className="text-xl font-black text-primary">
+                            <span className="text-lg font-black text-primary">
                                 ₹{tree.price.toLocaleString("en-IN")}
                             </span>
+                            {rentalDeliveryFee !== undefined && (
+                                <p className={`text-[9px] font-bold ${rentalDeliveryFee === 0 ? "text-emerald-600" : "text-muted-foreground"}`}>
+                                    {rentalDeliveryFee === 0 ? "Free delivery" : `+₹${rentalDeliveryFee.toLocaleString("en-IN")} delivery`}
+                                </p>
+                            )}
                         </div>
                         {tree.farmers?.farm_name && (
-                            <span className="text-[9px] text-muted-foreground font-medium bg-muted px-2 py-1 rounded-md text-right max-w-[50%] truncate">
+                            <span className="text-[9px] text-muted-foreground font-medium bg-white border border-border/50 px-2 py-1 rounded-lg text-right max-w-[45%] truncate shadow-sm">
                                 {tree.farmers.farm_name}
                             </span>
                         )}
                     </div>
-
-                    {/* Delivery badge */}
-                    {rentalDeliveryFee !== undefined && (
-                        <div className="flex items-center gap-1.5">
-                            <Truck className={`w-3 h-3 flex-shrink-0 ${rentalDeliveryFee === 0 ? "text-emerald-600" : "text-muted-foreground"}`} />
-                            <span className={`text-[10px] font-semibold ${rentalDeliveryFee === 0 ? "text-emerald-600" : "text-muted-foreground"}`}>
-                                {rentalDeliveryFee === 0 ? "Free Harvest Delivery" : `+ ₹${rentalDeliveryFee.toLocaleString("en-IN")} Delivery`}
-                            </span>
-                        </div>
-                    )}
                 </CardContent>
 
                 {/* ── Mobile CTA ── */}
-                <CardFooter className="px-5 pb-5 pt-0 lg:hidden">
+                <CardFooter className="px-4 pb-4 pt-0 lg:hidden">
                     <Link
                         href={`/trees/${tree.id}`}
                         className="w-full h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20"
