@@ -39,7 +39,12 @@ import { useLoginPrompt } from "@/store/use-login-prompt";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
-export function CartSidebar() {
+interface CartSidebarProps {
+    storeDeliveryFee: number;
+    storeFreeDeliveryThreshold: number;
+}
+
+export function CartSidebar({ storeDeliveryFee, storeFreeDeliveryThreshold }: CartSidebarProps) {
     const {
         items,
         isOpen,
@@ -92,6 +97,7 @@ export function CartSidebar() {
     };
 
     const hasOutOfStockItems = items.some((i) => i.status === "out_of_stock");
+    const deliveryFee = totalPrice() >= storeFreeDeliveryThreshold ? 0 : storeDeliveryFee;
 
     const handleCheckout = async () => {
         if (hasOutOfStockItems) return;
@@ -321,13 +327,13 @@ export function CartSidebar() {
                         )}
 
                         {/* Free delivery nudge */}
-                        {!hasOutOfStockItems && totalPrice() < 999 && (
+                        {!hasOutOfStockItems && deliveryFee > 0 && (
                             <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-lg px-3 py-2">
                                 <Leaf size={14} className="text-primary flex-shrink-0" />
                                 <p className="text-xs text-primary">
                                     Add{" "}
                                     <span className="font-semibold font-mono">
-                                        ₹{(999 - totalPrice()).toLocaleString("en-IN")}
+                                        ₹{(storeFreeDeliveryThreshold - totalPrice()).toLocaleString("en-IN")}
                                     </span>{" "}
                                     more for free delivery
                                 </p>
@@ -346,18 +352,15 @@ export function CartSidebar() {
                             </div>
                             <div className="flex justify-between text-sm text-muted-foreground">
                                 <span>Delivery</span>
-                                <span className="font-mono text-primary">
-                                    {totalPrice() >= 999 ? "Free" : "₹99"}
+                                <span className={`font-mono ${deliveryFee === 0 ? "text-primary" : ""}`}>
+                                    {deliveryFee === 0 ? "Free" : `₹${deliveryFee.toLocaleString("en-IN")}`}
                                 </span>
                             </div>
                             <Separator className="my-1" />
                             <div className="flex justify-between text-base font-semibold text-foreground">
                                 <span>Total</span>
                                 <span className="font-mono">
-                                    ₹
-                                    {(
-                                        totalPrice() + (totalPrice() >= 999 ? 0 : 99)
-                                    ).toLocaleString("en-IN")}
+                                    ₹{(totalPrice() + deliveryFee).toLocaleString("en-IN")}
                                 </span>
                             </div>
                         </div>

@@ -64,7 +64,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             <Card className="group h-full flex flex-col overflow-hidden rounded-2xl border border-border bg-card pt-0 shadow-sm hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300">
 
                 {/* ── Image ── */}
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted/30">
+                <div className="relative aspect-square w-full overflow-hidden bg-muted/30">
 
                     {primaryBadge && (
                         <div className="absolute top-3 left-3 z-20">
