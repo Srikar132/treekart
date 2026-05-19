@@ -4,7 +4,7 @@ import { getSupabaseServer, requireUser, requireAdmin } from "@/lib/auth";
 import { Database, TreeInsert } from "@/types/database.types";
 import Razorpay from "razorpay";
 import crypto from "crypto";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getSupabasePublic } from "@/utils/supabase/public";
 import { sendRentalConfirmedEmail } from "@/lib/email";
 import { getAppSettings } from "@/actions/admin.actions";
@@ -45,12 +45,13 @@ const razorpay = new Razorpay({
 });
 // ── PUBLIC ─────────────────────────────────────────────────────────
 
-export async function getAvailableTrees(options?: GetTreesOptions) {
-    const supabase = await getSupabasePublic();
+const _getAvailableTreesCached = unstable_cache(
+    async (options?: GetTreesOptions) => {
+        const supabase = await getSupabasePublic();
 
-    let query = supabase
-        .from("trees")
-        .select(`
+        let query = supabase
+            .from("trees")
+            .select(`
       *,
       farmers (
         id,
@@ -73,88 +74,92 @@ export async function getAvailableTrees(options?: GetTreesOptions) {
         )
       )
     `, { count: "exact" })
-        .eq("is_verified", true);
+            .eq("is_verified", true);
 
-    const statusFilter = options?.filters?.status || ["available"];
-    query = query.in("status", statusFilter);
+        const statusFilter = options?.filters?.status || ["available"];
+        query = query.in("status", statusFilter);
 
-    // Apply filters
-    if (options?.excludeId) {
-        query = query.neq("id", options.excludeId);
-    }
-
-    if (options?.filters) {
-        const { planId, minPrice, maxPrice, minAge, maxAge } = options.filters;
-        if (planId && planId.length > 0) {
-            query = query.in("plan_id", planId);
+        if (options?.excludeId) {
+            query = query.neq("id", options.excludeId);
         }
-        if (minPrice !== undefined) {
-            query = query.gte("price", minPrice);
-        }
-        if (maxPrice !== undefined) {
-            query = query.lte("price", maxPrice);
-        }
-        if (minAge !== undefined) {
-            query = query.gte("age_years", minAge);
-        }
-        if (maxAge !== undefined) {
-            query = query.lte("age_years", maxAge);
-        }
-    }
 
-    // Apply sorting
-    if (options?.sort) {
-        switch (options.sort) {
-            case "newest":
-                query = query.order("created_at", { ascending: false });
-                break;
-            case "price_asc":
-                query = query.order("price", { ascending: true });
-                break;
-            case "price_desc":
-                query = query.order("price", { ascending: false });
-                break;
-            case "age_asc":
-                query = query.order("age_years", { ascending: true });
-                break;
-            case "age_desc":
-                query = query.order("age_years", { ascending: false });
-                break;
+        if (options?.filters) {
+            const { planId, minPrice, maxPrice, minAge, maxAge } = options.filters;
+            if (planId && planId.length > 0) {
+                query = query.in("plan_id", planId);
+            }
+            if (minPrice !== undefined) {
+                query = query.gte("price", minPrice);
+            }
+            if (maxPrice !== undefined) {
+                query = query.lte("price", maxPrice);
+            }
+            if (minAge !== undefined) {
+                query = query.gte("age_years", minAge);
+            }
+            if (maxAge !== undefined) {
+                query = query.lte("age_years", maxAge);
+            }
         }
-    } else {
-        // Default sort
-        query = query.order("source", { ascending: true }).order("created_at", { ascending: false });
-    }
 
-    // Apply pagination
-    const page = options?.page && options.page > 0 ? options.page : 1;
-    const limit = options?.limit && options.limit > 0 ? options.limit : 10;
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
+        if (options?.sort) {
+            switch (options.sort) {
+                case "newest":
+                    query = query.order("created_at", { ascending: false });
+                    break;
+                case "price_asc":
+                    query = query.order("price", { ascending: true });
+                    break;
+                case "price_desc":
+                    query = query.order("price", { ascending: false });
+                    break;
+                case "age_asc":
+                    query = query.order("age_years", { ascending: true });
+                    break;
+                case "age_desc":
+                    query = query.order("age_years", { ascending: false });
+                    break;
+            }
+        } else {
+            query = query.order("source", { ascending: true }).order("created_at", { ascending: false });
+        }
 
-    query = query.range(from, to);
+        const page = options?.page && options.page > 0 ? options.page : 1;
+        const limit = options?.limit && options.limit > 0 ? options.limit : 10;
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
 
-    const { data, error, count } = await query;
-    if (error) throw new Error(error.message);
+        query = query.range(from, to);
 
-    return {
-        trees: data,
-        totalCount: count || 0,
-        page,
-        limit,
-        totalPages: count ? Math.ceil(count / limit) : 0,
-    };
+        const { data, error, count } = await query;
+        if (error) throw new Error(error.message);
+
+        return {
+            trees: data,
+            totalCount: count || 0,
+            page,
+            limit,
+            totalPages: count ? Math.ceil(count / limit) : 0,
+        };
+    },
+    ["available-trees"],
+    { tags: ["trees"], revalidate: 3600 }
+);
+
+export async function getAvailableTrees(options?: GetTreesOptions) {
+    return _getAvailableTreesCached(options);
 }
 
 
 // ── getTreeById ────────────────────────────────────────────────────
 // Returns tree + farmer only. No rental data embedded.
-export async function getTreeById(treeId: string) {
-    const supabase = await getSupabasePublic();
+const _getTreeByIdCached = unstable_cache(
+    async (treeId: string) => {
+        const supabase = await getSupabasePublic();
 
-    const { data: tree, error } = await supabase
-        .from("trees")
-        .select(`
+        const { data: tree, error } = await supabase
+            .from("trees")
+            .select(`
       *,
       farmers (
         id,
@@ -169,11 +174,18 @@ export async function getTreeById(treeId: string) {
         badge_color
       )
     `)
-        .eq("id", treeId)
-        .single();
+            .eq("id", treeId)
+            .single();
 
-    if (error) throw new Error(error.message);
-    return tree ?? null;
+        if (error) throw new Error(error.message);
+        return tree ?? null;
+    },
+    ["tree-by-id"],
+    { tags: ["trees"], revalidate: 3600 }
+);
+
+export async function getTreeById(treeId: string) {
+    return _getTreeByIdCached(treeId);
 }
 
 // ── getActiveRental ────────────────────────────────────────────────
@@ -249,6 +261,7 @@ export async function reserveTree(treeId: string) {
 
 export async function releaseTreeReservation(treeId: string) {
     await requireUser();
+    // TODO: add `reserved_by uuid` column to trees table and assert caller owns this reservation
     const supabase = await getSupabaseServer();
     await supabase
         .from("trees")
@@ -315,6 +328,7 @@ export async function verifyAndFulfilRental(payload: {
     rzpOrderId: string;
     rzpPaymentId: string;
     rzpSignature: string;
+    rentalDeliveryFee: number;
     deliveryAddress: {
         name: string;
         phone: string;
@@ -361,8 +375,7 @@ export async function verifyAndFulfilRental(payload: {
 
     if (!tree) throw new Error("Tree details not found for finalization");
 
-    const settings = await getAppSettings();
-    const rentalDeliveryFee = settings.rental_delivery_fee;
+    const rentalDeliveryFee = payload.rentalDeliveryFee;
 
     // Compute the reservation expiry — 1 year from today (end of mango season: May 31 of next year)
     const rentalStart = new Date();

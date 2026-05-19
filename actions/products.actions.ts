@@ -3,7 +3,7 @@
 import { getSupabaseServer, requireAdmin } from "@/lib/auth";
 import { Database } from "@/types/database.types";
 import { getSupabasePublic } from "@/utils/supabase/public";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
 type ProductBadge = Database["public"]["Enums"]["product_badge"];
 type ProductStatus = Database["public"]["Enums"]["product_status"];
@@ -25,89 +25,101 @@ export interface GetProductsOptions {
 
 // ── PUBLIC ─────────────────────────────────────────────────────────
 
+const _getMangoProductsCached = unstable_cache(
+    async (options?: GetProductsOptions) => {
+        const supabase = await getSupabasePublic();
+
+        let query = supabase
+            .from("mango_products")
+            .select("*", { count: "exact" });
+
+        if (options?.excludeId) {
+            query = query.neq("id", options.excludeId);
+        }
+
+        if (options?.filters) {
+            const { badge, status, minPrice, maxPrice } = options.filters;
+            if (badge && badge.length > 0) {
+                query = query.in("badge", badge);
+            }
+            if (status && status.length > 0) {
+                query = query.in("status", status);
+            }
+            if (minPrice !== undefined) {
+                query = query.gte("price", minPrice);
+            }
+            if (maxPrice !== undefined) {
+                query = query.lte("price", maxPrice);
+            }
+        }
+
+        if (options?.sort) {
+            switch (options.sort) {
+                case "newest":
+                    query = query.order("created_at", { ascending: false });
+                    break;
+                case "price_asc":
+                    query = query.order("price", { ascending: true });
+                    break;
+                case "price_desc":
+                    query = query.order("price", { ascending: false });
+                    break;
+                case "weight_asc":
+                    query = query.order("weight_kg", { ascending: true });
+                    break;
+                case "weight_desc":
+                    query = query.order("weight_kg", { ascending: false });
+                    break;
+            }
+        } else {
+            query = query.order("created_at", { ascending: false });
+        }
+
+        const page = options?.page && options.page > 0 ? options.page : 1;
+        const limit = options?.limit && options.limit > 0 ? options.limit : 10;
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+
+        query = query.range(from, to);
+
+        const { data, error, count } = await query;
+        if (error) throw new Error(error.message);
+
+        return {
+            products: data,
+            totalCount: count || 0,
+            page,
+            limit,
+            totalPages: count ? Math.ceil(count / limit) : 0,
+        };
+    },
+    ["mango-products"],
+    { tags: ["products"], revalidate: 3600 }
+);
+
 export async function getMangoProducts(options?: GetProductsOptions) {
-    const supabase = await getSupabasePublic();
-
-    let query = supabase
-        .from("mango_products")
-        .select("*", { count: "exact" });
-
-    // Apply filters
-    if (options?.excludeId) {
-        query = query.neq("id", options.excludeId);
-    }
-
-    if (options?.filters) {
-        const { badge, status, minPrice, maxPrice } = options.filters;
-        if (badge && badge.length > 0) {
-            query = query.in("badge", badge);
-        }
-        if (status && status.length > 0) {
-            query = query.in("status", status);
-        }
-        if (minPrice !== undefined) {
-            query = query.gte("price", minPrice);
-        }
-        if (maxPrice !== undefined) {
-            query = query.lte("price", maxPrice);
-        }
-    }
-
-    // Apply sorting
-    if (options?.sort) {
-        switch (options.sort) {
-            case "newest":
-                query = query.order("created_at", { ascending: false });
-                break;
-            case "price_asc":
-                query = query.order("price", { ascending: true });
-                break;
-            case "price_desc":
-                query = query.order("price", { ascending: false });
-                break;
-            case "weight_asc":
-                query = query.order("weight_kg", { ascending: true });
-                break;
-            case "weight_desc":
-                query = query.order("weight_kg", { ascending: false });
-                break;
-        }
-    } else {
-        // Default sort
-        query = query.order("created_at", { ascending: false });
-    }
-
-    // Apply pagination
-    const page = options?.page && options.page > 0 ? options.page : 1;
-    const limit = options?.limit && options.limit > 0 ? options.limit : 10;
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-
-    query = query.range(from, to);
-
-    const { data, error, count } = await query;
-    if (error) throw new Error(error.message);
-
-    return {
-        products: data,
-        totalCount: count || 0,
-        page,
-        limit,
-        totalPages: count ? Math.ceil(count / limit) : 0,
-    };
+    return _getMangoProductsCached(options);
 }
 
+const _getProductByIdCached = unstable_cache(
+    async (productId: string) => {
+        const supabase = await getSupabasePublic();
+
+        const { data, error } = await supabase
+            .from("mango_products")
+            .select("*")
+            .eq("id", productId)
+            .single();
+
+        if (error) throw new Error(error.message);
+        return data;
+    },
+    ["product-by-id"],
+    { tags: ["products"], revalidate: 3600 }
+);
+
 export async function getProductById(productId: string) {
-    const supabase = await getSupabaseServer();
-
-    const { data, error } = await supabase
-        .from("mango_products")
-        .select("*")
-        .eq("id", productId)
-        .single();
-
-    if (error) throw new Error(error.message);
-    return data;
+    return _getProductByIdCached(productId);
 }
 
 type ProductInsert = Database["public"]["Tables"]["mango_products"]["Insert"];
@@ -160,6 +172,7 @@ export async function createProduct(input: ProductInsert) {
 
     revalidatePath("/admin/products");
     revalidatePath("/store");
+    revalidateTag("products", "max");
     return data;
 }
 
@@ -180,6 +193,7 @@ export async function updateProduct(id: string, input: ProductUpdate) {
     revalidatePath(`/admin/products/${id}`);
     revalidatePath("/store");
     revalidatePath(`/store/${id}`);
+    revalidateTag("products", "max");
     return data;
 }
 
@@ -196,5 +210,6 @@ export async function deleteProduct(id: string) {
 
     revalidatePath("/admin/products");
     revalidatePath("/store");
+    revalidateTag("products", "max");
     return { success: true };
 }

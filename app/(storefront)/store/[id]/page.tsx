@@ -1,3 +1,5 @@
+export const revalidate = 3600;
+
 import { getMangoProducts, getProductById } from "@/actions/products.actions";
 import { notFound } from "next/navigation";
 import { ProductMedia } from "@/components/storefront/shop/product-media";

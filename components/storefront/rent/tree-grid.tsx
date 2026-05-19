@@ -3,11 +3,28 @@
 import { TreeCard } from "@/components/storefront/cards/tree-card";
 import { NoResults } from "@/components/ui/no-results";
 import type { Database } from "@/types/database.types";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
-import { getAvailableTrees, type GetTreesOptions } from "@/actions/tree.actions";
+import type { GetTreesOptions } from "@/actions/tree.actions";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
+
+async function fetchTrees(options: GetTreesOptions, page: number) {
+  const p = new URLSearchParams();
+  p.set("page", String(page));
+  if (options.limit) p.set("limit", String(options.limit));
+  if (options.sort) p.set("sort", options.sort);
+  if (options.excludeId) p.set("excludeId", options.excludeId);
+  if (options.filters?.planId?.length) p.set("planId", options.filters.planId.join(","));
+  if (options.filters?.status?.length) p.set("status", options.filters.status.join(","));
+  if (options.filters?.minPrice !== undefined) p.set("minPrice", String(options.filters.minPrice));
+  if (options.filters?.maxPrice !== undefined) p.set("maxPrice", String(options.filters.maxPrice));
+  if (options.filters?.minAge !== undefined) p.set("minAge", String(options.filters.minAge));
+  if (options.filters?.maxAge !== undefined) p.set("maxAge", String(options.filters.maxAge));
+  const res = await fetch(`/api/trees?${p}`);
+  if (!res.ok) throw new Error("Failed to fetch trees");
+  return res.json() as Promise<{ trees: TreeRow[]; totalCount: number; page: number; limit: number; totalPages: number }>;
+}
 
 type TreeRow = Database["public"]["Tables"]["trees"]["Row"] & {
   farmers: {
@@ -41,7 +58,7 @@ export function TreeGrid({ initialData, options, rentalDeliveryFee }: Props) {
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ["trees", options.filters, options.sort],
-    queryFn: ({ pageParam = 1 }) => getAvailableTrees({ ...options, page: pageParam as number }),
+    queryFn: ({ pageParam = 1 }) => fetchTrees(options, pageParam as number),
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
       lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
@@ -49,8 +66,7 @@ export function TreeGrid({ initialData, options, rentalDeliveryFee }: Props) {
       pages: [initialData],
       pageParams: [1],
     },
-    // staleTime: 0,
-    // refetchOnMount: "always",
+    staleTime: 3600_000,
   });
 
   // Sync React Query cache with fresh initialData from Server Component

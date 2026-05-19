@@ -36,6 +36,7 @@ export default async function AdminOrdersPage({ searchParams }: Props) {
               { label: "Confirmed", value: "confirmed" },
               { label: "Shipped", value: "shipped" },
               { label: "Delivered", value: "delivered" },
+              { label: "Cancelled", value: "cancelled" },
             ],
           },
         ]}

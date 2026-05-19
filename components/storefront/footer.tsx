@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Phone, Mail, MapPin, CreditCard, ArrowRight } from "lucide-react";
+import { Phone, Mail, MapPin, CreditCard, ArrowRight, ShieldCheck, Building2 } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
 import settings from "@/constants/settings";
 
@@ -108,6 +108,40 @@ export function Footer() {
                     </motion.div>
                 </motion.div>
 
+                {/* MCA Registration Trust Strip */}
+                <motion.div
+                    variants={itemVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    className="mb-8 flex flex-col sm:flex-row items-center justify-center gap-6 py-4 px-6 bg-white border border-slate-200 rounded-xl shadow-sm"
+                >
+                    <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Building2 size={15} className="text-primary" />
+                        </div>
+                        <div>
+                            <p className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">Registered Entity</p>
+                            <p className="text-[11px] font-black text-slate-900 uppercase tracking-wider">Treekart Private Limited</p>
+                        </div>
+                    </div>
+                    <div className="hidden sm:block h-8 w-px bg-slate-200" />
+                    <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <ShieldCheck size={15} className="text-primary" />
+                        </div>
+                        <div>
+                            <p className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">MCA · Govt. of India</p>
+                            <p className="text-[11px] font-black text-slate-900 uppercase tracking-wider">Ref. No. AC3508448</p>
+                        </div>
+                    </div>
+                    <div className="hidden sm:block h-8 w-px bg-slate-200" />
+                    <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600">Company Name Approved</p>
+                    </div>
+                </motion.div>
+
                 {/* Bottom Bar */}
                 <motion.div
                     variants={itemVariants}
@@ -136,7 +170,7 @@ export function Footer() {
 
                     <div className="text-center md:text-right space-y-1">
                         <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.1em]">
-                            &copy; {new Date().getFullYear()} <span className="text-slate-900">TreeKart.in</span> — Cultivating Sustainable Futures
+                            &copy; {new Date().getFullYear()} <span className="text-slate-900">Treekart Private Limited</span> — Cultivating Sustainable Futures
                         </p>
                         <p className="text-[9px] font-medium text-slate-300 uppercase tracking-widest">
                             Crafted with passion for the planet

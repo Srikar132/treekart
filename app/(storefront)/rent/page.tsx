@@ -1,6 +1,7 @@
 export const revalidate = 3600;
 
-import { getAvailableTrees, getTreePlans, type TreeSortOption } from "@/actions/tree.actions";
+import { getAvailableTrees, type TreeSortOption } from "@/actions/tree.actions";
+import { getCachedTreePlans } from "@/actions/public.actions";
 import { getAppSettings } from "@/actions/admin.actions";
 import { TreeGrid } from "@/components/storefront/rent/tree-grid";
 import { TreeFilters } from "@/components/storefront/rent/tree-filters";
@@ -80,7 +81,7 @@ export default async function RentPage({ searchParams }: Props) {
 
   const [initialData, treePlans, settings] = await Promise.all([
     getAvailableTrees(options),
-    getTreePlans(),
+    getCachedTreePlans(),
     getAppSettings(),
   ]);
 

@@ -587,7 +587,7 @@ export type Database = {
 
       farmer_status: "pending" | "approved" | "rejected"
       lead_status: "new" | "contacted" | "quoted" | "closed"
-      order_status: "pending" | "confirmed" | "shipped" | "delivered"
+      order_status: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled"
       plan_type: "basic" | "standard" | "max"
       rental_status: "active" | "completed" | "cancelled"
       tree_source: "own_farm" | "partner"
@@ -722,7 +722,7 @@ export const Constants = {
     Enums: {
       farmer_status: ["pending", "approved", "rejected"],
       lead_status: ["new", "contacted", "quoted", "closed"],
-      order_status: ["pending", "confirmed", "shipped", "delivered"],
+      order_status: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
       plan_type: ["basic", "standard", "max"],
       rental_status: ["active", "completed", "cancelled"],
       tree_source: ["own_farm", "partner"],

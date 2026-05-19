@@ -4,6 +4,7 @@ import { CartSidebar } from "@/components/storefront/cart-sidebar";
 import { Footer } from "@/components/storefront/footer";
 import { Navbar } from "@/components/storefront/navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { getAppSettings } from "@/actions/admin.actions";
 
 export const metadata: Metadata = {
   title: {
@@ -61,11 +62,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function StorefrontLayout({
+export default async function StorefrontLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const settings = await getAppSettings();
+
     return (
         <SidebarProvider defaultOpen={false}>
             <div className="flex min-h-screen w-full">
@@ -78,7 +81,10 @@ export default function StorefrontLayout({
                     <Footer />
                 </div>
             </div>
-            <CartSidebar />
+            <CartSidebar
+                storeDeliveryFee={settings.store_delivery_fee}
+                storeFreeDeliveryThreshold={settings.store_free_delivery_threshold}
+            />
         </SidebarProvider>
     );
 }

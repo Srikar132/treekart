@@ -5,12 +5,19 @@ import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { cache } from "react";
 import { getSupabasePublic } from "@/utils/supabase/public";
 import { Database, OrderStatus, PlanType, TreeStatus } from "@/types/database.types";
+import Razorpay from "razorpay";
 import {
   sendOrderShippedEmail,
   sendOrderDeliveredEmail,
+  sendOrderCancelledEmail,
   sendRentalStatusUpdateEmail,
   sendTreeUpdatePostedEmail,
 } from "@/lib/email";
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID!,
+  key_secret: process.env.RAZORPAY_KEY_SECRET!,
+});
 
 type UserRole = Database["public"]["Enums"]["user_role"];
 type RentalStatus = Database["public"]["Enums"]["rental_status"];
@@ -403,12 +410,13 @@ export async function adminUpdateOrderStatus(
 
   const supabase = await getSupabaseServer();
 
-  // 1. Fetch current status and user info to send emails
+  // 1. Fetch current status, payment info, and user info
   const { data: currentOrder } = await supabase
     .from("orders")
     .select(`
       status,
       total_amount,
+      payment_id,
       profiles (
         full_name,
         email
@@ -419,12 +427,16 @@ export async function adminUpdateOrderStatus(
 
   if (!currentOrder) throw new Error("Order not found");
 
-  // 2. Enforce forward-only status updates
+  // 2. Enforce forward-only status updates — cancellation bypasses rank check
   const currentRank = STATUS_RANK[currentOrder.status as keyof typeof STATUS_RANK] ?? 0;
   const newRank = STATUS_RANK[status as keyof typeof STATUS_RANK] ?? 0;
 
-  if (newRank < currentRank) {
+  if (status !== "cancelled" && newRank < currentRank) {
     throw new Error(`Invalid transition: Cannot move order from ${currentOrder.status} back to ${status}`);
+  }
+
+  if (status === "cancelled" && currentOrder.status === "delivered") {
+    throw new Error("Cannot cancel an already-delivered order. Contact support for dispute resolution.");
   }
 
   // 3. Perform the update
@@ -438,18 +450,47 @@ export async function adminUpdateOrderStatus(
 
   if (error) throw new Error(error.message);
 
-  // 4. Trigger Email Notifications
   const profile = currentOrder.profiles as any;
+
+  // 4. Initiate Razorpay refund if cancelling a paid order
+  let refundInitiated = false;
+  if (status === "cancelled" && currentOrder.payment_id && (currentOrder.total_amount ?? 0) > 0) {
+    try {
+      const amountPaise = Math.round((currentOrder.total_amount ?? 0) * 100);
+      await razorpay.payments.refund(currentOrder.payment_id, {
+        amount: amountPaise,
+        speed: "normal",
+        notes: { reason: "Order cancelled by admin", order_id: orderId },
+        receipt: orderId.slice(0, 40),
+      });
+      refundInitiated = true;
+    } catch (refundErr: any) {
+      // Log prominently but don't roll back the cancellation — refund can be retried manually
+      console.error(
+        `[AdminAction] REFUND FAILED for order ${orderId} (payment_id: ${currentOrder.payment_id}):`,
+        refundErr?.error?.description ?? refundErr?.message ?? refundErr
+      );
+    }
+  }
+
+  // 5. Trigger Email Notifications
   if (profile?.email) {
     try {
       if (status === "shipped") {
         await sendOrderShippedEmail(profile.email, profile.full_name || "Valued Customer", orderId, trackingId);
       } else if (status === "delivered") {
         await sendOrderDeliveredEmail(profile.email, profile.full_name || "Valued Customer", orderId);
+      } else if (status === "cancelled") {
+        await sendOrderCancelledEmail(
+          profile.email,
+          profile.full_name || "Valued Customer",
+          orderId,
+          currentOrder.total_amount ?? 0,
+          refundInitiated
+        );
       }
     } catch (emailErr) {
       console.error("[AdminAction] Failed to send status update email:", emailErr);
-      // We don't throw here to avoid rolling back the DB update if only the email fails
     }
   }
 
@@ -535,10 +576,6 @@ export async function adminDeleteBlog(id: string) {
   revalidatePath("/admin/blogs");
   revalidatePath("/blog");
 }
-
-
-
-
 
 
 // ===============================================
@@ -642,17 +679,21 @@ const DEFAULT_SETTINGS = {
 const _getCachedSettings = unstable_cache(
   async () => {
     const supabase = getSupabasePublic();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("app_settings")
       .select("store_delivery_fee, store_free_delivery_threshold, rental_delivery_fee")
       .eq("id", 1)
       .single();
+    if (error) console.error("[getAppSettings] Supabase error:", error.message);
     return (data as typeof DEFAULT_SETTINGS | null) ?? DEFAULT_SETTINGS;
   },
   ["app-settings"],
+  // revalidate: 3600 is a safety-net fallback; primary invalidation is via revalidateTag("app-settings")
   { tags: ["app-settings"], revalidate: 3600 }
 );
 
+// cache() adds per-request React memoization on top of unstable_cache's cross-request store,
+// avoiding repeated deserialization when called from multiple components in one render.
 export const getAppSettings = cache(_getCachedSettings);
 
 export async function adminUpdateDeliverySettings(input: {

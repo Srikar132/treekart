@@ -43,6 +43,8 @@ interface BlogPageProps {
   searchParams: Promise<{ page?: string }>;
 }
 
+export const revalidate = 3600;
+
 export default async function BlogPage({ searchParams }: BlogPageProps) {
   const { page } = await searchParams;
   const currentPage = Number(page) || 1;

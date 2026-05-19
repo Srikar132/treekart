@@ -16,7 +16,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import type { Database, TreePlan } from "@/types/database.types";
+import type { TreePlan } from "@/types/database.types";
 
 const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: "available", label: "Available" },
@@ -132,14 +132,15 @@ export function TreeFilters({
       {activePlans.map((pId) => {
         const planName = treePlans.find(tp => tp.id === pId)?.name || pId;
         return (
-        <button
-          key={pId}
-          onClick={() => togglePlan(pId)}
-          className="flex items-center gap-1 text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-full hover:bg-destructive/10 hover:text-destructive border border-primary/20 transition-colors"
-        >
-          {planName} <X size={12} />
-        </button>
-      )})}
+          <button
+            key={pId}
+            onClick={() => togglePlan(pId)}
+            className="flex items-center gap-1 text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-full hover:bg-destructive/10 hover:text-destructive border border-primary/20 transition-colors"
+          >
+            {planName} <X size={12} />
+          </button>
+        )
+      })}
       {activeStatus.filter(s => s !== 'available').map((s) => (
         <button
           key={s}
