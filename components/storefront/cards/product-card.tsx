@@ -141,8 +141,8 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
                     {/* Quality tag */}
                     <div className="flex items-center gap-1">
-                        <Leaf className="w-3 h-3 text-emerald-600 flex-shrink-0" />
-                        <span className="text-[9px] font-bold text-emerald-700 uppercase tracking-wide">
+                        <Leaf className="w-3 h-3 text-leaf flex-shrink-0" />
+                        <span className="text-[9px] font-bold text-leaf uppercase tracking-wide">
                             Carbide-free · Farm Fresh
                         </span>
                     </div>
@@ -164,7 +164,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                                 )}
                             </div>
                             {savings ? (
-                                <p className="text-[9px] text-emerald-600 font-bold uppercase tracking-wide">
+                                <p className="text-[9px] text-leaf font-bold uppercase tracking-wide">
                                     Save ₹{savings.toLocaleString("en-IN")}
                                 </p>
                             ) : (
@@ -175,7 +175,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                         </div>
                         <div className="flex items-center gap-1 bg-white rounded-lg px-2.5 py-1.5 border border-border/50 shadow-sm">
                             <Scale className="w-3 h-3 text-primary/70" />
-                            <span className="text-[10px] font-black text-foreground">{firstWeight} kg</span>
+                            <span className="text-[10px] font-black text-foreground">
+                                {weights.length > 1
+                                    ? `${Math.min(...weights)}–${Math.max(...weights)} kg`
+                                    : `${firstWeight} kg`}
+                            </span>
                         </div>
                     </div>
                 </CardContent>

@@ -164,11 +164,11 @@ export function TreeInfo({ tree, activeRental, rentalDeliveryFee }: TreeInfoProp
           </div>
         </div>
         {rentalDeliveryFee !== undefined && (
-          <div className={`flex items-center gap-3 p-4 rounded-xl border border-border/50 ${rentalDeliveryFee === 0 ? "bg-emerald-50/50" : "bg-secondary/30"}`}>
-            <Truck className={rentalDeliveryFee === 0 ? "text-emerald-600" : "text-primary"} size={24} />
+          <div className={cn("flex items-center gap-3 p-4 rounded-xl border border-border/50", rentalDeliveryFee === 0 ? "bg-secondary/50" : "bg-secondary/30")}>
+            <Truck className="text-primary" size={24} />
             <div>
               <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Delivery</p>
-              <p className={`font-bold ${rentalDeliveryFee === 0 ? "text-emerald-600" : ""}`}>
+              <p className={cn("font-bold", rentalDeliveryFee === 0 && "text-primary")}>
                 {rentalDeliveryFee === 0 ? "Free" : `₹${rentalDeliveryFee.toLocaleString()}`}
               </p>
             </div>

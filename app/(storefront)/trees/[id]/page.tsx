@@ -82,11 +82,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function TreeDetailsPage({ params }: Props) {
   const { id } = await params;
 
-  // Only block on critical above-the-fold data
-  const [tree, currentUser, settings] = await Promise.all([
+  // Only block on critical above-the-fold data; settings fetched inside TreeInfoStream to avoid blocking Suspense
+  const [tree, currentUser] = await Promise.all([
     getTreeById(id),
     getUser(),
-    getAppSettings(),
   ]);
 
   if (!tree) return notFound();
@@ -123,7 +122,7 @@ export default async function TreeDetailsPage({ params }: Props) {
           title={tree.variety || "Mango Tree"}
         />
         <Suspense fallback={<TreeInfoSkeleton />}>
-          <TreeInfoStream treeId={id} currentUserId={currentUser?.id ?? null} tree={tree as any} rentalDeliveryFee={settings.rental_delivery_fee} />
+          <TreeInfoStream treeId={id} currentUserId={currentUser?.id ?? null} tree={tree as any} />
         </Suspense>
       </div>
 
@@ -144,20 +143,22 @@ export default async function TreeDetailsPage({ params }: Props) {
 
 // ── Stream resolvers (co-located, not exported) ───────────────────────────────
 
-async function TreeInfoStream({ tree, treeId, currentUserId, rentalDeliveryFee }: {
+async function TreeInfoStream({ tree, treeId, currentUserId }: {
   tree: NonNullable<Awaited<ReturnType<typeof getTreeById>>>;
   treeId: string;
   currentUserId: string | null;
-  rentalDeliveryFee: number;
 }) {
   const isRented = tree.status === "rented";
-  const activeRental = isRented ? await getActiveRental(treeId) : null;
+  const [activeRental, settings] = await Promise.all([
+    isRented ? getActiveRental(treeId) : Promise.resolve(null),
+    getAppSettings(),
+  ]);
 
   return (
     <TreeInfo
       tree={tree as any}
       activeRental={activeRental}
-      rentalDeliveryFee={rentalDeliveryFee}
+      rentalDeliveryFee={settings.rental_delivery_fee}
     />
   );
 }

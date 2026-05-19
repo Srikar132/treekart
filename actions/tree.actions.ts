@@ -249,6 +249,7 @@ export async function reserveTree(treeId: string) {
 
 export async function releaseTreeReservation(treeId: string) {
     await requireUser();
+    // TODO: add `reserved_by uuid` column to trees table and assert caller owns this reservation
     const supabase = await getSupabaseServer();
     await supabase
         .from("trees")
@@ -315,6 +316,7 @@ export async function verifyAndFulfilRental(payload: {
     rzpOrderId: string;
     rzpPaymentId: string;
     rzpSignature: string;
+    rentalDeliveryFee: number;
     deliveryAddress: {
         name: string;
         phone: string;
@@ -361,8 +363,7 @@ export async function verifyAndFulfilRental(payload: {
 
     if (!tree) throw new Error("Tree details not found for finalization");
 
-    const settings = await getAppSettings();
-    const rentalDeliveryFee = settings.rental_delivery_fee;
+    const rentalDeliveryFee = payload.rentalDeliveryFee;
 
     // Compute the reservation expiry — 1 year from today (end of mango season: May 31 of next year)
     const rentalStart = new Date();

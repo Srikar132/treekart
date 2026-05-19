@@ -131,6 +131,7 @@ export default function RentalCheckoutClient({ tree, user, rentalDeliveryFee, in
               rzpOrderId: response.razorpay_order_id,
               rzpPaymentId: response.razorpay_payment_id,
               rzpSignature: response.razorpay_signature,
+              rentalDeliveryFee: orderData.rentalDeliveryFee,
               deliveryAddress: address,
               visitRequested,
             });

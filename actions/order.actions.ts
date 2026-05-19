@@ -56,19 +56,25 @@ function getRazorpay() {
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
+function trustedBoxPrice(dbPrices: Map<string, number>, id: string, weightKg: number | null): number {
+  const pricePerKg = dbPrices.get(id);
+  if (pricePerKg === undefined) throw new Error(`Product ${id} missing from DB price map`);
+  return pricePerKg * (weightKg ?? 1);
+}
+
 function buildOrderItems(items: CartItem[], dbPrices: Map<string, number>): OrderItemRecord[] {
   return items.map((item) => {
-    const trustedPricePerKg = dbPrices.get(item.id) ?? item.pricePerKg;
-    const trustedBoxPrice = trustedPricePerKg * (item.weightKg ?? 1);
+    const pricePerKg = dbPrices.get(item.id)!;
+    const boxPrice = trustedBoxPrice(dbPrices, item.id, item.weightKg ?? null);
     return {
       id: item.id,
       name: item.name,
       variety: item.variety,
-      pricePerKg: trustedPricePerKg,
+      pricePerKg,
       qty: item.qty,
       imageUrl: item.imageUrl,
       weightKg: item.weightKg ?? 0,
-      lineTotal: trustedBoxPrice * item.qty,
+      lineTotal: boxPrice * item.qty,
     };
   });
 }
@@ -79,9 +85,7 @@ function computeTotals(
   dbPrices: Map<string, number>
 ) {
   const subtotal = items.reduce((sum, i) => {
-    const trustedPricePerKg = dbPrices.get(i.id) ?? i.pricePerKg;
-    const trustedBoxPrice = trustedPricePerKg * (i.weightKg ?? 1);
-    return sum + trustedBoxPrice * i.qty;
+    return sum + trustedBoxPrice(dbPrices, i.id, i.weightKg ?? null) * i.qty;
   }, 0);
   const deliveryFee = subtotal >= settings.store_free_delivery_threshold ? 0 : settings.store_delivery_fee;
   const grandTotal = subtotal + deliveryFee;

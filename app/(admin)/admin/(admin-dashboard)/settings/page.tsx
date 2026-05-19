@@ -8,8 +8,7 @@ export const metadata = {
 };
 
 export default async function AdminSettingsPage() {
-  await requireAdmin();
-  const settings = await getAppSettings();
+  const [, settings] = await Promise.all([requireAdmin(), getAppSettings()]);
 
   return (
     <div className="space-y-8">

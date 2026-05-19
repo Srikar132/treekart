@@ -11,8 +11,7 @@ interface EditBlogPageProps {
 }
 
 export default async function EditBlogPage({ params }: EditBlogPageProps) {
-  await requireAdmin();
-  const { id } = await params;
+  const [{ id }] = await Promise.all([params, requireAdmin()]);
   const blog = await getBlogById(id);
 
   if (!blog) {

@@ -11,8 +11,7 @@ interface EditTreePageProps {
 }
 
 export default async function EditTreePage({ params }: EditTreePageProps) {
-  await requireAdmin();
-  const { id } = await params;
+  const [{ id }] = await Promise.all([params, requireAdmin()]);
   const tree = await getTreeById(id);
 
   if (!tree) {

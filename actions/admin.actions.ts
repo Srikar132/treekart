@@ -642,17 +642,21 @@ const DEFAULT_SETTINGS = {
 const _getCachedSettings = unstable_cache(
   async () => {
     const supabase = getSupabasePublic();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("app_settings")
       .select("store_delivery_fee, store_free_delivery_threshold, rental_delivery_fee")
       .eq("id", 1)
       .single();
+    if (error) console.error("[getAppSettings] Supabase error:", error.message);
     return (data as typeof DEFAULT_SETTINGS | null) ?? DEFAULT_SETTINGS;
   },
   ["app-settings"],
+  // revalidate: 3600 is a safety-net fallback; primary invalidation is via revalidateTag("app-settings")
   { tags: ["app-settings"], revalidate: 3600 }
 );
 
+// cache() adds per-request React memoization on top of unstable_cache's cross-request store,
+// avoiding repeated deserialization when called from multiple components in one render.
 export const getAppSettings = cache(_getCachedSettings);
 
 export async function adminUpdateDeliverySettings(input: {

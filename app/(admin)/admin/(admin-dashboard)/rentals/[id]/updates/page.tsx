@@ -14,15 +14,12 @@ interface TreeUpdatesPageProps {
 }
 
 export default async function TreeUpdatesPage({ params }: TreeUpdatesPageProps) {
-  await requireAdmin();
-  const { id } = await params; // This is the rentalId
+  const [{ id }] = await Promise.all([params, requireAdmin()]); // This is the rentalId
 
-  const rental = await adminGetRentalById(id);
+  const [rental, updates] = await Promise.all([adminGetRentalById(id), getTreeUpdates(id)]);
   if (!rental) {
     notFound();
   }
-
-  const updates = await getTreeUpdates(id);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
