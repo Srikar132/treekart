@@ -54,6 +54,7 @@ export function ProductGrid({ initialData, options }: Props) {
       pages: [initialData],
       pageParams: [1],
     },
+    staleTime: 3600_000,
   });
 
   const handleAddToCart = useCallback((product: MangoProduct) => {

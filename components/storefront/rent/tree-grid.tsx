@@ -66,8 +66,7 @@ export function TreeGrid({ initialData, options, rentalDeliveryFee }: Props) {
       pages: [initialData],
       pageParams: [1],
     },
-    // staleTime: 0,
-    // refetchOnMount: "always",
+    staleTime: 3600_000,
   });
 
   // Sync React Query cache with fresh initialData from Server Component
