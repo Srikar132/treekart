@@ -6,8 +6,23 @@ import { useMangoCart } from "@/store/use-mango-cart";
 import { useCallback, useEffect } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
-import { getMangoProducts, type GetProductsOptions } from "@/actions/products.actions";
+import type { GetProductsOptions } from "@/actions/products.actions";
 import { Loader2 } from "lucide-react";
+
+async function fetchProducts(options: GetProductsOptions, page: number) {
+  const p = new URLSearchParams();
+  p.set("page", String(page));
+  if (options.limit) p.set("limit", String(options.limit));
+  if (options.sort) p.set("sort", options.sort);
+  if (options.excludeId) p.set("excludeId", options.excludeId);
+  if (options.filters?.badge?.length) p.set("badge", options.filters.badge.join(","));
+  if (options.filters?.status?.length) p.set("status", options.filters.status.join(","));
+  if (options.filters?.minPrice !== undefined) p.set("minPrice", String(options.filters.minPrice));
+  if (options.filters?.maxPrice !== undefined) p.set("maxPrice", String(options.filters.maxPrice));
+  const res = await fetch(`/api/products?${p}`);
+  if (!res.ok) throw new Error("Failed to fetch products");
+  return res.json() as Promise<{ products: MangoProduct[]; totalCount: number; page: number; limit: number; totalPages: number }>;
+}
 
 type Props = {
   initialData: {
@@ -31,7 +46,7 @@ export function ProductGrid({ initialData, options }: Props) {
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ["products", options.filters, options.sort],
-    queryFn: ({ pageParam = 1 }) => getMangoProducts({ ...options, page: pageParam as number }),
+    queryFn: ({ pageParam = 1 }) => fetchProducts(options, pageParam as number),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => 
       lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
