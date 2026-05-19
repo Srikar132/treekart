@@ -129,10 +129,10 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                 </div>
 
                 {/* ── Info ── */}
-                <CardContent className="flex-1 px-5 pt-4 pb-3 space-y-3">
+                <CardContent className="flex-1 px-4 pt-3 pb-2 space-y-2">
                     <Link href={`/store/${product.id}`} className="block">
                         <h3 className={cn(
-                            "text-sm font-bold leading-snug line-clamp-2 group-hover:text-primary transition-colors",
+                            "text-sm font-bold leading-snug line-clamp-1 group-hover:text-primary transition-colors",
                             isOutOfStock && "text-muted-foreground"
                         )}>
                             {product.name}
@@ -148,11 +148,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                     </div>
 
                     {/* Price block */}
-                    <div className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-xl px-3 py-2.5">
+                    <div className="flex items-center justify-between bg-primary/5 border border-primary/10 rounded-xl px-3 py-2">
                         <div>
                             <div className="flex items-baseline gap-1.5">
                                 <span className={cn(
-                                    "text-xl font-black text-primary",
+                                    "text-lg font-black text-primary",
                                     isOutOfStock && "text-muted-foreground"
                                 )}>
                                     ₹{boxPrice.toLocaleString("en-IN")}
@@ -173,19 +173,18 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                                 </p>
                             )}
                         </div>
-                        <div className="flex items-center gap-1 bg-white rounded-lg px-2.5 py-1.5 border border-border/50 shadow-sm">
+                        <div className="flex items-center gap-1 bg-white rounded-lg px-2.5 py-1 border border-border/50 shadow-sm">
                             <Scale className="w-3 h-3 text-primary/70" />
                             <span className="text-[10px] font-black text-foreground">
-                                {weights.length > 1
-                                    ? `${Math.min(...weights)}–${Math.max(...weights)} kg`
-                                    : `${firstWeight} kg`}
+                                {firstWeight} kg
                             </span>
                         </div>
                     </div>
+
                 </CardContent>
 
                 {/* ── Mobile CTA ── */}
-                <CardFooter className="px-5 pb-5 pt-0 lg:hidden">
+                <CardFooter className="px-4 pb-4 pt-0 lg:hidden">
                     <button
                         onClick={handleAddToCart}
                         disabled={isAdding || isOutOfStock}
