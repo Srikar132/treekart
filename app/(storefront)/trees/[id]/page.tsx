@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { getAvailableTrees, getTreeById, getActiveRental, getTreeUpdates } from "@/actions/tree.actions";
 import { getAppSettings } from "@/actions/admin.actions";
-import { getUser } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { TreeMedia } from "@/components/storefront/trees/tree-media";
 import { TreeInfo } from "@/components/storefront/trees/tree-info";
@@ -9,6 +8,8 @@ import { TreeUpdates } from "@/components/storefront/trees/tree-updates";
 import { RelatedTrees } from "@/components/storefront/trees/related-trees";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserCircle } from "lucide-react";
 import { Metadata } from "next";
 
 type Props = { params: Promise<{ id: string }> };
@@ -67,10 +68,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// export const revalidate = 3600; // 1 hour ISR
+export const revalidate = 3600;
 
 // export async function generateStaticParams() {
-//   const { trees } = await getAvailableTrees({ 
+//   const { trees } = await getAvailableTrees({
 //     limit: 1000,
 //     filters: { status: ["available", "rented"] }
 //   });
@@ -82,10 +83,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function TreeDetailsPage({ params }: Props) {
   const { id } = await params;
 
-  // Only block on critical above-the-fold data; settings fetched inside TreeInfoStream to avoid blocking Suspense
-  const [tree, currentUser] = await Promise.all([
+  const [tree, settings] = await Promise.all([
     getTreeById(id),
-    getUser(),
+    getAppSettings(),
   ]);
 
   if (!tree) return notFound();
@@ -121,9 +121,19 @@ export default async function TreeDetailsPage({ params }: Props) {
           images={Array.isArray(tree.photos) ? (tree.photos as string[]) : []}
           title={tree.variety || "Mango Tree"}
         />
-        <Suspense fallback={<TreeInfoSkeleton />}>
-          <TreeInfoStream treeId={id} currentUserId={currentUser?.id ?? null} tree={tree as any} />
-        </Suspense>
+        <TreeInfo
+          tree={tree as any}
+          rentalDeliveryFee={settings.rental_delivery_fee}
+          rentalBadge={
+            isRented
+              ? (
+                <Suspense fallback={<ActiveRentalSkeleton />}>
+                  <ActiveRentalStream treeId={id} />
+                </Suspense>
+              )
+              : undefined
+          }
+        />
       </div>
 
       <Separator />
@@ -143,23 +153,34 @@ export default async function TreeDetailsPage({ params }: Props) {
 
 // ── Stream resolvers (co-located, not exported) ───────────────────────────────
 
-async function TreeInfoStream({ tree, treeId, currentUserId }: {
-  tree: NonNullable<Awaited<ReturnType<typeof getTreeById>>>;
-  treeId: string;
-  currentUserId: string | null;
-}) {
-  const isRented = tree.status === "rented";
-  const [activeRental, settings] = await Promise.all([
-    isRented ? getActiveRental(treeId) : Promise.resolve(null),
-    getAppSettings(),
-  ]);
-
+async function ActiveRentalStream({ treeId }: { treeId: string }) {
+  const rental = await getActiveRental(treeId);
+  if (!rental?.profiles) {
+    return (
+      <>
+        <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white shadow-sm">
+          <UserCircle className="text-slate-400" size={24} />
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Status</p>
+          <p className="text-lg font-bold text-foreground">Already Rented</p>
+        </div>
+      </>
+    );
+  }
   return (
-    <TreeInfo
-      tree={tree as any}
-      activeRental={activeRental}
-      rentalDeliveryFee={settings.rental_delivery_fee}
-    />
+    <>
+      <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
+        <AvatarImage src={rental.profiles.avatar_url || ""} />
+        <AvatarFallback className="bg-primary/10 text-primary uppercase">
+          {rental.profiles.full_name?.charAt(0) || "U"}
+        </AvatarFallback>
+      </Avatar>
+      <div>
+        <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Currently Leased By</p>
+        <p className="text-lg font-bold text-foreground">{rental.profiles.full_name}</p>
+      </div>
+    </>
   );
 }
 
@@ -185,35 +206,13 @@ async function RelatedTreesStream({ planId, excludeId }: {
 
 // ── Skeletons ─────────────────────────────────────────────────────────────────
 
-function TreeInfoSkeleton() {
+function ActiveRentalSkeleton() {
   return (
-    <div className="flex flex-col space-y-6 pt-4">
-      <div className="space-y-3">
-        <Skeleton className="h-10 w-3/4" />
-        <Skeleton className="h-8 w-1/3" />
-      </div>
-
-      <div className="flex gap-2">
-        <Skeleton className="h-6 w-20 rounded-full" />
-        <Skeleton className="h-6 w-24 rounded-full" />
-      </div>
-
-      <div className="space-y-2 pt-4">
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-5/6" />
-      </div>
-
-      <div className="pt-6">
-        <Skeleton className="h-14 w-full rounded-lg" />
-      </div>
-
-      <Separator className="my-6" />
-
-      <div className="space-y-4">
-        <Skeleton className="h-12 w-full rounded-md" />
-        <Skeleton className="h-12 w-full rounded-md" />
-        <Skeleton className="h-12 w-full rounded-md" />
+    <div className="flex items-center gap-4">
+      <Skeleton className="h-12 w-12 rounded-full" />
+      <div className="space-y-1.5">
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="h-5 w-40" />
       </div>
     </div>
   );

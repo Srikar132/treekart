@@ -251,6 +251,45 @@ export async function sendOrderDeliveredEmail(
 }
 
 
+export async function sendOrderCancelledEmail(
+  email: string,
+  name: string,
+  orderId: string,
+  amount: number,
+  refundInitiated: boolean
+): Promise<EmailResult> {
+  validateFields({ email, name, orderId });
+  if (typeof amount !== "number" || amount < 0) {
+    throw new Error(`[EmailService] Validation failed: "amount" must be a non-negative number.`);
+  }
+
+  const safeName = escapeHtml(name);
+  const safeShortId = escapeHtml(shortId(orderId));
+  const formattedAmount = amount.toLocaleString("en-IN");
+
+  const refundNote = refundInitiated
+    ? `<div class="info-box"><p>A refund of <strong>&#8377;${formattedAmount}</strong> has been initiated and will be credited to your original payment method within 5–7 business days.</p></div>`
+    : `<div class="info-box"><p>If you have any questions about this cancellation, please reply to this email and our team will assist you promptly.</p></div>`;
+
+  const content = `
+    <div class="status-badge status-badge-warning">Order Cancelled</div>
+    <h1>Your Order Has Been Cancelled</h1>
+    <p>Hello ${safeName},</p>
+    <p>We regret to inform you that your order <strong>#${safeShortId}</strong> has been cancelled by our team.</p>
+    ${refundNote}
+    <a href="${BASE_URL}/account" class="button">View My Orders</a>
+    <a href="${BASE_URL}/store" class="button-outline">Shop Again</a>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: `Order Cancelled — #${safeShortId}`,
+    html: emailLayout(content, `Your TreeKart order #${safeShortId} has been cancelled.`),
+    context: "sendOrderCancelledEmail",
+  });
+}
+
+
 // ── Rental Emails ──────────────────────────────────────────────────────────────
 
 export async function sendRentalConfirmedEmail(

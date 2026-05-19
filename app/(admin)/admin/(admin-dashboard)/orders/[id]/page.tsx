@@ -43,7 +43,8 @@ export default async function AdminOrderDetailsPage({ params }: Props) {
             "h-8 px-4 rounded-lg text-[10px] font-black uppercase tracking-widest border-0",
             order.status === "confirmed" ? "bg-blue-100 text-blue-600" :
               order.status === "shipped" ? "bg-orange-100 text-orange-600" :
-                "bg-green-100 text-green-600"
+                order.status === "cancelled" ? "bg-red-100 text-red-600" :
+                  "bg-green-100 text-green-600"
           )}>
             {order.status}
           </Badge>

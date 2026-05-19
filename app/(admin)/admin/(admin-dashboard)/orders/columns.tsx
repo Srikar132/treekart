@@ -13,10 +13,10 @@ import {
     DropdownMenuSeparator, 
     DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Eye, Truck, CheckCircle, Trash2, ShoppingBag, ArrowUpDown } from "lucide-react"
+import { MoreHorizontal, Eye, Truck, CheckCircle, XCircle, ShoppingBag, ArrowUpDown } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { adminDeleteOrder, adminUpdateOrderStatus } from "@/actions/admin.actions"
+import { adminUpdateOrderStatus } from "@/actions/admin.actions"
 import { useTransition } from "react"
 import { toast } from "sonner"
 
@@ -82,6 +82,7 @@ export const orderColumns: ColumnDef<any>[] = [
                     "rounded-md text-[8px] font-black uppercase tracking-widest border-0 px-3 py-1",
                     status === "confirmed" ? "bg-blue-100 text-blue-600" :
                     status === "shipped" ? "bg-orange-100 text-orange-600" :
+                    status === "cancelled" ? "bg-red-100 text-red-600" :
                     "bg-green-100 text-green-600"
                 )}>
                     {status}
@@ -109,12 +110,12 @@ function OrderActions({ order }: { order: any }) {
         })
     }
 
-    const handleDelete = async () => {
-        if (!confirm("Cancel this order?")) return
+    const handleCancel = () => {
+        if (!confirm("Cancel this order? A refund will be initiated if the order was paid.")) return
         startTransition(async () => {
             try {
-                await adminDeleteOrder(order.id)
-                toast.success("Order cancelled")
+                await adminUpdateOrderStatus(order.id, "cancelled")
+                toast.success("Order cancelled. Refund initiated if applicable.")
             } catch (err: any) {
                 toast.error(err.message)
             }
@@ -155,12 +156,12 @@ function OrderActions({ order }: { order: any }) {
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                        onClick={handleDelete}
-                        disabled={isPending}
+                    <DropdownMenuItem
+                        onClick={handleCancel}
+                        disabled={isPending || order.status === "cancelled" || order.status === "delivered"}
                         className="rounded-lg cursor-pointer text-destructive focus:bg-destructive/5 focus:text-destructive flex items-center gap-2"
                     >
-                        <Trash2 size={14} /> Cancel Order
+                        <XCircle size={14} /> Cancel Order
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>

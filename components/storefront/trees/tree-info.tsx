@@ -3,8 +3,8 @@
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Info, Leaf, MapPin, Calendar, Wheat, Share2, UserCircle, Truck } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { ReactNode } from "react";
+import { CheckCircle, Info, Leaf, MapPin, Calendar, Wheat, Share2, Truck } from "lucide-react";
 import { AnimatedButton } from "@/components/shared/animated-button";
 import { ShareDialog } from "@/components/shared/share-dialog";
 import { useRentalStore } from "@/store/use-rental-store";
@@ -32,7 +32,7 @@ export type ActiveRental = {
 
 interface TreeInfoProps {
   tree: TreeWithDetails;
-  activeRental: ActiveRental;
+  rentalBadge?: ReactNode;
   rentalDeliveryFee?: number;
 }
 
@@ -46,7 +46,7 @@ const item = {
   show: { opacity: 1, y: 0 },
 };
 
-export function TreeInfo({ tree, activeRental, rentalDeliveryFee }: TreeInfoProps) {
+export function TreeInfo({ tree, rentalBadge, rentalDeliveryFee }: TreeInfoProps) {
   const router = useRouter();
   const { setPlan } = useRentalStore();
   const { openLoginPrompt } = useLoginPrompt();
@@ -198,36 +198,11 @@ export function TreeInfo({ tree, activeRental, rentalDeliveryFee }: TreeInfoProp
         {isRented ? (
           <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-4">
-              {activeRental?.profiles ? (
-                <>
-                  <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
-                    <AvatarImage src={activeRental.profiles.avatar_url || ""} />
-                    <AvatarFallback className="bg-primary/10 text-primary uppercase">
-                      {activeRental.profiles.full_name?.charAt(0) || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Currently Leased By</p>
-                    <p className="text-lg font-bold text-foreground">{activeRental.profiles.full_name}</p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white shadow-sm">
-                    <UserCircle className="text-slate-400" size={24} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Status</p>
-                    <p className="text-lg font-bold text-foreground">Already Rented</p>
-                  </div>
-                </>
-              )}
+              {rentalBadge}
             </div>
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground italic bg-white/50 p-3 rounded-lg border">
-                {activeRental?.profiles?.full_name
-                  ? `This heritage tree is currently thriving under ${activeRental.profiles.full_name.split(" ")[0]}'s care.`
-                  : "This heritage tree has been secured for the current season by another member."}
+                This heritage tree has been secured for the current season by another member.
               </p>
               
               {tree.reserved_until && new Date(tree.reserved_until) > new Date() && (
