@@ -3,10 +3,10 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import {
-    MoreHorizontal, Plus, 
+    MoreHorizontal, Plus,
     Mail, Phone, TreePine, ShieldCheck,
     CalendarDays, MapPin, CreditCard,
-    HandHelping,
+    HandHelping, Printer,
 } from "lucide-react";
 import { buttonVariants, Button } from "@/components/ui/button";
 import {
@@ -22,6 +22,7 @@ import { startTransition } from "react";
 import { adminUpdateRentalStatus } from "@/actions/admin.actions";
 import { toast } from "sonner";
 import { Rental, Tree, Profile, Farmer, RentalStatus } from "@/types/database.types";
+import { buildStickerHTML } from "@/components/admin/shared/print-sticker";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface Address {
@@ -208,6 +209,26 @@ export const rentalColumns: ColumnDef<RentalRow>[] = [
         cell: ({ row }) => {
             const rental = row.original;
 
+            function handlePrintSticker() {
+                if (!rental.delivery_address) return;
+                const html = buildStickerHTML({
+                    type: "rental",
+                    referenceId: rental.id,
+                    date: rental.rented_at ?? "",
+                    deliveryAddress: rental.delivery_address as any,
+                    treeVariety: rental.trees?.variety ?? "Unknown",
+                    season: rental.season ?? "",
+                    amountPaid: rental.amount_paid,
+                });
+                const win = window.open("", "_blank", "width=420,height=630");
+                if (!win) return;
+                win.document.write(html);
+                win.document.close();
+                win.onafterprint = () => win.close();
+                if (win.document.readyState === "complete") { win.focus(); win.print(); }
+                else { win.onload = () => { win.focus(); win.print(); }; }
+            }
+
             function updateStatus(status: RentalStatus) {
                 if (!confirm(`Mark this lease as ${status}?`)) return;
                 startTransition(async () => {
@@ -256,6 +277,15 @@ export const rentalColumns: ColumnDef<RentalRow>[] = [
                                             </Link>
                                         }
                                     />
+                                )}
+
+                                {rental.delivery_address && (
+                                    <DropdownMenuItem
+                                        onClick={handlePrintSticker}
+                                        className="rounded-lg cursor-pointer flex items-center gap-2"
+                                    >
+                                        <Printer size={14} className="text-muted-foreground" /> Print Sticker
+                                    </DropdownMenuItem>
                                 )}
 
                             </DropdownMenuGroup>
