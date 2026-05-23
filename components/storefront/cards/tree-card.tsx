@@ -20,6 +20,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { TreeListItem } from "@/types";
+import { getPlanBadgeClass } from "@/lib/plan-badge";
 
 interface TreeCardProps {
     tree: TreeListItem;
@@ -32,8 +33,9 @@ export function TreeCard({ tree, rentalDeliveryFee }: TreeCardProps) {
             ? (tree.photos as string[])
             : ["/images/mango_basket.webp"];
 
-    const isSale = tree.tree_plans?.name?.toLowerCase().includes("base");
-    const badgeText = tree.tree_plans?.badge_text || (isSale ? "Sale" : null);
+    const planLabel = tree.tree_plans?.badge_text || tree.tree_plans?.name || null;
+    const planBadgeClass = planLabel ? getPlanBadgeClass(tree.tree_plans?.name ?? "") : "";
+    const planColorOverride = tree.tree_plans?.badge_color ?? null;
 
     const yieldLabel = tree.yield_min_kg && tree.yield_max_kg
         ? `${tree.yield_min_kg}–${tree.yield_max_kg} kg`
@@ -56,9 +58,12 @@ export function TreeCard({ tree, rentalDeliveryFee }: TreeCardProps) {
 
                     {/* Top badges */}
                     <div className="absolute top-3 left-3 z-20 flex flex-col gap-1.5">
-                        {badgeText && (
-                            <Badge className="bg-red-500 text-white border-0 shadow text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full">
-                                {badgeText}
+                        {planLabel && (
+                            <Badge
+                                className={`${planBadgeClass} border-0 shadow text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full text-white`}
+                                style={planColorOverride ? { backgroundColor: planColorOverride } : undefined}
+                            >
+                                {planLabel}
                             </Badge>
                         )}
                         {tree.farmers?.is_organic && (
@@ -67,15 +72,6 @@ export function TreeCard({ tree, rentalDeliveryFee }: TreeCardProps) {
                             </Badge>
                         )}
                     </div>
-
-                    {/* Plan name pill — top right */}
-                    {tree.tree_plans?.name && (
-                        <div className="absolute top-3 right-3 z-20">
-                            <span className="bg-black/40 backdrop-blur-sm text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full">
-                                {tree.tree_plans.name}
-                            </span>
-                        </div>
-                    )}
 
                     {/* Carousel */}
                     <Carousel className="w-full h-full" opts={{ loop: true }}>

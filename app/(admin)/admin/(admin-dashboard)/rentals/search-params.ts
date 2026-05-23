@@ -13,7 +13,7 @@ export const rentalsSearchParamsCache = createSearchParamsCache({
     sort: parseAsString.withDefault("rented_at"),
     order: parseAsStringEnum(["asc", "desc"] as const).withDefault("desc"),
     q: parseAsString.withDefault(""),
-    status: parseAsStringEnum(["active", "completed", "cancelled"] as const).withDefault("" as RentalStatus),
+    status: parseAsStringEnum(["pending", "active", "completed", "cancelled"] as const).withDefault("" as RentalStatus),
     season: parseAsString.withDefault(""),
 });
 

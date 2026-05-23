@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    href?: string;
+    href?: string | null;
     label: React.ReactNode;
     icon?: React.ReactNode;
     className?: string;
@@ -12,18 +12,18 @@ interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
     hideArrow?: boolean;
 }
 
-export function AnimatedButton({ 
-    href, 
-    label, 
+export function AnimatedButton({
+    href,
+    label,
     icon,
-    className, 
-    fillClassName = "bg-white", 
-    hoverTextClassName = "hover:text-foreground", 
-    hideArrow, 
-    disabled, 
-    ...props 
+    className,
+    fillClassName = "bg-white",
+    hoverTextClassName = "hover:text-foreground",
+    hideArrow,
+    disabled,
+    ...props
 }: AnimatedButtonProps) {
-    
+
     const content = (
         <>
             <span

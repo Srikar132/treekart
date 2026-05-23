@@ -4,7 +4,7 @@ import { requireAdmin, getSupabaseServer } from "@/lib/auth";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { cache } from "react";
 import { getSupabasePublic } from "@/utils/supabase/public";
-import { Database, OrderStatus, PlanType, TreeStatus } from "@/types/database.types";
+import { Database, OrderStatus, TreeStatus } from "@/types/database.types";
 import Razorpay from "razorpay";
 import {
   sendOrderShippedEmail,
@@ -35,11 +35,13 @@ export async function getAdminStats() {
   const { data, error } = await supabase.rpc("get_admin_stats");
   if (error) throw new Error(error.message);
 
+  const stats = data as { users: number; trees: number; orders: number; order_revenue: number; rental_revenue: number };
+
   return {
-    users: data.users,
-    trees: data.trees,
-    orders: data.orders,
-    revenue: data.order_revenue + data.rental_revenue,
+    users: stats.users,
+    trees: stats.trees,
+    orders: stats.orders,
+    revenue: stats.order_revenue + stats.rental_revenue,
   };
 }
 

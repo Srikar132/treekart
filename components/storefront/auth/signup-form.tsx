@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { registerUser } from "@/actions/auth.actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Leaf, Loader2, Eye, EyeOff, TreePine, CheckCircle2 } from "lucide-react";
 import { AnimatedButton } from "@/components/shared/animated-button";
 import { type ActionState, type SignUpFields } from "@/lib/validations";
@@ -16,6 +17,8 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const [termsError, setTermsError] = useState(false);
 
     const [state, action, pending] = useActionState(registerUser, {});
 
@@ -32,6 +35,15 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
             }
         }
     }, [state, router, redirectTo]);
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        if (!agreedToTerms) {
+            e.preventDefault();
+            setTermsError(true);
+            return;
+        }
+        setTermsError(false);
+    };
 
     if (isSuccess) {
         return (
@@ -78,7 +90,7 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
                 </div>
 
                 <div className="border border-border bg-card p-8 md:p-10">
-                    <form action={action} className="space-y-6">
+                    <form action={action} onSubmit={handleSubmit} className="space-y-6">
                         <input type="hidden" name="redirectTo" value={redirectTo} />
                         {/* Full Name */}
                         <div className="space-y-2">
@@ -193,6 +205,40 @@ export function SignupForm({ redirectTo }: { redirectTo: string }) {
                                 {state.errors._server}
                             </div>
                         )}
+
+                        {/* Terms & Privacy Checkbox */}
+                        <div className="space-y-2">
+                            <div className={`flex items-start gap-3 p-4 border border-l-4 ${termsError ? "border-destructive border-l-destructive bg-destructive/5" : "border-border border-l-primary bg-primary/5"}`}>
+                                <Checkbox
+                                    id="terms"
+                                    checked={agreedToTerms}
+                                    onCheckedChange={(checked) => {
+                                        setAgreedToTerms(!!checked);
+                                        if (checked) setTermsError(false);
+                                    }}
+                                    className="mt-0.5 size-5"
+                                />
+                                <label
+                                    htmlFor="terms"
+                                    className="text-[11px] font-semibold text-foreground leading-relaxed cursor-pointer select-none"
+                                >
+                                    I have read and agree to the{" "}
+                                    <Link href="/terms" className="text-primary font-bold underline underline-offset-2 decoration-primary/40 hover:decoration-primary">
+                                        Terms & Conditions
+                                    </Link>{" "}
+                                    and{" "}
+                                    <Link href="/privacy" className="text-primary font-bold underline underline-offset-2 decoration-primary/40 hover:decoration-primary">
+                                        Privacy Policy
+                                    </Link>
+                                </label>
+                            </div>
+                            {termsError && (
+                                <p className="text-[10px] font-bold text-destructive uppercase tracking-wider flex items-center gap-1.5">
+                                    <span className="inline-block w-1 h-1 rounded-full bg-destructive" />
+                                    Please accept the Terms & Conditions and Privacy Policy to continue
+                                </p>
+                            )}
+                        </div>
 
                         <AnimatedButton
                             label={pending ? "Creating Account..." : "Sign Up"}

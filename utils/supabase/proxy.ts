@@ -12,6 +12,8 @@ const PUBLIC_PREFIXES = [
     '/faq',
     '/trees',
     '/api',
+    '/privacy',
+    '/terms',
 ]
 
 const AUTH_PAGES = [

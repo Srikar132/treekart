@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { OrderStatusUpdater } from "./order-status-updater";
+import { PrintSticker } from "@/components/admin/shared/print-sticker";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -20,6 +21,7 @@ export default async function AdminOrderDetailsPage({ params }: Props) {
 
   const delivery = order.delivery_address as any;
   const items = order.items as any[] ?? [];
+  const stickerItems = items.map((i: any) => ({ name: i.name as string, qty: i.qty as number }));
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -39,15 +41,26 @@ export default async function AdminOrderDetailsPage({ params }: Props) {
               Ref: #{order.id.slice(0, 8).toUpperCase()} • Placed {order.created_at ? new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : "Date TBD"}
             </p>
           </div>
-          <Badge className={cn(
-            "h-8 px-4 rounded-lg text-[10px] font-black uppercase tracking-widest border-0",
-            order.status === "confirmed" ? "bg-blue-100 text-blue-600" :
-              order.status === "shipped" ? "bg-orange-100 text-orange-600" :
-                order.status === "cancelled" ? "bg-red-100 text-red-600" :
-                  "bg-green-100 text-green-600"
-          )}>
-            {order.status}
-          </Badge>
+          <div className="flex items-center gap-3">
+            <PrintSticker
+              type="order"
+              referenceId={order.id}
+              date={order.created_at ?? ""}
+              deliveryAddress={delivery}
+              items={stickerItems}
+              totalAmount={order.total_amount}
+              trackingId={order.tracking_id}
+            />
+            <Badge className={cn(
+              "h-8 px-4 rounded-lg text-[10px] font-black uppercase tracking-widest border-0",
+              order.status === "confirmed" ? "bg-blue-100 text-blue-600" :
+                order.status === "shipped" ? "bg-orange-100 text-orange-600" :
+                  order.status === "cancelled" ? "bg-red-100 text-red-600" :
+                    "bg-green-100 text-green-600"
+            )}>
+              {order.status}
+            </Badge>
+          </div>
         </div>
       </div>
 

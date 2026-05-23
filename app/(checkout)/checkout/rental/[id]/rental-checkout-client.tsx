@@ -127,13 +127,10 @@ export default function RentalCheckoutClient({ tree, user, rentalDeliveryFee, in
           setStep("processing");
           try {
             const result = await verifyAndFulfilRental({
-              treeId: tree.id,
+              rentalId: orderData.rentalId,
               rzpOrderId: response.razorpay_order_id,
               rzpPaymentId: response.razorpay_payment_id,
               rzpSignature: response.razorpay_signature,
-              rentalDeliveryFee: orderData.rentalDeliveryFee,
-              deliveryAddress: address,
-              visitRequested,
             });
             setSuccessRentalId(result.rentalId);
             setStep("success");

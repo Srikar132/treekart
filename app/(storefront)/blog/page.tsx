@@ -55,7 +55,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   return (
     <main className="bg-white min-h-screen">
       <div className="max-w-6xl mx-auto px-6 py-20 md:py-32 space-y-20">
-        
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-4">
@@ -81,8 +81,8 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         <div className="border-t border-border min-h-[400px]">
           {posts.length > 0 ? (
             posts.map((post) => (
-              <Link 
-                href={`/blog/${post.slug}`} 
+              <Link
+                href={`/blog/${post.slug}`}
                 key={post.id}
                 className="group grid grid-cols-1 md:grid-cols-12 gap-8 py-12 border-b border-border/60 hover:bg-secondary/5 transition-all duration-500 px-4 -mx-4 items-center"
               >
@@ -107,7 +107,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 {/* Meta column */}
                 <div className="md:col-span-2 space-y-1">
                   <p className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
-                    {new Date(post.published_at).toLocaleDateString('en-IN', {
+                    {new Date(post.published_at! || '').toLocaleDateString('en-IN', {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric'
@@ -155,19 +155,19 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between pt-10 border-t border-border/40">
-            <Link 
+            <Link
               href={`/blog?page=${currentPage - 1}`}
               className={`flex items-center gap-3 text-[10px] font-black tracking-widest transition-colors ${currentPage > 1 ? 'text-foreground hover:text-primary' : 'text-muted-foreground pointer-events-none opacity-30'}`}
             >
               <ChevronLeft size={16} />
               Previous
             </Link>
-            
+
             <div className="hidden sm:flex gap-4">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Link 
+                <Link
                   href={`/blog?page=${page}`}
-                  key={page} 
+                  key={page}
                   className={`w-10 h-10 flex items-center justify-center text-[10px] font-black transition-colors ${page === currentPage ? 'bg-primary text-white' : 'hover:bg-secondary/20 text-muted-foreground'}`}
                 >
                   {String(page).padStart(2, '0')}
@@ -175,7 +175,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               ))}
             </div>
 
-            <Link 
+            <Link
               href={`/blog?page=${currentPage + 1}`}
               className={`flex items-center gap-3 text-[10px] font-black tracking-widest transition-colors ${currentPage < totalPages ? 'text-foreground hover:text-primary' : 'text-muted-foreground pointer-events-none opacity-30'}`}
             >
