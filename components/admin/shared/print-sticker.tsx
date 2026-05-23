@@ -25,6 +25,16 @@ type PrintStickerProps =
           amountPaid: number;
       };
 
+function esc(s: string | null | undefined): string {
+    if (!s) return "";
+    return s
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 export function buildStickerHTML(props: PrintStickerProps): string {
     const { deliveryAddress: a, referenceId, date } = props;
 
@@ -46,12 +56,12 @@ export function buildStickerHTML(props: PrintStickerProps): string {
                   const visible = props.items.slice(0, 3);
                   const extra = props.items.length - visible.length;
                   return (
-                      visible.map((i) => `<div class="item-line">${i.name} &times; ${i.qty}</div>`).join("") +
+                      visible.map((i) => `<div class="item-line">${esc(i.name)} &times; ${i.qty}</div>`).join("") +
                       (extra > 0 ? `<div class="item-line">+${extra} more item${extra > 1 ? "s" : ""}</div>` : "")
                   );
               })()
-            : `<div class="item-line">Tree Variety: ${props.treeVariety}</div>
-               <div class="item-line">Season: ${props.season}</div>`;
+            : `<div class="item-line">Tree Variety: ${esc(props.treeVariety)}</div>
+               <div class="item-line">Season: ${esc(props.season)}</div>`;
 
     const refRows =
         props.type === "order"
@@ -59,13 +69,13 @@ export function buildStickerHTML(props: PrintStickerProps): string {
         <div class="ref-key">REF</div><div class="ref-val">#${shortRef}</div>
         <div class="ref-key">DATE</div><div class="ref-val">${formattedDate}</div>
         <div class="ref-key">AMT</div><div class="ref-val">&#8377;${props.totalAmount.toLocaleString("en-IN")}</div>
-        ${props.trackingId ? `<div class="ref-key">TRK</div><div class="ref-val">${props.trackingId}</div>` : ""}
+        ${props.trackingId ? `<div class="ref-key">TRK</div><div class="ref-val">${esc(props.trackingId)}</div>` : ""}
     `
             : `
         <div class="ref-key">REF</div><div class="ref-val">#${shortRef}</div>
         <div class="ref-key">DATE</div><div class="ref-val">${formattedDate}</div>
         <div class="ref-key">AMT</div><div class="ref-val">&#8377;${props.amountPaid.toLocaleString("en-IN")}</div>
-        <div class="ref-key">SEASON</div><div class="ref-val">${props.season}</div>
+        <div class="ref-key">SEASON</div><div class="ref-val">${esc(props.season)}</div>
     `;
 
     const typeLabel = props.type === "order" ? "ORDER LABEL" : "RENTAL LABEL";
@@ -253,10 +263,10 @@ export function buildStickerHTML(props: PrintStickerProps): string {
 
   <div class="ship-to">
     <div class="section-label">Ship To</div>
-    <div class="recipient-name">${a.name}</div>
-    <div class="recipient-phone">${a.phone}</div>
-    ${addressLines.map((l) => `<div class="address-line">${l}</div>`).join("")}
-    <div class="pincode-line">${a.pincode} &bull; ${a.country ?? "India"}</div>
+    <div class="recipient-name">${esc(a.name)}</div>
+    <div class="recipient-phone">${esc(a.phone)}</div>
+    ${addressLines.map((l) => `<div class="address-line">${esc(l)}</div>`).join("")}
+    <div class="pincode-line">${esc(a.pincode)} &bull; ${esc(a.country ?? "India")}</div>
   </div>
 
   <div class="from-section">

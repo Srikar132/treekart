@@ -570,6 +570,35 @@ export type Database = {
     }
     Functions: {
       get_admin_stats: { Args: never; Returns: Json }
+      fulfil_rental: {
+        Args: {
+          p_rental_id: string
+          p_rzp_payment_id: string
+          p_tree_id: string
+          p_reserved_until: string
+        }
+        Returns: boolean
+      }
+      fulfil_rental_by_order_id: {
+        Args: { p_rzp_order_id: string; p_rzp_payment_id: string }
+        Returns: {
+          rental_id: string | null
+          tree_id: string | null
+          amount_paid: number | null
+          season: string | null
+          user_email: string | null
+          user_name: string | null
+        }[]
+      }
+      confirm_order_by_order_id: {
+        Args: { p_rzp_order_id: string; p_rzp_payment_id: string }
+        Returns: {
+          order_id: string | null
+          total_amount: number | null
+          user_email: string | null
+          user_name: string | null
+        }[]
+      }
     }
     Enums: {
       farmer_status: "pending" | "approved" | "rejected"
@@ -582,7 +611,7 @@ export type Database = {
         | "cancelled"
       product_badge: "Pre-Order" | "Sale" | "New" | "None"
       product_status: "available" | "out_of_stock" | "pre_order"
-      rental_status: "active" | "completed" | "cancelled"
+      rental_status: "pending" | "active" | "completed" | "cancelled"
       tree_source: "own_farm" | "partner"
       tree_status: "available" | "rented" | "inactive"
       user_role: "user" | "farmer" | "admin"
@@ -724,7 +753,7 @@ export const Constants = {
       ],
       product_badge: ["Pre-Order", "Sale", "New", "None"],
       product_status: ["available", "out_of_stock", "pre_order"],
-      rental_status: ["active", "completed", "cancelled"],
+      rental_status: ["pending", "active", "completed", "cancelled"],
       tree_source: ["own_farm", "partner"],
       tree_status: ["available", "rented", "inactive"],
       user_role: ["user", "farmer", "admin"],

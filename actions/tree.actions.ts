@@ -260,14 +260,26 @@ export async function reserveTree(treeId: string) {
 
 
 export async function releaseTreeReservation(treeId: string) {
-    await requireUser();
-    // TODO: add `reserved_by uuid` column to trees table and assert caller owns this reservation
+    const user = await requireUser();
     const supabase = await getSupabaseServer();
-    await supabase
-        .from("trees")
-        .update({ status: "available" })
-        .eq("id", treeId)
-        .eq("status", "inactive");
+
+    // Delete the pending rental owned by this user — confirms ownership before releasing tree
+    const { data: deleted } = await supabase
+        .from("rentals")
+        .delete()
+        .eq("tree_id", treeId)
+        .eq("user_id", user.id)
+        .eq("status", "pending")
+        .select("id");
+
+    // Only release tree if we actually held the reservation
+    if (deleted && deleted.length > 0) {
+        await supabase
+            .from("trees")
+            .update({ status: "available" })
+            .eq("id", treeId)
+            .eq("status", "inactive");
+    }
 }
 
 export async function createRentalOrder(input: {
@@ -310,124 +322,112 @@ export async function createRentalOrder(input: {
         },
     });
 
-    return {
-        rzpOrderId: rzpOrder.id,
-        amount: totalPaise,
-        currency: "INR",
-        keyId: process.env.RAZORPAY_KEY_ID!,
-        rentalDeliveryFee,
-        treeDetails: tree,
-        deliveryAddress: input.deliveryAddress,
-        visitRequested: input.visitRequested,
-    };
-}
-
-
-export async function verifyAndFulfilRental(payload: {
-    treeId: string;
-    rzpOrderId: string;
-    rzpPaymentId: string;
-    rzpSignature: string;
-    rentalDeliveryFee: number;
-    deliveryAddress: {
-        name: string;
-        phone: string;
-        line1: string;
-        city: string;
-        state: string;
-        pincode: string;
-    };
-    visitRequested: boolean;
-}) {
-    const user = await requireUser();
-    const supabase = await getSupabaseServer();
-
-    // DEBUG: Verify session identity
-    // const { data: { user: authUser } } = await supabase.auth.getUser();
-    // console.log("Log: Supabase sees Auth ID:", authUser?.id);
-    // console.log("Log: Code is sending User ID:", user.id);
-
-    // Verify HMAC signature
-    const body = `${payload.rzpOrderId}|${payload.rzpPaymentId}`;
-    const expectedSig = crypto
-        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
-        .update(body)
-        .digest("hex");
-
-    if (expectedSig !== payload.rzpSignature) {
-        await releaseTreeReservation(payload.treeId);
-        throw new Error("Payment verification failed");
-    }
-
-    // Get current season
+    // Compute season
     const now = new Date();
     const season =
         now.getMonth() >= 3
             ? `${now.getFullYear()}-${(now.getFullYear() + 1).toString().slice(2)}`
             : `${now.getFullYear() - 1}-${now.getFullYear().toString().slice(2)}`;
 
-    // Fetch tree details for the final record
-    const { data: tree } = await supabase
-        .from("trees")
-        .select("price, variety")
-        .eq("id", payload.treeId)
+    // Insert pending rental — all delivery details stored here so verifyAndFulfilRental
+    // doesn't need to receive them from the client (prevents tampering)
+    const { data: rental, error: rentalInsertError } = await supabase
+        .from("rentals")
+        .insert({
+            user_id: user.id,
+            tree_id: input.treeId,
+            season,
+            status: "pending",
+            payment_id: rzpOrder.id, // Razorpay ORDER id — replaced by payment id on fulfilment
+            amount_paid: (tree.price ?? 0) + rentalDeliveryFee,
+            delivery_address: input.deliveryAddress,
+            visit_requested: input.visitRequested,
+        })
+        .select("id")
         .single();
 
-    if (!tree) throw new Error("Tree details not found for finalization");
+    if (rentalInsertError) throw new Error("Failed to create pending rental: " + rentalInsertError.message);
 
-    const rentalDeliveryFee = payload.rentalDeliveryFee;
+    return {
+        rentalId: rental.id,
+        rzpOrderId: rzpOrder.id,
+        amount: totalPaise,
+        currency: "INR",
+        keyId: process.env.RAZORPAY_KEY_ID!,
+        rentalDeliveryFee,
+    };
+}
 
-    // Compute the reservation expiry — 1 year from today (end of mango season: May 31 of next year)
-    const rentalStart = new Date();
-    const reservedUntil = new Date(rentalStart);
+
+export async function verifyAndFulfilRental(payload: {
+    rentalId: string;
+    rzpOrderId: string;
+    rzpPaymentId: string;
+    rzpSignature: string;
+}) {
+    const user = await requireUser();
+    const supabase = await getSupabaseServer();
+
+    // 1. Look up the pending rental with ownership check
+    const { data: rental, error: fetchError } = await supabase
+        .from("rentals")
+        .select("id, status, tree_id, amount_paid, season")
+        .eq("id", payload.rentalId)
+        .eq("user_id", user.id)
+        .single();
+
+    if (fetchError || !rental) throw new Error("Rental not found");
+
+    // 2. Idempotency — webhook may have already fulfilled this
+    if (rental.status === "active") return { success: true, rentalId: rental.id };
+    if (rental.status !== "pending") throw new Error("Rental in unexpected state: " + rental.status);
+
+    // 3. Verify HMAC signature
+    const expectedSig = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+        .update(`${payload.rzpOrderId}|${payload.rzpPaymentId}`)
+        .digest("hex");
+
+    if (expectedSig !== payload.rzpSignature) {
+        await releaseTreeReservation(rental.tree_id!);
+        throw new Error("Payment verification failed");
+    }
+
+    // 4. Compute reservation expiry — end of May next year (mango season)
+    const reservedUntil = new Date();
     reservedUntil.setFullYear(reservedUntil.getFullYear() + 1);
-    // Always expire at end of May to align with mango season
     reservedUntil.setMonth(4); // May (0-indexed)
     reservedUntil.setDate(31);
     reservedUntil.setHours(23, 59, 59, 999);
 
-    // IMPORTANT: rentals.user_id must exactly equal auth.uid() (UUID)
-    const { data: rental, error: rentalError } = await supabase
-        .from("rentals")
-        .insert({
-            user_id: user.id, // must be UUID
-            tree_id: payload.treeId,
-            season,
-            status: "active",
-            payment_id: payload.rzpPaymentId,
-            amount_paid: (tree.price ?? 0) + rentalDeliveryFee,
-            delivery_address: payload.deliveryAddress, // remove `as any`
-            visit_requested: payload.visitRequested,
-        })
-        .select()
-        .single();
+    // 5. Atomic fulfilment: activate rental + mark tree rented in one transaction
+    const { error: rpcError } = await supabase.rpc("fulfil_rental", {
+        p_rental_id: rental.id,
+        p_rzp_payment_id: payload.rzpPaymentId,
+        p_tree_id: rental.tree_id!,
+        p_reserved_until: reservedUntil.toISOString(),
+    });
 
-    if (rentalError) {
-        console.log(rentalError);
-        throw new Error("Failed to create rental: " + rentalError.message);
-    }
+    if (rpcError) throw new Error("Failed to finalise rental: " + rpcError.message);
 
-    const { error: treeUpdateError } = await supabase
+    // 6. Fetch tree variety for email (non-critical, best-effort)
+    const { data: tree } = await supabase
         .from("trees")
-        .update({ status: "rented", reserved_until: reservedUntil.toISOString() })
-        .eq("id", payload.treeId);
-
-    if (treeUpdateError) {
-        console.error("CRITICAL: Failed to update tree status to rented:", treeUpdateError);
-    }
+        .select("variety")
+        .eq("id", rental.tree_id!)
+        .single();
 
     revalidatePath("/account");
     revalidatePath("/rent");
     revalidateTag("trees", "max");
 
-    // Send confirmation email — non-blocking so payment success is never blocked by email failure
     sendRentalConfirmedEmail(
         user.email!,
         user.full_name || "Valued Customer",
         rental.id,
-        tree.variety || "Mango Tree",
-        (tree.price ?? 0) + rentalDeliveryFee,
-        season
+        tree?.variety || "Mango Tree",
+        rental.amount_paid,
+        rental.season ?? ""
     ).catch((err) => console.error("[Rental Email] Failed to send confirmation:", err));
 
     return { success: true, rentalId: rental.id };
