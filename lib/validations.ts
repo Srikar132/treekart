@@ -51,17 +51,17 @@ export const treeSchema = z.object({
     description: z.string().min(20, "Description must be at least 20 characters"),
     gps_lat: z.coerce.number().min(-90).max(90).nullable().optional(),
     gps_lng: z.coerce.number().min(-180).max(180).nullable().optional(),
-    price: z.coerce.number().min(1, "Price is required").nullable().optional(),
-    age_years: z.coerce.number().min(1, "Age is required").nullable().optional(),
-    yield_min_kg: z.coerce.number().min(1, "Min yield is required").nullable().optional(),
-    yield_max_kg: z.coerce.number().min(1, "Max yield is required").nullable().optional(),
+    price: z.coerce.number().min(1, "Price is required"),
+    age_years: z.coerce.number().min(1, "Age is required"),
+    yield_min_kg: z.coerce.number().min(1, "Min yield is required"),
+    yield_max_kg: z.coerce.number().min(1, "Max yield is required"),
     plan_id: z.string().min(1, "Plan is required"),
     source: z.enum(["own_farm", "partner"]),
     status: z.enum(["available", "rented", "inactive"]),
     photos: z.array(z.string()).max(4, "Maximum 4 photos allowed").optional().default([]),
 }).refine(
     (d) => {
-        if (d.yield_max_kg === null || d.yield_min_kg === null || d.yield_max_kg === undefined || d.yield_min_kg === undefined) return true;
+        if (d.yield_max_kg === undefined || d.yield_min_kg === undefined) return true;
         return d.yield_max_kg >= d.yield_min_kg;
     },
     { message: "Max yield must be ≥ min yield", path: ["yield_max_kg"] }
