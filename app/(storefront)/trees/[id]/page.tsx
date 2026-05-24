@@ -10,7 +10,14 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserCircle } from "lucide-react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import {
+  buildMetadata,
+  buildProductSchema,
+  buildBreadcrumbSchema,
+  treeKeywords,
+  siteConfig,
+} from "@/lib/seo";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -18,54 +25,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const tree = await getTreeById(id);
 
-  if (!tree) return {};
+  if (!tree) return { title: "Tree Not Found" };
 
-  const title = `${tree.variety || "Mango Tree"} — Heritage Orchard Rental`;
-  const description = `Rent this ${tree.variety} tree aged ${tree.age_years} years from ${tree.farmers?.farm_name || "our orchard"}. Get a guaranteed harvest of ${tree.yield_min_kg}-${tree.yield_max_kg}kg fresh mangoes.`;
+  const variety = tree.variety ?? "Mango Tree";
+  const farmName = tree.farmers?.farm_name ?? "our orchard";
   const photos = Array.isArray(tree.photos) ? (tree.photos as string[]) : [];
-  const ogImage = photos[0] || "/og-image.png";
 
-  return {
-    title,
-    description,
-    keywords: [
-      "rent mango tree",
-      `${tree.variety} mango`,
-      "orchard rental",
-      "tree adoption India",
-      "fresh alphonso mangoes",
-      "sustainable farming",
-    ],
-    alternates: {
-      canonical: `/trees/${id}`,
-    },
-    openGraph: {
-      title,
-      description,
-      url: `https://www.treekart.in/trees/${id}`,
-      siteName: "TreeKart",
-      images: [
-        {
-          url: ogImage,
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
-      locale: "en_US",
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [ogImage],
-    },
-    robots: {
-      index: true,
-      follow: true,
-    },
-  };
+  return buildMetadata({
+    title: `${variety} — Heritage Orchard Rental`,
+    description: `Rent this ${variety} tree aged ${tree.age_years} years from ${farmName}. Get a guaranteed harvest of ${tree.yield_min_kg}–${tree.yield_max_kg}kg fresh mangoes delivered to your door.`,
+    path: `/trees/${id}`,
+    keywords: [`${variety} mango tree rental`, `${variety} orchard India`, ...treeKeywords],
+    image: photos[0] ?? siteConfig.ogImage,
+    imageAlt: `${variety} mango tree at ${farmName}`,
+  });
 }
 
 export const revalidate = 3600;
@@ -92,28 +65,38 @@ export default async function TreeDetailsPage({ params }: Props) {
 
   const isRented = tree.status === "rented";
 
+  const variety = tree.variety ?? "Mango Tree";
+  const photos = Array.isArray(tree.photos) ? (tree.photos as string[]) : [];
+  const treeUrl = `${siteConfig.url}/trees/${id}`;
+
   return (
     <main className="container py-10 lg:py-16 space-y-20">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Product",
-            "name": `${tree.variety || "Mango Tree"} Orchard Rental`,
-            "description": `Rent a ${tree.age_years} year old ${tree.variety} mango tree. Yield: ${tree.yield_min_kg}-${tree.yield_max_kg}kg.`,
-            "image": Array.isArray(tree.photos) ? (tree.photos as string[]) : [],
-            "offers": {
-              "@type": "Offer",
-              "price": tree.price,
-              "priceCurrency": "INR",
-              "availability": tree.status === "available" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-            },
-            "brand": {
-              "@type": "Brand",
-              "name": "TreeKart"
-            }
-          })
+          __html: JSON.stringify(
+            buildProductSchema({
+              name: `${variety} Orchard Rental`,
+              description: `Rent a ${tree.age_years}-year-old ${variety} mango tree. Guaranteed yield: ${tree.yield_min_kg}–${tree.yield_max_kg}kg of fresh Alphonso mangoes.`,
+              images: photos,
+              price: tree.price,
+              availability: tree.status === "available" ? "InStock" : "OutOfStock",
+              url: treeUrl,
+              sku: tree.id,
+            })
+          ),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildBreadcrumbSchema([
+              { name: "Home", url: siteConfig.url },
+              { name: "Rent a Tree", url: `${siteConfig.url}/rent` },
+              { name: variety, url: treeUrl },
+            ])
+          ),
         }}
       />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">

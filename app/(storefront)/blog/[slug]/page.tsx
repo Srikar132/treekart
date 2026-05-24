@@ -7,10 +7,47 @@ import { Calendar, User, Tag, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
+import type { Metadata } from "next";
+import {
+  buildMetadata,
+  buildArticleSchema,
+  buildBreadcrumbSchema,
+  blogKeywords,
+  siteConfig,
+} from "@/lib/seo";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const blog = await getBlogBySlug(slug);
+
+  if (!blog) return { title: "Article Not Found" };
+
+  const publishedAt = blog.published_at ?? blog.created_at;
+  const image = blog.cover_image ?? siteConfig.ogImage;
+
+  return buildMetadata({
+    title: blog.title,
+    description:
+      blog.excerpt ??
+      `${blog.title} — From the TreeKart Journal. Stories, tips, and updates from our Alphonso mango orchards.`,
+    path: `/blog/${slug}`,
+    keywords: [
+      ...(blog.category ? [blog.category] : []),
+      ...blogKeywords,
+      ...(blog.author ? [blog.author] : []),
+    ],
+    image,
+    imageAlt: blog.title,
+    type: "article",
+    publishedAt,
+  });
+}
+
+export const revalidate = 3600;
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
@@ -20,8 +57,44 @@ export default async function BlogPostPage({ params }: Props) {
     notFound();
   }
 
+  const publishedAt = blog.published_at ?? blog.created_at;
+  const image = blog.cover_image ?? siteConfig.ogImage;
+  const postUrl = `${siteConfig.url}/blog/${blog.slug}`;
+  const authorName = blog.author ?? "TreeKart Team";
+
   return (
     <article className="min-h-screen bg-background pb-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildArticleSchema({
+              title: blog.title,
+              description:
+                blog.excerpt ??
+                `${blog.title} — From the TreeKart Journal.`,
+              url: postUrl,
+              image,
+              author: authorName,
+              publishedAt,
+              category: blog.category ?? undefined,
+              keywords: blog.category ? [blog.category, ...blogKeywords] : blogKeywords,
+            })
+          ),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildBreadcrumbSchema([
+              { name: "Home", url: siteConfig.url },
+              { name: "Journal", url: `${siteConfig.url}/blog` },
+              { name: blog.title, url: postUrl },
+            ])
+          ),
+        }}
+      />
       {/* Editorial Header */}
       <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden bg-slate-900">
         {blog.cover_image ? (

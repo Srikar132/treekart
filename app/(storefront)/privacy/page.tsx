@@ -1,4 +1,5 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import {
   Shield, Lock, Eye, FileText, CreditCard,
   Share2, Cookie, UserCheck, ExternalLink, Baby,
@@ -7,10 +8,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { AnimatedButton } from "@/components/shared/animated-button";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy — TreeKart",
-  description: "Learn how TreeKart collects, uses, and protects your personal information.",
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Privacy Policy",
+  description:
+    "Learn how TreeKart collects, uses, and protects your personal information when you shop for mangoes or rent a tree.",
+  path: "/privacy",
+  keywords: ["TreeKart privacy policy", "data protection", "personal information", "cookie policy"],
+});
 
 const sections = [
   {

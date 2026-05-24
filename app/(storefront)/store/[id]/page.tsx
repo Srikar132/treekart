@@ -6,9 +6,14 @@ import { ProductMedia } from "@/components/storefront/shop/product-media";
 import { ProductInfo } from "@/components/storefront/shop/product-info";
 import { RelatedProducts } from "@/components/storefront/shop/related-products";
 import { Separator } from "@/components/ui/separator";
-import Image from "next/image";
-
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import {
+  buildMetadata,
+  buildProductSchema,
+  buildBreadcrumbSchema,
+  storeKeywords,
+  siteConfig,
+} from "@/lib/seo";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -18,53 +23,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const product = await getProductById(id);
 
-  if (!product) return {};
+  if (!product) return { title: "Product Not Found" };
 
   const title = `${product.name} — Premium Organic Mangoes`;
-  const description = `${product.description} Freshly picked ${product.variety} mangoes from TreeKart orchards. Available in ${product.weight_kg?.join(", ")}kg boxes.`;
-  const ogImage = product.image_url?.[0] || "/og-image.png";
+  const description = `${product.description ?? ""} Freshly picked ${product.variety ?? "Alphonso"} mangoes from TreeKart orchards. Available in ${(product.weight_kg ?? []).join(", ")}kg boxes.`.trim();
+  const ogImage = product.image_url?.[0] ?? siteConfig.ogImage;
 
-  return {
+  return buildMetadata({
     title,
     description,
+    path: `/store/${id}`,
     keywords: [
-      "buy mangoes online",
-      `${product.name}`,
-      `${product.variety} mangoes`,
-      "organic alphonso",
-      "fresh fruit delivery",
-      "premium mango boxes",
+      product.name,
+      `${product.variety ?? "Alphonso"} mangoes`,
+      ...storeKeywords,
     ],
-    alternates: {
-      canonical: `/store/${id}`,
-    },
-    openGraph: {
-      title,
-      description,
-      url: `https://www.treekart.in/store/${id}`,
-      siteName: "TreeKart",
-      images: [
-        {
-          url: ogImage,
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
-      locale: "en_US",
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [ogImage],
-    },
-    robots: {
-      index: true,
-      follow: true,
-    },
-  };
+    image: ogImage,
+    imageAlt: title,
+  });
 }
 
 export default async function ProductDetailsPage({ params }: Props) {
@@ -75,28 +51,41 @@ export default async function ProductDetailsPage({ params }: Props) {
 
     if (!product) return notFound();
 
+    const productUrl = `${siteConfig.url}/store/${id}`;
+
     return (
       <main className="container py-10 lg:py-16 space-y-20">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Product",
-              "name": product.name,
-              "description": product.description,
-              "image": product.image_url,
-              "offers": {
-                "@type": "Offer",
-                "price": product.price,
-                "priceCurrency": "INR",
-                "availability": product.status === "available" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-              },
-              "brand": {
-                "@type": "Brand",
-                "name": "TreeKart"
-              }
-            })
+            __html: JSON.stringify(
+              buildProductSchema({
+                name: product.name,
+                description: product.description ?? product.name,
+                images: product.image_url ?? [],
+                price: product.price,
+                availability:
+                  product.status === "available"
+                    ? "InStock"
+                    : product.status === "pre_order"
+                    ? "PreOrder"
+                    : "OutOfStock",
+                url: productUrl,
+                sku: product.id,
+              })
+            ),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(
+              buildBreadcrumbSchema([
+                { name: "Home", url: siteConfig.url },
+                { name: "Shop", url: `${siteConfig.url}/store` },
+                { name: product.name, url: productUrl },
+              ])
+            ),
           }}
         />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">

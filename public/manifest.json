@@ -1,0 +1,58 @@
+{
+  "name": "TreeKart — Rent a Mango Tree",
+  "short_name": "TreeKart",
+  "description": "Rent a real Alphonso mango tree and get fresh organic mangoes delivered to your doorstep.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2d6e3e",
+  "lang": "en-IN",
+  "scope": "/",
+  "orientation": "portrait-primary",
+  "categories": ["shopping", "food", "lifestyle"],
+  "icons": [
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Shop Mangoes",
+      "short_name": "Shop",
+      "description": "Buy fresh Alphonso mangoes",
+      "url": "/store",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Rent a Tree",
+      "short_name": "Rent",
+      "description": "Rent a heritage mango tree",
+      "url": "/rent",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -9,6 +9,7 @@ import Script from "next/script";
 import { Toaster } from "sonner";
 import NextTopLoader from "nextjs-toploader";
 import { LoginPromptDialog } from "@/components/shared/login-prompt-dialog";
+import { buildOrganizationSchema, buildWebSiteSchema, siteConfig } from "@/lib/seo";
 
 const dmSans = DM_Sans({
   variable: "--font-sans",
@@ -23,7 +24,7 @@ const dmMono = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.treekart.in"),
+  metadataBase: new URL(siteConfig.url),
   formatDetection: {
     email: false,
     address: false,
@@ -31,15 +32,20 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.ico' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: "/favicon.ico" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
     ],
-    apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    other: [
+      { rel: "android-chrome", url: "/android-chrome-192x192.png", sizes: "192x192" },
+      { rel: "android-chrome", url: "/android-chrome-512x512.png", sizes: "512x512" },
     ],
   },
-  manifest: '/manifest.json',
+  manifest: "/manifest.json",
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? undefined,
+  },
 };
 
 export default function RootLayout({
@@ -58,25 +64,11 @@ export default function RootLayout({
             <TooltipProvider delay={100}>
               <script
                 type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                  __html: JSON.stringify({
-                    "@context": "https://schema.org",
-                    "@type": "Organization",
-                    "name": "TreeKart",
-                    "url": "https://www.treekart.in",
-                    "logo": "https://www.treekart.in/logo.webp",
-                    "contactPoint": {
-                      "@type": "ContactPoint",
-                      "telephone": "+91-7981365932",
-                      "contactType": "customer service"
-                    },
-                    "sameAs": [
-                      "https://facebook.com/treekart",
-                      "https://twitter.com/treekart",
-                      "https://instagram.com/treekart"
-                    ]
-                  })
-                }}
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(buildOrganizationSchema()) }}
+              />
+              <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(buildWebSiteSchema()) }}
               />
               {children}
             </TooltipProvider>
