@@ -56,6 +56,7 @@ export function TreeGrid({ initialData, options, rentalDeliveryFee }: Props) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isError,
   } = useInfiniteQuery({
     queryKey: ["trees", options.filters, options.sort],
     queryFn: ({ pageParam = 1 }) => fetchTrees(options, pageParam as number),
@@ -69,16 +70,6 @@ export function TreeGrid({ initialData, options, rentalDeliveryFee }: Props) {
     staleTime: 3600_000,
   });
 
-  // Sync React Query cache with fresh initialData from Server Component
-  // useEffect(() => {
-  //   if (initialData) {
-  //     queryClient.setQueryData(["trees", options.filters, options.sort], {
-  //       pages: [initialData],
-  //       pageParams: [1],
-  //     });
-  //   }
-  // }, [initialData, queryClient, options.filters, options.sort]);
-
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
@@ -86,6 +77,12 @@ export function TreeGrid({ initialData, options, rentalDeliveryFee }: Props) {
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const allTrees = data?.pages.flatMap((page) => page.trees) || [];
+
+  if (isError) return (
+    <div className="text-center py-20 text-muted-foreground">
+      <p className="font-bold">Failed to load trees. Please refresh.</p>
+    </div>
+  );
 
   if (allTrees.length === 0) {
     return <NoResults

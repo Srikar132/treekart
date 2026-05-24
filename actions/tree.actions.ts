@@ -8,6 +8,7 @@ import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getSupabasePublic } from "@/utils/supabase/public";
 import { sendRentalConfirmedEmail } from "@/lib/email";
 import { getAppSettings } from "@/actions/admin.actions";
+import { cache } from "react";
 
 
 export type TreeSortOption = "newest" | "price_asc" | "price_desc" | "age_asc" | "age_desc";
@@ -189,14 +190,15 @@ export async function getTreeById(treeId: string) {
 }
 
 // ── getActiveRental ────────────────────────────────────────────────
-// Only call this when tree.status === "rented".
-// Returns the single active rental with the renter's profile.
-export async function getActiveRental(treeId: string) {
-    const supabase = await getSupabaseServer();
+// Public data — renter's name/avatar is shown to all visitors.
+// Uses public client so cookies() is NOT called → route stays ISR-eligible.
+const _getActiveRentalCached = unstable_cache(
+    async (treeId: string) => {
+        const supabase = getSupabasePublic();
 
-    const { data, error } = await supabase
-        .from("rentals")
-        .select(`
+        const { data, error } = await supabase
+            .from("rentals")
+            .select(`
       id,
       status,
       user_id,
@@ -206,28 +208,44 @@ export async function getActiveRental(treeId: string) {
         avatar_url
       )
     `)
-        .eq("tree_id", treeId)
-        .eq("status", "active")
-        .limit(1)
-        .maybeSingle();
+            .eq("tree_id", treeId)
+            .eq("status", "active")
+            .limit(1)
+            .maybeSingle();
 
-    if (error) throw new Error(error.message);
-    return data; // null if somehow no active rental despite status
-}
+        if (error) throw new Error(error.message);
+        return data;
+    },
+    ["active-rental"],
+    { tags: ["rentals"], revalidate: 300 }
+);
+
+// React.cache() deduplicates the two Suspense-boundary calls within the same render.
+export const getActiveRental = cache(async (treeId: string) => {
+    return _getActiveRentalCached(treeId);
+});
 
 // ── getTreeUpdates ─────────────────────────────────────────────────
 // Scoped to a rental, not a tree. Old rentals' updates won't bleed.
+const _getTreeUpdatesCached = unstable_cache(
+    async (rentalId: string) => {
+        const supabase = getSupabasePublic();
+
+        const { data, error } = await supabase
+            .from("tree_updates")
+            .select("*")
+            .eq("rental_id", rentalId)
+            .order("posted_at", { ascending: false });
+
+        if (error) throw new Error(error.message);
+        return data ?? [];
+    },
+    ["tree-updates"],
+    { tags: ["rentals"], revalidate: 300 }
+);
+
 export async function getTreeUpdates(rentalId: string) {
-    const supabase = await getSupabasePublic();
-
-    const { data, error } = await supabase
-        .from("tree_updates")
-        .select("*")
-        .eq("rental_id", rentalId)
-        .order("posted_at", { ascending: false });
-
-    if (error) throw new Error(error.message);
-    return data ?? [];
+    return _getTreeUpdatesCached(rentalId);
 }
 
 
@@ -420,6 +438,7 @@ export async function verifyAndFulfilRental(payload: {
     revalidatePath("/account");
     revalidatePath("/rent");
     revalidateTag("trees", "max");
+    revalidateTag("rentals", "max");
 
     sendRentalConfirmedEmail(
         user.email!,

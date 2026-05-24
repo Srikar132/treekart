@@ -44,6 +44,7 @@ export function ProductGrid({ initialData, options }: Props) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isError,
   } = useInfiniteQuery({
     queryKey: ["products", options.filters, options.sort],
     queryFn: ({ pageParam = 1 }) => fetchProducts(options, pageParam as number),
@@ -83,6 +84,12 @@ export function ProductGrid({ initialData, options }: Props) {
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const allProducts = data?.pages.flatMap((page) => page.products) || [];
+
+  if (isError) return (
+    <div className="text-center py-20 text-muted-foreground">
+      <p className="font-bold">Failed to load products. Please refresh.</p>
+    </div>
+  );
 
   if (allProducts.length === 0) {
     return <NoResults />;
