@@ -1,4 +1,5 @@
 export const revalidate = 3600;
+export const dynamicParams = true;
 
 import { getMangoProducts, getProductById } from "@/actions/products.actions";
 import { notFound } from "next/navigation";
@@ -41,6 +42,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     image: ogImage,
     imageAlt: title,
   });
+}
+
+export async function generateStaticParams() {
+  const { products } = await getMangoProducts({ limit: 1000 });
+  return products.map((p) => ({ id: String(p.id) }));
 }
 
 export default async function ProductDetailsPage({ params }: Props) {
