@@ -138,7 +138,11 @@ export default async function TreeDetailsPage({ params }: Props) {
 
 async function ActiveRentalStream({ treeId }: { treeId: string }) {
   const rental = await getActiveRental(treeId);
-  if (!rental?.profiles) {
+  const profile = rental?.profiles
+    ? Array.isArray(rental.profiles) ? rental.profiles[0] : rental.profiles
+    : null;
+
+  if (!profile) {
     return (
       <>
         <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white shadow-sm">
@@ -154,14 +158,14 @@ async function ActiveRentalStream({ treeId }: { treeId: string }) {
   return (
     <>
       <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
-        <AvatarImage src={rental.profiles.avatar_url || ""} />
+        <AvatarImage src={profile.avatar_url || ""} />
         <AvatarFallback className="bg-primary/10 text-primary uppercase">
-          {rental.profiles.full_name?.charAt(0) || "U"}
+          {profile.full_name?.charAt(0) || "U"}
         </AvatarFallback>
       </Avatar>
       <div>
         <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Currently Leased By</p>
-        <p className="text-lg font-bold text-foreground">{rental.profiles.full_name}</p>
+        <p className="text-lg font-bold text-foreground">{profile.full_name}</p>
       </div>
     </>
   );
