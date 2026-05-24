@@ -49,6 +49,9 @@ export const metadata: Metadata = {
     description: "Rent a real Alphonso mango tree and enjoy fresh organic mangoes delivered to your doorstep.",
     images: ["/og-image.png"],
   },
+  verification: {
+    google: "ONFOV0CiJYVlawuh114zJ8dxhByI_ea2u9Yq69TsARg",
+  },
   robots: {
     index: true,
     follow: true,
