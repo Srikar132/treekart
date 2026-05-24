@@ -42,16 +42,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export const revalidate = 3600;
+export const dynamicParams = true;
 
-// export async function generateStaticParams() {
-//   const { trees } = await getAvailableTrees({
-//     limit: 1000,
-//     filters: { status: ["available", "rented"] }
-//   });
-//   return trees.map((tree) => ({
-//     id: String(tree.id),
-//   }));
-// }
+export async function generateStaticParams() {
+  const { trees } = await getAvailableTrees({
+    limit: 1000,
+    filters: { status: ["available", "rented"] },
+  });
+  return trees.map((tree) => ({ id: String(tree.id) }));
+}
 
 export default async function TreeDetailsPage({ params }: Props) {
   const { id } = await params;
