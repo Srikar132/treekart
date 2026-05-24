@@ -22,25 +22,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Dynamic tree routes
-  const { trees } = await getAvailableTrees({
-    limit: 1000,
-    filters: { status: ["available", "rented"] },
-  });
-  const treeRoutes: MetadataRoute.Sitemap = trees.map((tree) => ({
-    url: `${base}/trees/${tree.id}`,
-    lastModified: new Date(tree.created_at),
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }));
+  let treeRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const { trees } = await getAvailableTrees({
+      limit: 1000,
+      filters: { status: ["available", "rented"] },
+    });
+    treeRoutes = trees.map((tree) => ({
+      url: `${base}/trees/${tree.id}`,
+      lastModified: new Date(tree.created_at),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }));
+  } catch {
+    // must not break the sitemap
+  }
 
   // Dynamic product routes
-  const { products } = await getMangoProducts({ limit: 1000 });
-  const productRoutes: MetadataRoute.Sitemap = products.map((product) => ({
-    url: `${base}/store/${product.id}`,
-    lastModified: new Date(product.updated_at),
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }));
+  let productRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const { products } = await getMangoProducts({ limit: 1000 });
+    productRoutes = products.map((product) => ({
+      url: `${base}/store/${product.id}`,
+      lastModified: new Date(product.updated_at),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }));
+  } catch {
+    // must not break the sitemap
+  }
 
   // Dynamic blog routes
   let blogRoutes: MetadataRoute.Sitemap = [];
