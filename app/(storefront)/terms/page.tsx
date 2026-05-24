@@ -1,10 +1,14 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import { Gavel, CheckCircle2, AlertCircle, ShoppingBag, Truck } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "Terms of Service — TreeKart",
-  description: "Read our terms and conditions for tree rentals and product purchases.",
-};
+export const metadata: Metadata = buildMetadata({
+  title: "Terms of Service",
+  description:
+    "Read TreeKart's terms and conditions covering tree rentals, mango orders, shipping, and customer rights.",
+  path: "/terms",
+  keywords: ["TreeKart terms of service", "rental agreement", "refund policy", "mango order terms"],
+});
 
 export default function TermsPage() {
   const points = [

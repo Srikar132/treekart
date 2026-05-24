@@ -1,19 +1,39 @@
-import { MetadataRoute } from 'next'
- 
+import { MetadataRoute } from "next";
+import { siteConfig } from "@/lib/seo";
+
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: [
-        '/admin/',
-        '/checkout/',
-        '/account/',
-        '/auth/',
-        '/farmer/',
-        '/api/',
-      ],
-    },
-    sitemap: 'https://www.treekart.in/sitemap.xml',
-  }
+    rules: [
+      {
+        userAgent: "Googlebot",
+        allow: ["/", "/store/", "/trees/", "/blog/", "/rent", "/about", "/faq", "/contact"],
+        disallow: [
+          "/admin/",
+          "/checkout/",
+          "/account/",
+          "/auth/",
+          "/farmer/",
+          "/api/",
+          "/_next/",
+          "/blocked",
+        ],
+      },
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: [
+          "/admin/",
+          "/checkout/",
+          "/account/",
+          "/auth/",
+          "/farmer/",
+          "/api/",
+          "/_next/",
+          "/blocked",
+        ],
+      },
+    ],
+    sitemap: `${siteConfig.url}/sitemap.xml`,
+    host: siteConfig.url,
+  };
 }

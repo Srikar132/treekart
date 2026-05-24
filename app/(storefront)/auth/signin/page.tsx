@@ -1,6 +1,13 @@
 import { SigninForm } from "@/components/storefront/auth/signin-form";
 import { getUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Sign In",
+  description: "Sign in to your TreeKart account to manage your tree rentals and mango orders.",
+  robots: { index: false, follow: false },
+};
 
 export default async function LoginPage({
     searchParams,

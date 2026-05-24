@@ -1,46 +1,41 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
 import { getBlogs } from "@/actions/blog.actions";
 import Image from "next/image";
-
-export const metadata: Metadata = {
-  title: "The Journal — TreeKart",
-  description: "Notes from the orchard. Updates on harvest cycles, organic farming techniques, and the heritage of Alphonso mangoes.",
-  keywords: ["mango blog", "organic farming journal", "Alphonso harvest updates", "orchard stories", "sustainable agriculture blog"],
-  alternates: {
-    canonical: "/blog",
-  },
-  openGraph: {
-    title: "The Journal — TreeKart",
-    description: "Notes from the orchard. Updates on harvest cycles, organic farming techniques, and the heritage of Alphonso mangoes.",
-    url: "https://www.treekart.in/blog",
-    siteName: "TreeKart",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "TreeKart Journal",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "The Journal — TreeKart",
-    description: "Notes from the orchard. Updates on harvest cycles, organic farming techniques, and the heritage of Alphonso mangoes.",
-    images: ["/og-image.png"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+import { buildMetadata, blogKeywords, siteConfig } from "@/lib/seo";
 
 interface BlogPageProps {
   searchParams: Promise<{ page?: string }>;
+}
+
+export async function generateMetadata({ searchParams }: BlogPageProps): Promise<Metadata> {
+  const { page } = await searchParams;
+  const currentPage = Number(page) || 1;
+  const isPaginated = currentPage > 1;
+
+  const base = buildMetadata({
+    title: isPaginated
+      ? `The Journal — Page ${currentPage} | TreeKart`
+      : "The Journal — Notes from the Orchard",
+    description:
+      "Stories, harvest updates, and organic farming tips from our Alphonso mango orchards. Follow the journey from blossom to your doorstep.",
+    path: isPaginated ? `/blog?page=${currentPage}` : "/blog",
+    keywords: [
+      ...blogKeywords,
+      "mango farming tips",
+      "Alphonso mango season",
+      "orchard journal",
+      "organic fruit news",
+    ],
+  });
+
+  // Paginated pages should not be indexed to avoid duplicate content
+  if (isPaginated) {
+    base.robots = { index: false, follow: true };
+  }
+
+  return base;
 }
 
 export const revalidate = 3600;
@@ -52,8 +47,26 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
   const { data: posts, totalPages, count } = await getBlogs(currentPage, limit);
 
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "TreeKart Journal — Orchard Stories",
+    url: `${siteConfig.url}/blog`,
+    numberOfItems: count,
+    itemListElement: posts.map((post, index) => ({
+      "@type": "ListItem",
+      position: (currentPage - 1) * limit + index + 1,
+      url: `${siteConfig.url}/blog/${post.slug}`,
+      name: post.title,
+    })),
+  };
+
   return (
     <main className="bg-white min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
       <div className="max-w-6xl mx-auto px-6 py-20 md:py-32 space-y-20">
 
         {/* Header */}
