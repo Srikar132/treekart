@@ -21,12 +21,12 @@ No test framework is configured.
 
 ### Route Groups
 
-| Group | Path prefix | Purpose |
-|---|---|---|
-| `(storefront)` | `/`, `/store`, `/trees`, `/rent`, `/blog`, `/account`, `/auth` | Public customer-facing |
-| `(admin)` | `/admin` | Protected admin dashboard |
-| `(checkout)` | `/checkout` | Cart and rental checkout |
-| `(farmer)` | `/farmer` | Farmer portal (in progress) |
+| Group          | Path prefix                                                    | Purpose                     |
+| -------------- | -------------------------------------------------------------- | --------------------------- |
+| `(storefront)` | `/`, `/store`, `/trees`, `/rent`, `/blog`, `/account`, `/auth` | Public customer-facing      |
+| `(admin)`      | `/admin`                                                       | Protected admin dashboard   |
+| `(checkout)`   | `/checkout`                                                    | Cart and rental checkout    |
+| `(farmer)`     | `/farmer`                                                      | Farmer portal (in progress) |
 
 ### Data & Auth (Supabase)
 
@@ -86,12 +86,12 @@ Forms use `react-hook-form` + `zod`. Shared Zod schemas live in `lib/validations
 
 Tailwind v4 with OKLCH design tokens. Brand palette:
 
-| Token | Color |
-|---|---|
-| `mango` | `oklch(0.78 0.18 85)` — mango yellow |
-| `grove` | `oklch(0.42 0.14 145)` — deep green (maps to `primary`) |
-| `grove-light` / `secondary` | `oklch(0.94 0.07 145)` — green mist |
-| `leaf` | `oklch(0.62 0.16 145)` — mid green |
+| Token                       | Color                                                   |
+| --------------------------- | ------------------------------------------------------- |
+| `mango`                     | `oklch(0.78 0.18 85)` — mango yellow                    |
+| `grove`                     | `oklch(0.42 0.14 145)` — deep green (maps to `primary`) |
+| `grove-light` / `secondary` | `oklch(0.94 0.07 145)` — green mist                     |
+| `leaf`                      | `oklch(0.62 0.16 145)` — mid green                      |
 
 Use `bg-mango`, `text-grove`, etc. Never hardcode hex/rgb. Never edit `globals.css`.
 
