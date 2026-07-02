@@ -3,10 +3,11 @@ import { buildMetadata } from "@/lib/seo";
 import {
   Shield, Lock, Eye, FileText, CreditCard,
   Share2, Cookie, UserCheck, ExternalLink, Baby,
-  RefreshCw, TreePine, MessageCircle
+  RefreshCw, TreePine, MessageCircle, Mail, Phone, MapPin
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AnimatedButton } from "@/components/shared/animated-button";
+import settings from "@/constants/settings";
 
 export const metadata: Metadata = buildMetadata({
   title: "Privacy Policy",
@@ -186,6 +187,43 @@ export default function PrivacyPage() {
               </div>
             );
           })}
+
+          {/* 12. Contact Us */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 h-10 w-10 rounded-xl bg-primary/8 flex items-center justify-center text-primary border border-primary/10">
+                <Mail size={18} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-[10px] font-black text-primary/60 uppercase tracking-widest">12</span>
+                  <h2 className="text-base md:text-lg font-black text-slate-900 tracking-tight">
+                    Contact Us
+                  </h2>
+                </div>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed mb-4">
+                  For any privacy-related questions or to make a data request, contact us at:
+                </p>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-3 text-sm text-slate-600 font-medium">
+                    <Mail size={16} className="text-primary flex-shrink-0" />
+                    <a href={`mailto:${settings.EMAIL}`} className="hover:text-primary transition-colors">
+                      {settings.EMAIL}
+                    </a>
+                  </li>
+                  <li className="flex items-center gap-3 text-sm text-slate-600 font-medium">
+                    <Phone size={16} className="text-primary flex-shrink-0" />
+                    <span>{settings.PHONE}</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-sm text-slate-600 font-medium">
+                    <MapPin size={16} className="text-primary flex-shrink-0" />
+                    <span>{settings.ADDRESS}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
           {/* Contact CTA */}
           <div className="bg-primary rounded-2xl p-8 md:p-14 flex flex-col items-center text-center gap-6 shadow-lg shadow-primary/20">
             <div className="h-14 w-14 rounded-2xl bg-white/10 flex items-center justify-center">
