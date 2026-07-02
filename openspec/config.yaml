@@ -1,0 +1,62 @@
+schema: spec-driven
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+context: |
+  TreeKart — mango tree rental + product e-commerce platform.
+
+  Tech stack:
+    - Next.js 16.2.4 (App Router) — NOTE: breaking changes vs older Next.js;
+      check node_modules/next/dist/docs/ before writing Next-specific code.
+    - React 19.2, TypeScript
+    - Supabase (Postgres + Auth) via @supabase/ssr
+    - Tailwind CSS v4 with OKLCH design tokens
+    - shadcn/ui (built on Base UI — use `render` prop, NOT `asChild`)
+    - TanStack Query + TanStack Table
+    - Zustand (state), react-hook-form + zod (forms/validation)
+    - Razorpay (payments), Cloudinary (image uploads), Resend (email)
+    - Arcjet (security/rate limiting)
+
+  Route groups (app/):
+    - (storefront) — public customer-facing: /, /store, /trees, /rent, /blog, /account, /auth
+    - (admin)      — protected admin dashboard: /admin
+    - (checkout)   — cart + rental checkout: /checkout
+    - (farmer)     — farmer portal (in progress): /farmer
+
+  Auth & data:
+    - Supabase server client: utils/supabase/server.ts
+    - Auth helpers in lib/auth.ts: getUser(), requireUser(), requireAdmin(), requireFarmer()
+    - Roles from profiles.role (user | farmer | admin), NOT JWT claims.
+
+  Server Actions (all mutations, "use server"): actions/*.actions.ts
+    (auth, user, admin, tree, products, order, blog, contact)
+
+  Domain model (types/database.types.ts — use Tables<'x'>/Enums<'x'> helpers):
+    - trees: plan_type basic|standard|max; tree_status available|rented|inactive
+    - rentals: rental_status active|completed|cancelled
+    - orders: order_status pending|confirmed|shipped|delivered
+    - mango_products: product_status available|out_of_stock|pre_order
+    - profiles: user_role user|farmer|admin
+
+  Conventions:
+    - Component-based architecture; reuse existing components
+      (AnimatedButton, ProductCard) before making new ones.
+    - Use AnimatedButton for all storefront CTAs.
+    - Use OKLCH design tokens (bg-mango, text-grove, etc.). Never hardcode
+      hex/rgb. Never edit globals.css.
+    - Admin list pages use components/admin/data-table.tsx (TanStack Table);
+      per-entity columns in components/admin/<entity>/columns.tsx.
+    - No test framework configured.
+
+# Per-artifact rules (optional)
+rules:
+  proposal:
+    - This is new version NextJs , so here we use proxy.ts instead of middleware.ts.
+    - State the problem and why now before the solution.
+    - Include a "Non-goals" section to bound scope.
+  tasks:
+    - Break tasks into small, independently verifiable chunks.
+    - Reference concrete files/actions/components affected.
+  design:
+    - Note Supabase schema/RLS impacts and any migration needed.
+    - Call out which route group and Server Actions are touched.

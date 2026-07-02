@@ -71,6 +71,17 @@ function redirectTo(request: NextRequest, destination: string) {
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({ request })
 
+    const { pathname } = request.nextUrl
+
+    // Auth callback must reach its route handler even without a session — its whole
+    // purpose is to exchange the code for a session. Gating it here bounces it to
+    // /auth/signin before the exchange runs, breaking password reset + signup confirm.
+    // Match the exact path only (not a prefix) so protected routes stay gated.
+    // (Add '/auth/confirm' here if a dedicated confirmation endpoint is introduced.)
+    if (pathname === '/auth/callback') {
+        return supabaseResponse
+    }
+
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
@@ -97,8 +108,6 @@ export async function updateSession(request: NextRequest) {
 
     // IMPORTANT: Do NOT put any logic between createServerClient and getUser().
     const { data: { user } } = await supabase.auth.getUser()
-
-    const { pathname } = request.nextUrl
 
     // ── PHASE 1 — Unauthenticated ──────────────────────────────────────────────
     if (!user) {
