@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "standardwebhooks": "https://esm.sh/standardwebhooks@1.0.0"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    }
+  }
+}

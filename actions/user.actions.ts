@@ -1,9 +1,68 @@
 "use server";
 
 import { requireUser, requireAdmin, getSupabaseServer } from "@/lib/auth";
+import { profileCompletionSchema, orderEmailSchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
 
 // ── PROFILE ────────────────────────────────────────────────────────
+
+/**
+ * Onboarding — run after a new user's first OTP verification.
+ * Name is required; email is optional here (it is required later, at checkout).
+ */
+export async function completeProfile(input: { fullName: string; email?: string }) {
+    const user = await requireUser();
+
+    const parsed = profileCompletionSchema.safeParse(input);
+    if (!parsed.success) {
+        const f = parsed.error.flatten().fieldErrors;
+        return { success: false as const, error: f.fullName?.[0] ?? f.email?.[0] ?? "Invalid input." };
+    }
+
+    const supabase = await getSupabaseServer();
+    const email = parsed.data.email?.trim();
+
+    const { error } = await supabase
+        .from("profiles")
+        .update({
+            full_name: parsed.data.fullName.trim(),
+            // Only write email when one was actually given — skipping must leave it null.
+            ...(email ? { email } : {}),
+        })
+        .eq("id", user.id);
+
+    if (error) return { success: false as const, error: error.message };
+
+    revalidatePath("/", "layout");
+    return { success: true as const };
+}
+
+/**
+ * Capture the contact email at checkout, for users who skipped it at sign-up.
+ * Writes the same profiles.email so it is never requested twice.
+ */
+export async function saveContactEmail(input: { email: string }) {
+    const user = await requireUser();
+
+    const parsed = orderEmailSchema.safeParse(input);
+    if (!parsed.success) {
+        return {
+            success: false as const,
+            error: parsed.error.flatten().fieldErrors.email?.[0] ?? "Enter a valid email address.",
+        };
+    }
+
+    const supabase = await getSupabaseServer();
+    const { error } = await supabase
+        .from("profiles")
+        .update({ email: parsed.data.email.trim() })
+        .eq("id", user.id);
+
+    if (error) return { success: false as const, error: error.message };
+
+    revalidatePath("/", "layout");
+    return { success: true as const };
+}
 
 
 

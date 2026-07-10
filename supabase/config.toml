@@ -203,15 +203,17 @@ token_verifications = 30
 # Number of Web3 logins that can be made in a 5 minute interval per IP address.
 web3 = 30
 
-# Configure one of the supported captcha providers: `hcaptcha`, `turnstile`.
-# [auth.captcha]
-# enabled = true
-# provider = "hcaptcha"
-# secret = ""
+# CAPTCHA on OTP send. Arcjet's per-IP limit bounds the loss; only a CAPTCHA
+# raises the cost for distributed bots. Every MSG91 SMS is money.
+[auth.captcha]
+enabled = true
+provider = "turnstile"
+secret = "env(TURNSTILE_SECRET_KEY)"
 
 [auth.email]
-# Allow/disallow new user signups via email to your project.
-enable_signup = true
+# Email is no longer an auth identity — phone + OTP only. It is retained solely
+# as an optional contact field on profiles, for order receipts.
+enable_signup = false
 # If enabled, a user will be required to confirm any email change on both the old, and new email
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
@@ -248,18 +250,17 @@ otp_expiry = 3600
 # content_path = "./templates/password_changed_notification.html"
 
 [auth.sms]
-# Allow/disallow new user signups via SMS to your project.
-enable_signup = false
-# If enabled, users need to confirm their phone number before signing in.
-enable_confirmations = false
-# Template for sending OTP to users
+# Phone + OTP is the sole auth method.
+enable_signup = true
+enable_confirmations = true
+# MUST match the DLT-registered MSG91 template exactly, or Indian carriers drop it.
 template = "Your code is {{ .Code }}"
-# Controls the minimum amount of time that must pass before sending another sms otp.
 max_frequency = "5s"
 
-# Use pre-defined map of phone number to OTP for testing.
-# [auth.sms.test_otp]
-# 4152127777 = "123456"
+# Local development only: fixed number -> code, so `npm run dev` never calls MSG91
+# and never spends an SMS. Has no effect on the hosted project.
+[auth.sms.test_otp]
+9876543210 = "123456"
 
 # Configure logged in session timeouts.
 # [auth.sessions]
@@ -278,12 +279,18 @@ max_frequency = "5s"
 # enabled = true
 # uri = "pg-functions://<database>/<schema>/<hook_name>"
 
-# Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
+# SMS delivery goes through the custom Send SMS Hook -> MSG91 (see
+# supabase/functions/send-sms). MSG91 is NOT one of Supabase's native providers
+# (`twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`), so no native
+# provider block is enabled here. Supabase still generates and verifies the OTP;
+# the hook only delivers it.
+#
+# The hook itself is registered in the dashboard: Authentication -> Hooks -> Send SMS
+# (HTTP Endpoint), which issues the SEND_SMS_HOOK_SECRET the function verifies.
 [auth.sms.twilio]
 enabled = false
 account_sid = ""
 message_service_sid = ""
-# DO NOT commit your Twilio auth token to git. Use environment variable substitution instead:
 auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
 
 # Multi-factor-authentication is available to Supabase Pro plan.
@@ -291,10 +298,10 @@ auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
 # Control how many MFA factors can be enrolled at once per user.
 max_enrolled_factors = 10
 
-# Control MFA via App Authenticator (TOTP)
+# Control MFA via App Authenticator (TOTP) — the admin second factor. Free on all plans.
 [auth.mfa.totp]
-enroll_enabled = false
-verify_enabled = false
+enroll_enabled = true
+verify_enabled = true
 
 # Configure MFA via Phone Messaging
 [auth.mfa.phone]
@@ -363,6 +370,11 @@ enabled = false
 authorization_url_path = "/oauth/consent"
 # Allow dynamic client registration
 allow_dynamic_registration = false
+
+# Auth Send SMS Hook — Supabase authenticates this call with a webhook signature,
+# not a user JWT, so JWT verification must be off or every OTP send returns 401.
+[functions.send-sms]
+verify_jwt = false
 
 [edge_runtime]
 enabled = true

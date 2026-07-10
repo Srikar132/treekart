@@ -34,17 +34,29 @@ Supabase client lives in `utils/supabase/server.ts`. All server-side code uses t
 
 - `getUser()` — merges `auth.users` + `profiles` table into one `AuthUser` object
 - `requireUser()` — redirects to `/auth/signin` if not logged in
-- `requireAdmin()` — redirects to `/admin/auth/login` if not admin
+- `requireAdmin()` — redirects to `/admin/login` if not admin
 - `requireFarmer()` — redirects to `/` if not farmer/admin
 
 Roles come from `profiles.role` (`user | farmer | admin`), not from JWT claims.
+
+**Auth is phone + OTP only — no email/password.** Supabase is both the auth provider and the database, so `profiles.id` stays a UUID referencing `auth.users(id)` and every RLS policy keying on `auth.uid()` is unchanged.
+
+- Identity is `profiles.phone` in E.164 (`+91…`), `UNIQUE`. Helpers in `lib/phone.ts`.
+- Sign-in and sign-up are one flow at `/auth/signin` (`signInWithOtp` → `verifyOtp`). That route also hosts the onboarding dialog, which is why the proxy can redirect incomplete profiles to it.
+- **Profile completeness is `full_name` only.** Never gate on `email`, or users who skipped it are trapped in onboarding.
+- `profiles.email` is an optional contact field — captured at onboarding or checkout, used for receipts, **never** for auth. It is required to place an order, enforced server-side in `lib/order-email-guard.ts` by the order actions, not just by the dialog.
+- Admins additionally pass **TOTP MFA**; `proxy.ts` requires **AAL2** for `/admin`. Recovery codes reset the factor — they do not grant AAL2.
+- OTP send is guarded by Cloudflare Turnstile + Arcjet. Turnstile tokens are **single-use**: reset the widget before every send, including resends.
+- SMS is delivered by MSG91 via the custom Send SMS Hook (`supabase/functions/send-sms`), which is Deno and excluded from `tsconfig.json`.
+- `redirectTo` always passes through `lib/safe-redirect.ts` (open-redirect guard).
 
 ### Server Actions
 
 All mutations live in `actions/` as Next.js Server Actions (`"use server"`). Return `ActionState<T>` — a discriminated union `{ success: true; data: T } | { success: false; error: string }`. Public read-only fetches are in `actions/public.actions.ts`.
 
-- `auth.actions.ts` — sign up, sign in, password reset, logout
-- `user.actions.ts` — profile updates
+- `auth.actions.ts` — `sendOtp`, `verifyOtp`, `logout` (phone + OTP)
+- `admin-mfa.actions.ts` — recovery-code generation/redemption (service role)
+- `user.actions.ts` — profile updates, `completeProfile`, `saveContactEmail`
 - `admin.actions.ts` — admin operations
 - `tree.actions.ts` — tree CRUD
 - `products.actions.ts` — product CRUD

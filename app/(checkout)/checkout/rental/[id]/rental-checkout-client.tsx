@@ -41,6 +41,8 @@ import {
 
 import { CheckoutSuccess, CheckoutProcessing } from "@/components/checkout/shared/checkout-stages";
 import { CheckoutHeader } from "@/components/checkout/shared/checkout-header";
+import { EmailRequiredDialog } from "@/components/checkout/email-required-dialog";
+import { isEmailRequiredError } from "@/lib/order-email-guard";
 
 type CheckoutStep = "details" | "processing" | "success";
 
@@ -90,6 +92,7 @@ export default function RentalCheckoutClient({ tree, user, rentalDeliveryFee, in
   const [visitRequested, setVisitRequested] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailPromptOpen, setEmailPromptOpen] = useState(false);
   const [successRentalId, setSuccessRentalId] = useState<string | null>(null);
 
   async function handleRentNow() {
@@ -141,6 +144,12 @@ export default function RentalCheckoutClient({ tree, user, rentalDeliveryFee, in
         },
       });
     } catch (err: any) {
+      // createRentalOrder already released the tree reservation before throwing.
+      if (isEmailRequiredError(err)) {
+        setEmailPromptOpen(true);
+        setLoading(false);
+        return;
+      }
       setError(err.message ?? "An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -176,6 +185,11 @@ export default function RentalCheckoutClient({ tree, user, rentalDeliveryFee, in
   // ── Main Checkout ───────────────────────────────────────────────
   return (
     <div className="">
+      <EmailRequiredDialog
+        open={emailPromptOpen}
+        onOpenChange={setEmailPromptOpen}
+        onSaved={handleRentNow}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
 
         {/* LEFT — Details Form */}

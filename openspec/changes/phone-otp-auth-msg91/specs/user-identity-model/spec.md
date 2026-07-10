@@ -32,6 +32,17 @@ The database SHALL provide a `handle_new_user` trigger on `auth.users` insert th
 - **WHEN** a new `auth.users` row is inserted with a phone number
 - **THEN** a `profiles` row is created with that phone and default role `user`
 
+### Requirement: The new-user trigger never aborts signup
+The `handle_new_user` trigger SHALL tolerate conflicts — both on `profiles.id` and on the `profiles.phone` unique index — without raising, so a constraint collision can never roll back the `auth.users` insert and break signup.
+
+#### Scenario: Duplicate profile id does not abort signup
+- **WHEN** the trigger fires for an id that already has a `profiles` row
+- **THEN** the insert is skipped and signup succeeds
+
+#### Scenario: Conflicting phone does not abort signup
+- **WHEN** the trigger attempts to insert a phone already held by an orphaned `profiles` row
+- **THEN** the conflict is handled without raising and the `auth.users` insert is not rolled back
+
 ### Requirement: Existing users are migrated to phone identity
 The migration SHALL normalize stored 10-digit numbers to E.164, set `auth.users.phone` and `phone_confirmed_at`, and resolve collisions before enforcing uniqueness. Accounts with no usable phone MUST be reported, never silently dropped.
 
@@ -39,10 +50,20 @@ The migration SHALL normalize stored 10-digit numbers to E.164, set `auth.users.
 - **WHEN** an existing profile has phone `9876543210`
 - **THEN** migration sets `auth.users.phone = +919876543210` and `phone_confirmed_at`, enabling OTP sign-in
 
-#### Scenario: Duplicate phones are resolved before uniqueness is enforced
-- **WHEN** two existing profiles share the same normalized phone
-- **THEN** the collision is recorded and resolved before the `UNIQUE` constraint is applied
-- **AND** applying the constraint does not fail
+#### Scenario: Duplicate phones are nulled so the unique index can be created
+- **WHEN** two or more existing profiles share the same normalized phone
+- **THEN** every colliding row has its `phone` set to NULL and is recorded in the migration report
+- **AND** no colliding row silently inherits the number
+- **AND** the `UNIQUE` index is created successfully afterwards
+
+#### Scenario: Un-normalizable phones are nulled, not left raw
+- **WHEN** a profile's phone cannot be normalized to E.164
+- **THEN** its `phone` is set to NULL and the row is reported
+- **AND** no raw, un-normalized value remains that could violate the unique index
+
+#### Scenario: Nulled users recover by signing in with OTP
+- **WHEN** a user whose phone was nulled signs in with that number
+- **THEN** they authenticate by OTP and are treated as a new profile requiring onboarding
 
 #### Scenario: Missing or invalid phone is reported
 - **WHEN** an existing profile has a null or un-normalizable phone

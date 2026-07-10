@@ -13,7 +13,8 @@ Doing it now, before the user base grows, keeps the data migration small. Supaba
 - Identity becomes `profiles.phone` in **E.164** (`+91XXXXXXXXXX`), `UNIQUE`.
 - **New sign-in UI**: a single phone-number input → OTP screen → verify. One flow serves both sign-in and sign-up (`signInWithOtp` with `shouldCreateUser: true`).
   - **Returning user** → redirected back to wherever they came from (`redirectTo`).
-  - **New user** → a **responsive profile dialog** opens to collect **name + email**: slides down from the top on mobile, centered modal on desktop. These are persisted to `profiles`.
+  - **New user** → a **responsive profile dialog** opens to collect their **name** (required) and **email** (optional): slides down from the top on mobile, centered modal on desktop. The dialog explains *why* email is asked for — order confirmations and delivery updates — and lets the user skip it. Values are persisted to `profiles`.
+- **Progressive email capture**: email is never forced at sign-up. It becomes **required at the point of ordering** — before a mango order or tree rental is placed, a user without an email is asked for one, and the server action refuses to create the order without it.
 - **Admin** uses the same phone + OTP entry, plus a **TOTP MFA** second factor (authenticator app). `proxy.ts` enforces assurance level **AAL2** on `/admin`. First-time admins enrol via a QR code.
 - OTP send is guarded by **Cloudflare Turnstile** + **Arcjet** rate limiting to prevent SMS pumping / toll fraud (every MSG91 SMS costs money).
 - Existing users are migrated: normalize stored 10-digit phones to E.164, backfill `auth.users.phone` + `phone_confirmed_at`, report collisions/nulls, then enforce uniqueness.
@@ -24,7 +25,8 @@ Doing it now, before the user base grows, keeps the data migration small. Supaba
 ### New Capabilities
 - `phone-otp-auth`: Phone + OTP as the sole authentication method — the two-step flow, session issuance, returning-user redirect, OTP anti-abuse controls, and phone-enumeration resistance.
 - `sms-otp-delivery`: OTP SMS delivery through MSG91 via a custom Supabase Send SMS Hook (Edge Function), DLT-registered templates, delivery-failure handling, and secret handling.
-- `user-onboarding`: The new-user profile dialog (responsive: top sheet on mobile, centered modal on desktop) capturing name + email, and the gate that prevents an incomplete profile from reaching protected routes.
+- `user-onboarding`: The new-user profile dialog (responsive: top sheet on mobile, centered modal on desktop) capturing a required name and an optional, explained email, and the gate that prevents an incomplete profile from reaching protected routes.
+- `order-email-capture`: Email is required to place an order. The checkout flow prompts users who have none, and the order server actions reject order creation when the profile has no email.
 - `admin-mfa-auth`: Admin authentication — phone OTP plus TOTP second factor, QR enrolment for first-time admins, AAL2 enforcement on `/admin`, and the admin role check.
 - `user-identity-model`: Phone (E.164, `UNIQUE`) as canonical identity; the `handle_new_user` trigger; removal of password/email-confirmation identity; existing-user backfill and cutover.
 

@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { isMaintenanceMode, isMaintenanceAllowedPath } from '@/lib/maintenance'
+import { safeRedirect } from '@/lib/safe-redirect'
 
 // ── Route Definitions ──────────────────────────────────────────────────────────
 
@@ -17,13 +17,17 @@ const PUBLIC_PREFIXES = [
     '/terms',
 ]
 
+// The phone-OTP screens. Authenticated, fully-onboarded users are bounced away.
+// /auth/signin doubles as the onboarding host: when a signed-in user has no
+// full_name it renders the profile dialog instead of the phone form, which gives
+// the completion gate below a real URL to redirect to.
 const AUTH_PAGES = [
     '/auth/signin',
     '/auth/signup',
-    '/auth/forgot-password',
-    '/auth/reset-password',
     '/admin/login',
 ]
+
+const SIGNIN = '/auth/signin'
 
 const CUSTOMER_ONLY_PREFIXES = [
     '/account',
@@ -67,29 +71,21 @@ function redirectTo(request: NextRequest, destination: string) {
     return NextResponse.redirect(url)
 }
 
+/** Send the user to sign-in, remembering where they were headed. */
+function redirectToSignin(request: NextRequest, pathname: string) {
+    const url = request.nextUrl.clone()
+    url.pathname = SIGNIN
+    url.search = ''
+    url.searchParams.set('redirectTo', safeRedirect(pathname + request.nextUrl.search))
+    return NextResponse.redirect(url)
+}
+
 // ── Middleware ─────────────────────────────────────────────────────────────────
 
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({ request })
 
     const { pathname } = request.nextUrl
-
-    // ── MAINTENANCE MODE ───────────────────────────────────────────────────────
-    // Hold every visitor on the home page while an upgrade is in progress.
-    // Runs before any Supabase call so it still works if the database is mid-migration.
-    // /admin and /api stay reachable (see lib/maintenance.ts).
-    if (isMaintenanceMode() && !isMaintenanceAllowedPath(pathname)) {
-        return redirectTo(request, '/')
-    }
-
-    // Auth callback must reach its route handler even without a session — its whole
-    // purpose is to exchange the code for a session. Gating it here bounces it to
-    // /auth/signin before the exchange runs, breaking password reset + signup confirm.
-    // Match the exact path only (not a prefix) so protected routes stay gated.
-    // (Add '/auth/confirm' here if a dedicated confirmation endpoint is introduced.)
-    if (pathname === '/auth/callback') {
-        return supabaseResponse
-    }
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -128,59 +124,72 @@ export async function updateSession(request: NextRequest) {
             return redirectTo(request, ADMIN_LOGIN)
         }
 
-        const url = request.nextUrl.clone()
-        url.pathname = '/auth/signin'
-        url.searchParams.set('redirectTo', pathname + request.nextUrl.search)
-        return NextResponse.redirect(url)
+        return redirectToSignin(request, pathname)
     }
 
-    // ── PHASE 2 — Fetch Profile ────────────────────────────────────────────────
+    // ── PHASE 2 — Profile + assurance level ────────────────────────────────────
     const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, full_name')
         .eq('id', user.id)
         .single()
 
-    const role = profile?.role as 'admin' | 'farmer' | 'customer' | undefined
+    const role = profile?.role as 'admin' | 'farmer' | 'user' | undefined
+    // Completeness is full_name ONLY. Testing email here would permanently trap
+    // every user who legitimately skipped it during onboarding.
+    const profileComplete = !!profile?.full_name
 
-    // ── PHASE 3 — Auth Page Bounce ─────────────────────────────────────────────
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    const isAAL2 = aal?.currentLevel === 'aal2'
+
+    // ── PHASE 3 — Admin MFA, evaluated BEFORE the profile gate ─────────────────
+    // Order matters: an admin without a full_name would otherwise ping-pong
+    // between /admin/login (wants MFA) and /auth/signin (wants a profile).
+    if (role === 'admin') {
+        // An admin below AAL2 must be able to sit on the login page to finish MFA.
+        if (pathname === ADMIN_LOGIN) {
+            return isAAL2 ? redirectTo(request, '/admin') : supabaseResponse
+        }
+        if (isAdminRoute(pathname) && !isAAL2) {
+            return redirectTo(request, ADMIN_LOGIN)
+        }
+    }
+
+    // ── PHASE 4 — Profile integrity ────────────────────────────────────────────
+    if (!isPublicRoute(pathname) && !isAuthPage(pathname) && (!profile || profileError)) {
+        return redirectToSignin(request, pathname)
+    }
+
+    // ── PHASE 5 — Onboarding gate ──────────────────────────────────────────────
+    // /auth/signin hosts the profile dialog, so it must pass through or we loop.
+    if (profile && !profileComplete) {
+        if (pathname === SIGNIN) return supabaseResponse
+        if (!isPublicRoute(pathname)) return redirectToSignin(request, pathname)
+    }
+
+    // ── PHASE 6 — Auth page bounce (fully onboarded users) ─────────────────────
     if (isAuthPage(pathname)) {
-        if (pathname.startsWith('/auth/reset-password')) {
-            return supabaseResponse
-        }
-
-        if (!profile || profileError) {
-            return supabaseResponse
-        }
+        if (!profile || profileError) return supabaseResponse
 
         if (role === 'admin') return redirectTo(request, '/admin')
         if (role === 'farmer') return redirectTo(request, '/farmer')
         return redirectTo(request, '/')
     }
 
-    // ── PHASE 4 — Profile Integrity Check ─────────────────────────────────────
-    if (!isPublicRoute(pathname) && (!profile || profileError)) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/auth/signin'
-        url.searchParams.set('redirectTo', pathname + request.nextUrl.search)
-        return NextResponse.redirect(url)
-    }
-
-    // ── PHASE 5 — Admin Rules ──────────────────────────────────────────────────
+    // ── PHASE 7 — Role rules ───────────────────────────────────────────────────
     if (role === 'admin') {
         if (isCustomerOnlyRoute(pathname)) return redirectTo(request, '/admin')
         if (isFarmerRoute(pathname)) return redirectTo(request, '/admin')
         return supabaseResponse
     }
 
-    // ── PHASE 6 — Farmer Rules ─────────────────────────────────────────────────
     if (role === 'farmer') {
         if (isAdminRoute(pathname)) return redirectTo(request, '/farmer')
         if (isCustomerOnlyRoute(pathname)) return redirectTo(request, '/farmer')
         return supabaseResponse
     }
 
-    // ── PHASE 7 — Customer Rules ───────────────────────────────────────────────
+    // Customer
     if (isAdminRoute(pathname)) return redirectTo(request, '/')
     if (isFarmerRoute(pathname)) return redirectTo(request, '/')
 
