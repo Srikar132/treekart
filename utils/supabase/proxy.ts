@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isMaintenanceMode, isMaintenanceAllowedPath } from '@/lib/maintenance'
 
 // ── Route Definitions ──────────────────────────────────────────────────────────
 
@@ -72,6 +73,14 @@ export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({ request })
 
     const { pathname } = request.nextUrl
+
+    // ── MAINTENANCE MODE ───────────────────────────────────────────────────────
+    // Hold every visitor on the home page while an upgrade is in progress.
+    // Runs before any Supabase call so it still works if the database is mid-migration.
+    // /admin and /api stay reachable (see lib/maintenance.ts).
+    if (isMaintenanceMode() && !isMaintenanceAllowedPath(pathname)) {
+        return redirectTo(request, '/')
+    }
 
     // Auth callback must reach its route handler even without a session — its whole
     // purpose is to exchange the code for a session. Gating it here bounces it to
