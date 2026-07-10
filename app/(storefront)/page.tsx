@@ -8,6 +8,8 @@ import { WhyChooseUs } from "@/components/storefront/home/why-choose-us";
 import { PricingSection } from "@/components/storefront/home/pricing";
 import { Testimonials } from "@/components/storefront/home/testimonials";
 import { PromoBanner } from "@/components/storefront/home/promo-banner";
+import { MaintenanceBanner } from "@/components/storefront/maintenance-banner";
+import { isMaintenanceMode } from "@/lib/maintenance";
 import {
     getCachedHeroSlides,
     getCachedTestimonials,
@@ -86,6 +88,7 @@ const Page = async () => {
 
     return (
         <main className="flex flex-col">
+            {isMaintenanceMode() && <MaintenanceBanner />}
             <HeroSection slides={heroSlides} />
             <FeaturedCategories />
             <HowItWorks />
