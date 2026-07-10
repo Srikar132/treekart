@@ -1,38 +1,39 @@
-import { SigninForm } from "@/components/storefront/auth/signin-form";
+import { PhoneOtpForm } from "@/components/storefront/auth/phone-otp-form";
 import { getUser } from "@/lib/auth";
+import { safeRedirect } from "@/lib/safe-redirect";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sign In",
-  description: "Sign in to your TreeKart account to manage your tree rentals and mango orders.",
-  robots: { index: false, follow: false },
+    title: "Sign In",
+    description: "Sign in to TreeKart with your mobile number.",
+    robots: { index: false, follow: false },
 };
 
-export default async function LoginPage({
+/**
+ * This route serves two states, which is what gives the proxy's onboarding gate
+ * a concrete URL to redirect to:
+ *   - signed out            → phone + OTP form
+ *   - signed in, no name    → profile dialog opens immediately
+ *   - signed in, onboarded  → bounced away (handled by the proxy)
+ */
+export default async function SigninPage({
     searchParams,
 }: {
     searchParams: Promise<{ redirectTo?: string }>;
 }) {
-    try {
-        const { redirectTo = "/" } = await searchParams;
-        
-        // If user is already logged in, send them away
-        const user = await getUser();
-        if (user) {
-            redirect(redirectTo);
-        }
+    const params = await searchParams;
+    // Never trust redirectTo from the query string.
+    const redirectTo = safeRedirect(params.redirectTo);
 
-        return <SigninForm redirectTo={redirectTo} />;
-    } catch (error) {
-        // Allow Next.js internal errors (redirects, dynamic signals) to bubble up
-        if (
-            (error instanceof Error && error.message.includes("NEXT_REDIRECT")) ||
-            (error as any)?.digest === "DYNAMIC_SERVER_USAGE"
-        ) {
-            throw error;
-        }
-        console.error("Error in LoginPage:", error);
-        throw error;
-    }
+    const user = await getUser();
+
+    if (user?.full_name) redirect(redirectTo);
+
+    return (
+        <PhoneOtpForm
+            redirectTo={redirectTo}
+            startWithProfileDialog={!!user && !user.full_name}
+        />
+    );
 }

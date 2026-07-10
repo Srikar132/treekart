@@ -1,0 +1,16 @@
+{
+  "//": "Supabase Edge Functions run on Deno, not Node. Hand that folder to the Deno LSP so the TypeScript server stops reporting phantom errors on Deno globals and jsr:/https: imports. The app's tsconfig already excludes supabase/functions.",
+  "deno.enable": false,
+  "deno.enablePaths": [
+    "supabase/functions"
+  ],
+  "deno.lint": true,
+  "deno.unstable": [
+    "bare-node-builtins",
+    "byonm",
+    "sloppy-imports",
+    "unsafe-proto",
+    "webgpu",
+    "kv"
+  ]
+}

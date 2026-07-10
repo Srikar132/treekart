@@ -1,18 +1,14 @@
-import { SignupForm } from "@/components/storefront/auth/signup-form";
-import type { Metadata } from "next";
+import { safeRedirect } from "@/lib/safe-redirect";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Create Account",
-  description: "Create a free TreeKart account to rent mango trees and buy fresh Alphonso mangoes.",
-  robots: { index: false, follow: false },
-};
-
-
+// Sign-up and sign-in are one passwordless phone + OTP flow.
+// This route only exists so old links keep working.
 export default async function RegisterPage({
     searchParams,
 }: {
     searchParams: Promise<{ redirectTo?: string }>;
 }) {
-    const { redirectTo = "/" } = await searchParams;
-    return <SignupForm redirectTo={redirectTo} />;
+    const params = await searchParams;
+    const redirectTo = safeRedirect(params.redirectTo);
+    redirect(`/auth/signin?redirectTo=${encodeURIComponent(redirectTo)}`);
 }

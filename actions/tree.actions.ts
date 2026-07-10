@@ -8,6 +8,7 @@ import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getSupabasePublic } from "@/utils/supabase/public";
 import { sendRentalConfirmedEmail } from "@/lib/email";
 import { getAppSettings } from "@/actions/admin.actions";
+import { EmailRequiredError } from "@/lib/order-email-guard";
 import { cache } from "react";
 
 
@@ -313,6 +314,14 @@ export async function createRentalOrder(input: {
     visitRequested: boolean;
 }) {
     const user = await requireUser();
+
+    // Server-side gate — never trust the checkout dialog. The tree is already
+    // reserved by this point, so release it before rejecting or it stays locked.
+    if (!user.email?.trim()) {
+        await releaseTreeReservation(input.treeId);
+        throw new EmailRequiredError();
+    }
+
     const supabase = await getSupabaseServer();
 
     // Fetch tree price

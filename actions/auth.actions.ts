@@ -1,255 +1,131 @@
 "use server";
 
 import { getSupabaseServer } from "@/lib/auth";
-import { signInSchema, signUpSchema, forgotPasswordSchema, resetPasswordSchema, type ActionState, type SignInFields, type SignUpFields, type ForgotPasswordFields, type ResetPasswordFields } from "@/lib/validations";
+import { phoneSchema, otpSchema } from "@/lib/validations";
+import { toE164 } from "@/lib/phone";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { authAj, signupAj } from "@/lib/arcjet";
+import { otpAj } from "@/lib/arcjet";
 
-type SignInState = ActionState<SignInFields>;
-type SignUpState = ActionState<SignUpFields> & { success?: boolean; hasSession?: boolean };
+export type SendOtpState = {
+    error?: string;
+    success?: boolean;
+    /** E.164, echoed back so the verify step can reuse it. */
+    phone?: string;
+};
 
+export type VerifyOtpState = {
+    error?: string;
+    success?: boolean;
+    /** New user with no full_name yet — caller opens the onboarding dialog. */
+    needsProfile?: boolean;
+    role?: "user" | "farmer" | "admin";
+};
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "http://localhost:3000";
-
-export async function loginUser(
-    _prev: SignInState,
+/**
+ * Send an OTP.
+ *
+ * Sign-in and sign-up are one flow: `shouldCreateUser: true` provisions the
+ * account on first use. The response is deliberately uniform whether or not the
+ * number is registered — otherwise this endpoint enumerates our customers.
+ */
+export async function sendOtp(
+    _prev: SendOtpState,
     formData: FormData
-): Promise<SignInState> {
+): Promise<SendOtpState> {
     try {
-        const decision = await authAj.protect({ headers: await headers() });
+        const decision = await otpAj.protect({ headers: await headers() });
         if (decision.isDenied()) {
+            return { error: "Too many requests. Please try again in a few minutes." };
+        }
+
+        const parsed = phoneSchema.safeParse({ phone: formData.get("phone") as string });
+        if (!parsed.success) {
             return {
-                errors: { _server: "Too many login attempts. Please try again later." },
-                values: { email: formData.get("email") as string },
+                error:
+                    parsed.error.flatten().fieldErrors.phone?.[0] ??
+                    "Enter a valid 10-digit Indian mobile number.",
             };
         }
 
-        const raw = {
-            email: formData.get("email") as string,
-            password: formData.get("password") as string,
-        };
+        const e164 = toE164(parsed.data.phone);
+        if (!e164) return { error: "Enter a valid 10-digit Indian mobile number." };
 
-        const parsed = signInSchema.safeParse(raw);
+        const captchaToken = (formData.get("captchaToken") as string) || undefined;
+
+        const supabase = await getSupabaseServer();
+        const { error } = await supabase.auth.signInWithOtp({
+            phone: e164,
+            options: { channel: "sms", shouldCreateUser: true, captchaToken },
+        });
+
+        if (error) {
+            // Never surface the provider error verbatim — it distinguishes
+            // registered from unregistered numbers.
+            console.error("sendOtp:", error.message);
+            return { error: "Could not send the code. Please try again." };
+        }
+
+        return { success: true, phone: e164 };
+    } catch (err) {
+        console.error("sendOtp exception:", err);
+        return { error: "An unexpected error occurred. Please try again." };
+    }
+}
+
+/**
+ * Verify an OTP and establish the session.
+ *
+ * Returns whether onboarding is still needed (no full_name) and the user's role,
+ * so the caller can route without a second round-trip.
+ */
+export async function verifyOtp(
+    _prev: VerifyOtpState,
+    formData: FormData
+): Promise<VerifyOtpState> {
+    try {
+        const e164 = toE164((formData.get("phone") as string) ?? "");
+        if (!e164) {
+            return { error: "Your session expired. Please request a new code." };
+        }
+
+        const parsed = otpSchema.safeParse({ otp: formData.get("otp") as string });
         if (!parsed.success) {
-            return {
-                errors: parsed.error.flatten().fieldErrors as SignInState["errors"],
-                values: raw,
-            };
+            return { error: parsed.error.flatten().fieldErrors.otp?.[0] ?? "Enter the 6-digit code." };
         }
 
         const supabase = await getSupabaseServer();
-        const { error } = await supabase.auth.signInWithPassword(parsed.data);
+        const { data, error } = await supabase.auth.verifyOtp({
+            phone: e164,
+            token: parsed.data.otp,
+            type: "sms",
+        });
 
-        if (error) {
-            // ✅ Don't rely on error.message text
-            if (
-                error.code === "email_not_confirmed" || // common
-                error.message?.toLowerCase().includes("not confirmed")
-            ) {
-                return {
-                    errors: {
-                        _server:
-                            "Your email address is not verified. Please check your inbox or click below to resend the verification link.",
-                    },
-                    values: raw,
-                    isUnverified: true,
-                };
-            }
-
-            return {
-                errors: {
-                    _server:
-                        error.message === "Invalid login credentials"
-                            ? "Incorrect email or password. Please try again."
-                            : error.message,
-                },
-                values: raw,
-            };
+        if (error || !data.user) {
+            return { error: "That code is incorrect or has expired. Please try again." };
         }
 
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("full_name, role")
+            .eq("id", data.user.id)
+            .single();
+
         revalidatePath("/", "layout");
-        return { success: true };
-    } catch (error: any) {
-        console.error("Login Error:", error);
         return {
-            errors: { _server: error.message || "An unexpected error occurred during login." },
-            values: { email: formData.get("email") as string },
+            success: true,
+            // Completeness is full_name only — email is optional at this stage.
+            needsProfile: !profile?.full_name,
+            role: (profile?.role ?? "user") as VerifyOtpState["role"],
         };
+    } catch (err) {
+        console.error("verifyOtp exception:", err);
+        return { error: "An unexpected error occurred. Please try again." };
     }
 }
 
-/**
- * Server Action: Sign Up
- */
-export async function registerUser(
-    _prev: SignUpState,
-    formData: FormData
-): Promise<SignUpState> {
-    const decision = await signupAj.protect({ headers: await headers() });
-    if (decision.isDenied()) {
-        return {
-            errors: { _server: "Too many signup attempts. Please try again later." },
-            values: { email: formData.get("email") as string, fullName: formData.get("fullName") as string },
-        };
-    }
-
-    const redirectTo = (formData.get("redirectTo") as string) || "/";
-
-    const raw = {
-        fullName: formData.get("fullName") as string,
-        email: formData.get("email") as string,
-        phone: formData.get("phone") as string,
-        password: formData.get("password") as string,
-        confirmPassword: formData.get("confirmPassword") as string,
-    };
-
-    const parsed = signUpSchema.safeParse(raw);
-    if (!parsed.success) {
-        return {
-            errors: parsed.error.flatten().fieldErrors as SignUpState["errors"],
-            values: raw,
-        };
-    }
-
+export async function logout() {
     const supabase = await getSupabaseServer();
-
-    const { data, error } = await supabase.auth.signUp({
-        email: parsed.data.email,
-        password: parsed.data.password,
-        options: {
-            emailRedirectTo: `${baseUrl}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
-            data: {
-                full_name: parsed.data.fullName,
-                phone: parsed.data.phone,
-                email: parsed.data.email,
-            },
-        },
-    });
-
-    if (error) {
-        return {
-            errors: { _server: error.message },
-            values: raw,
-        };
-    }
-
-
-
-    if (data.session) {
-        // Auto-confirmed — session exists, client can redirect immediately
-        revalidatePath("/", "layout");
-        return { success: true, hasSession: true, values: raw };
-    } else {
-        // Confirmation email sent — client should show verify screen
-        return { success: true, hasSession: false, values: raw };
-    }
-}
-/**
- * Server Action: Forgot Password
- */
-export async function requestPasswordReset(
-    _prev: ActionState<ForgotPasswordFields>,
-    formData: FormData
-): Promise<ActionState<ForgotPasswordFields>> {
-    const raw = {
-        email: formData.get("email") as string,
-    };
-
-    const parsed = forgotPasswordSchema.safeParse(raw);
-    if (!parsed.success) {
-        return {
-            errors: parsed.error.flatten().fieldErrors as any,
-            values: raw,
-        };
-    }
-
-    const supabase = await getSupabaseServer();
-
-    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-        redirectTo: `${baseUrl}/auth/callback?next=/auth/reset-password`,
-    });
-
-    if (error) {
-        return {
-            errors: { _server: error.message },
-            values: raw,
-        };
-    }
-
-    return { success: true, values: raw };
-}
-
-
-/**
- * Server Action: Reset Password
- */
-export async function updatePassword(
-    _prev: ActionState<ResetPasswordFields>,
-    formData: FormData
-): Promise<ActionState<ResetPasswordFields>> {
-    const raw = {
-        password: formData.get("password") as string,
-        confirmPassword: formData.get("confirmPassword") as string,
-    };
-
-    const parsed = resetPasswordSchema.safeParse(raw);
-    if (!parsed.success) {
-        return {
-            errors: parsed.error.flatten().fieldErrors as any,
-            values: raw,
-        };
-    }
-
-    const supabase = await getSupabaseServer();
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-        return {
-            errors: { _server: "Your reset session has expired or is invalid. Please request a new link." },
-            values: raw,
-        };
-    }
-
-    const { error } = await supabase.auth.updateUser({
-        password: parsed.data.password,
-    });
-
-    if (error) {
-        return {
-            errors: { _server: error.message },
-            values: raw,
-        };
-    }
-
-    return { success: true };
-}
-
-/**
- * Server Action: Resend Verification Email
- */
-export async function resendVerificationEmail(email: string) {
-    if (!email) return { error: "Email is required" };
-
-    const decision = await authAj.protect({ headers: await headers() });
-    if (decision.isDenied()) {
-        return { error: "Too many requests. Please try again later." };
-    }
-
-    const supabase = await getSupabaseServer();
-
-
-    const { error } = await supabase.auth.resend({
-        type: "signup",
-        email,
-        options: {
-            emailRedirectTo: `${baseUrl}/auth/callback`,
-        },
-    });
-
-    if (error) {
-        return { error: error.message };
-    }
-
-    return { success: true };
+    await supabase.auth.signOut();
+    revalidatePath("/", "layout");
 }

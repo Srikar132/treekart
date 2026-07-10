@@ -15,6 +15,7 @@ import { type DeliveryAddress } from "@/types/checkout";
 import { paymentAj } from "@/lib/arcjet";
 import { headers } from "next/headers";
 import { getAppSettings } from "@/actions/admin.actions";
+import { assertContactEmail } from "@/lib/order-email-guard";
 
 // Shape stored in orders.items (Json column)
 type OrderItemRecord = {
@@ -125,6 +126,8 @@ export async function createMangoOrder(
   }
 
   const user = await requireUser();
+  // Server-side gate — never trust the checkout dialog.
+  assertContactEmail(user.email);
   const supabase = await getSupabaseServer();
   const razorpay = getRazorpay();
 

@@ -31,6 +31,8 @@ import {
 
 import { CheckoutSuccess, CheckoutProcessing } from "@/components/checkout/shared/checkout-stages";
 import { CheckoutHeader } from "@/components/checkout/shared/checkout-header";
+import { EmailRequiredDialog } from "@/components/checkout/email-required-dialog";
+import { isEmailRequiredError } from "@/lib/order-email-guard";
 import { cn } from "@/lib/utils";
 
 type CheckoutStep = "details" | "processing" | "success";
@@ -64,6 +66,7 @@ export default function StoreCheckoutClient({ user, storeDeliveryFee, storeFreeD
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successOrderId, setSuccessOrderId] = useState<string | null>(null);
+  const [emailPromptOpen, setEmailPromptOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
@@ -131,6 +134,13 @@ export default function StoreCheckoutClient({ user, storeDeliveryFee, storeFreeD
         },
       });
     } catch (err: any) {
+      // The order action refused because the profile has no email — ask for it,
+      // keeping the cart and address exactly as they are.
+      if (isEmailRequiredError(err)) {
+        setEmailPromptOpen(true);
+        setLoading(false);
+        return;
+      }
       setError(err.message ?? "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -166,6 +176,11 @@ export default function StoreCheckoutClient({ user, storeDeliveryFee, storeFreeD
   // ── Main Checkout ───────────────────────────────────────────────
   return (
     <div>
+      <EmailRequiredDialog
+        open={emailPromptOpen}
+        onOpenChange={setEmailPromptOpen}
+        onSaved={handlePlaceOrder}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
 
         {/* LEFT — Details Form */}

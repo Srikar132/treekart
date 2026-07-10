@@ -61,6 +61,43 @@ After a returning user (one with a complete profile) verifies their OTP, the sys
 - **AND** they complete phone + OTP and already have a complete profile
 - **THEN** they are redirected to `/checkout`, not the home page
 
+### Requirement: The redirect target is validated against open redirects
+The `redirectTo` value SHALL be validated before any navigation. Only same-origin, root-relative paths are permitted. Absolute URLs, protocol-relative URLs (`//host`), and any value resolving to a different origin MUST be rejected and replaced with the default destination.
+
+#### Scenario: External redirect target is rejected
+- **WHEN** a user signs in via `/auth/signin?redirectTo=https://evil.example.com`
+- **THEN** the external target is discarded and the user lands on the default destination
+
+#### Scenario: Protocol-relative target is rejected
+- **WHEN** `redirectTo` is `//evil.example.com`
+- **THEN** it is rejected and the user lands on the default destination
+
+#### Scenario: Relative path is honoured
+- **WHEN** `redirectTo` is `/checkout`
+- **THEN** the user is redirected to `/checkout`
+
+### Requirement: The OTP step survives a page refresh
+The phone number under verification SHALL persist across a reload of the OTP screen so the user is not stranded. If the pending number cannot be recovered, the flow MUST return to the phone-entry step rather than presenting an unusable OTP form.
+
+#### Scenario: Refresh keeps the user on the OTP step
+- **WHEN** a user reloads the page while on the OTP entry step
+- **THEN** the pending phone number is restored and they may still enter their code
+
+#### Scenario: Unrecoverable state returns to phone entry
+- **WHEN** the pending phone number cannot be recovered
+- **THEN** the user is returned to the phone-entry step
+
+### Requirement: Each OTP send uses a fresh CAPTCHA token
+Cloudflare Turnstile tokens are single-use. The UI SHALL reset the Turnstile widget and obtain a new token before every OTP send, including resends. A send MUST NOT reuse a consumed token.
+
+#### Scenario: Resend obtains a new token
+- **WHEN** the user requests a resend after the cooldown
+- **THEN** the widget is reset and a fresh token accompanies the new send
+
+#### Scenario: Consumed token is not reused
+- **WHEN** a token has already been used for a successful send
+- **THEN** it is not submitted again for a subsequent send
+
 ### Requirement: OTP send is protected against abuse
 The OTP-send action SHALL require a valid Cloudflare Turnstile token and be rate-limited by Arcjet, to prevent SMS pumping and toll fraud. Repeated sends MUST be throttled and a resend cooldown enforced in the UI.
 

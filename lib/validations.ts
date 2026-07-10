@@ -1,47 +1,50 @@
 import { z } from "zod";
 
-export const signInSchema = z.object({
+// ── Phone + OTP auth ────────────────────────────────────────────────
+// The UI accepts a bare 10-digit Indian mobile; it is normalized to E.164
+// (lib/phone.ts) before ever reaching Supabase.
+
+export const phoneSchema = z.object({
+    phone: z
+        .string()
+        .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit Indian mobile number"),
+});
+
+export const otpSchema = z.object({
+    otp: z.string().regex(/^\d{6}$/, "Enter the 6-digit code"),
+});
+
+/**
+ * Onboarding. Name is required; email is optional here — it is asked for again,
+ * and required, at the point of ordering. Profile completeness is `full_name`
+ * alone, so a user who skips email is never trapped in the dialog.
+ */
+export const profileCompletionSchema = z.object({
+    fullName: z.string().trim().min(1, "Full name is required"),
+    email: z
+        .union([z.string().email("Enter a valid email address"), z.literal("")])
+        .optional(),
+});
+
+/** Checkout: an email is mandatory before an order can be created. */
+export const orderEmailSchema = z.object({
     email: z.string().email("Enter a valid email address"),
-    password: z.string().min(1, "Password is required"),
 });
 
-export const forgotPasswordSchema = z.object({
-    email: z.string().email("Enter a valid email address"),
+/** Admin MFA recovery code redemption. */
+export const recoveryCodeSchema = z.object({
+    code: z.string().trim().min(8, "Enter a valid recovery code"),
 });
 
-export const resetPasswordSchema = z.object({
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-});
-
-export const signUpSchema = z
-    .object({
-        fullName: z.string().min(1, "Full name is required"),
-        email: z.string().email("Enter a valid email address"),
-        phone: z
-            .string()
-            .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit Indian mobile number"),
-        password: z.string().min(8, "Password must be at least 8 characters"),
-        confirmPassword: z.string(),
-    })
-    .refine((d) => d.password === d.confirmPassword, {
-        message: "Passwords do not match",
-        path: ["confirmPassword"],
-    });
-
-export type SignInFields = z.infer<typeof signInSchema>;
-export type SignUpFields = z.infer<typeof signUpSchema>;
-export type ForgotPasswordFields = z.infer<typeof forgotPasswordSchema>;
-export type ResetPasswordFields = z.infer<typeof resetPasswordSchema>;
+export type PhoneFields = z.infer<typeof phoneSchema>;
+export type OtpFields = z.infer<typeof otpSchema>;
+export type ProfileCompletionFields = z.infer<typeof profileCompletionSchema>;
+export type OrderEmailFields = z.infer<typeof orderEmailSchema>;
 
 export type ActionState<T extends Record<string, string>> = {
     errors?: Partial<Record<keyof T | "_server", string>>;
     values?: Partial<T>;
     success?: boolean;
-    isUnverified?: boolean;
 };
 
 // schema for tree form
