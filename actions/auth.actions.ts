@@ -1,7 +1,7 @@
 "use server";
 
 import { getSupabaseServer } from "@/lib/auth";
-import { phoneSchema, otpSchema } from "@/lib/validations";
+import { otpSchema } from "@/lib/validations";
 import { toE164 } from "@/lib/phone";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
@@ -39,16 +39,9 @@ export async function sendOtp(
             return { error: "Too many requests. Please try again in a few minutes." };
         }
 
-        const parsed = phoneSchema.safeParse({ phone: formData.get("phone") as string });
-        if (!parsed.success) {
-            return {
-                error:
-                    parsed.error.flatten().fieldErrors.phone?.[0] ??
-                    "Enter a valid 10-digit Indian mobile number.",
-            };
-        }
-
-        const e164 = toE164(parsed.data.phone);
+        // toE164 accepts either a raw 10-digit number (first send) or an already
+        // normalized +91 number (resend passes the stored E.164), so both paths validate.
+        const e164 = toE164((formData.get("phone") as string) ?? "");
         if (!e164) return { error: "Enter a valid 10-digit Indian mobile number." };
 
         const captchaToken = (formData.get("captchaToken") as string) || undefined;
