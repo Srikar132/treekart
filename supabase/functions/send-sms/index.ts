@@ -1,7 +1,9 @@
 // Supabase Auth — Send SMS Hook
 //
-// Supabase generates and verifies the OTP; this function only DELIVERS it,
-// via MSG91 (which is not a Supabase-native SMS provider).
+// Supabase generates and verifies the OTP; this function only DELIVERS it, via
+// MSG91's SendOTP API. We pass Supabase's code as the custom `otp` parameter so
+// MSG91 sends OUR code (not one it generates) — verification still happens in
+// Supabase, so the two must be the same value.
 //
 // Contract (https://supabase.com/docs/guides/auth/auth-hooks/send-sms-hook):
 //   Request : { user: { phone, ... }, sms: { otp: "123456" } } + webhook signature
@@ -16,9 +18,12 @@
 
 /// <reference types="jsr:@supabase/functions-js/edge-runtime.d.ts" />
 
-import { Webhook } from "standardwebhooks";
+import { Webhook } from "npm:standardwebhooks@1.0.0";
 
-const MSG91_FLOW_URL = "https://control.msg91.com/api/v5/flow";
+// MSG91 SendOTP endpoint. Must be control.msg91.com — the OTP API is served there;
+// api.msg91.com returns "template invalid" because it can't resolve OTP templates.
+// template_id / mobile / otp / <var> go as query params; auth key in the `authkey` header.
+const MSG91_OTP_URL = "https://control.msg91.com/api/v5/otp";
 
 /** Never log a full phone number or an OTP. */
 function maskPhone(phone: string): string {
@@ -35,11 +40,14 @@ function hookError(status: number, message: string): Response {
 Deno.serve(async (req) => {
     if (req.method !== "POST") return hookError(405, "Method not allowed");
 
-    // ── 1. Authenticate the caller BEFORE doing anything that costs money ──────
+    // ── 1. Authenticate the caller BEFORE anything that costs money ───────────
     // An unsigned endpoint that sends SMS is an open invoice.
     const rawSecret = Deno.env.get("SEND_SMS_HOOK_SECRET");
     const authKey = Deno.env.get("MSG91_AUTH_KEY");
     const templateId = Deno.env.get("MSG91_TEMPLATE_ID");
+    // The template's OTP placeholder name (##var1##, ##number##, ##OTP##, …).
+    // Kept as a secret so renaming the template variable needs no redeploy.
+    const otpVar = Deno.env.get("MSG91_OTP_VAR") || "otp";
 
     if (!rawSecret || !authKey || !templateId) {
         console.error("send-sms: missing required secrets");
@@ -68,35 +76,37 @@ Deno.serve(async (req) => {
         return hookError(400, "Malformed hook payload");
     }
 
-    // ── 2. Deliver via MSG91 ──────────────────────────────────────────────────
-    // MSG91 expects the number without a leading '+': 91XXXXXXXXXX
-    const mobiles = user.phone.replace(/^\+/, "");
+    // ── 2. Deliver via MSG91 SendOTP ──────────────────────────────────────────
+    // MSG91 wants the number with country code and NO '+': 919876543210
+    const mobile = user.phone.replace(/^\+/, "");
 
-    // NOTE: the recipient variable key below ("OTP") MUST match the variable name
-    // in the DLT-registered template. If the template declares ##var1##, use "var1".
-    const body = {
-        template_id: templateId,
-        short_url: "0",
-        recipients: [{ mobiles, OTP: sms.otp }],
-    };
+    // Everything goes in the QUERY string, NO body. When this endpoint receives a
+    // JSON body it reads params from the body and ignores the query — which drops
+    // template_id and fails with "Template ID Missing". The code is passed both as
+    // `otp` (the SendOTP endpoint's own param) and under the template's variable
+    // name (MSG91_OTP_VAR) so whichever the template uses is filled.
+    const url = new URL(MSG91_OTP_URL);
+    url.searchParams.set("template_id", templateId);
+    url.searchParams.set("mobile", mobile);
+    url.searchParams.set("otp", sms.otp);
+    url.searchParams.set(otpVar, sms.otp);
 
     let res: Response;
     try {
-        res = await fetch(MSG91_FLOW_URL, {
+        res = await fetch(url.toString(), {
             method: "POST",
             headers: { authkey: authKey, "Content-Type": "application/json" },
-            body: JSON.stringify(body),
         });
     } catch (err) {
         console.error("send-sms: MSG91 request failed", {
-            phone: maskPhone(mobiles),
+            phone: maskPhone(mobile),
             err: String(err),
         });
         return hookError(502, "Could not reach the SMS provider");
     }
 
     // MSG91 can return HTTP 200 while reporting a logical failure in the body
-    // (e.g. DLT template mismatch, insufficient balance). Both paths must fail.
+    // (DLT template mismatch, insufficient balance). Both paths must fail.
     const text = await res.text();
     let parsed: { type?: string; message?: unknown } = {};
     try {
@@ -107,9 +117,9 @@ Deno.serve(async (req) => {
 
     const logicalFailure = parsed?.type === "error";
     if (!res.ok || logicalFailure) {
-        // Log the provider's reason (never the OTP) so a template mismatch is debuggable.
+        // Log MSG91's reason (never the OTP) so a template/DLT mismatch is debuggable.
         console.error("send-sms: MSG91 rejected the message", {
-            phone: maskPhone(mobiles),
+            phone: maskPhone(mobile),
             status: res.status,
             providerMessage: parsed?.message ?? text.slice(0, 200),
         });
