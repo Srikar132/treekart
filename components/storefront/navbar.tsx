@@ -82,26 +82,6 @@ function NavContent({ user }: { user: AuthUser | null }) {
                     </TooltipContent>
                 </Tooltip> */}
 
-                {user ? (
-                    <ProfileDropdown user={user} />
-                ) : (
-                    <Tooltip>
-                        <TooltipTrigger
-                            render={
-                                <Link
-                                    href="/account"
-                                    className="text-foreground hover:text-primary transition-colors inline-flex items-center"
-                                />
-                            }
-                        >
-                            <User className="w-5 h-5 lg:w-[22px] lg:h-[22px]" strokeWidth={1.5} />
-                            <span className="sr-only">Account</span>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" sideOffset={5}>
-                            <p>Account</p>
-                        </TooltipContent>
-                    </Tooltip>
-                )}
 
                 <Tooltip>
                     <TooltipTrigger
@@ -124,6 +104,28 @@ function NavContent({ user }: { user: AuthUser | null }) {
                         <p>Cart</p>
                     </TooltipContent>
                 </Tooltip>
+
+                {user ? (
+                    <ProfileDropdown user={user} />
+                ) : (
+                    <Tooltip>
+                        <TooltipTrigger
+                            render={
+                                <Link
+                                    href="/account"
+                                    className="text-foreground border border-black hover:text-primary transition-colors inline-flex items-center"
+                                />
+                            }
+                        >
+                            <User className="w-5 h-5 lg:w-[22px] lg:h-[22px]" strokeWidth={1.5} />
+                            <span className="sr-only">Account</span>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" sideOffset={5}>
+                            <p>Account</p>
+                        </TooltipContent>
+                    </Tooltip>
+                )}
+
             </div>
         </div>
     );

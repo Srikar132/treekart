@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { updateProfile } from "@/actions/user.actions";
 import { AnimatedButton } from "@/components/shared/animated-button";
+import { formatE164ForDisplay } from "@/lib/phone";
 import { toast } from "sonner";
 
 interface ProfileSettingsProps {
@@ -13,7 +14,6 @@ interface ProfileSettingsProps {
 }
 
 export function ProfileSettings({ user }: ProfileSettingsProps) {
-
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: user.full_name || "",
@@ -39,12 +39,9 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
 
   return (
     <div className="max-w-2xl space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="space-y-4">
-        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Security & Profile</h2>
-        <p className="text-sm text-slate-500 font-medium leading-relaxed">
-          Manage your personal information and contact preferences. These details are used for order fulfillment and digital orchard updates.
-        </p>
-      </div>
+      <p className="text-sm text-slate-500 font-medium leading-relaxed">
+        Manage your personal information and contact preferences. These details are used for order fulfillment and digital orchard updates.
+      </p>
 
       <form onSubmit={handleUpdate} className="space-y-12">
         <div className="grid grid-cols-1 gap-10">
@@ -70,9 +67,10 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
               Registered Mobile
             </label>
             <Input
-              value={formData.phone}
+              value={formData.phone ? formatE164ForDisplay(formData.phone) : ""}
+              placeholder="No phone on file"
               readOnly
-              className="h-16 rounded-2xl border-slate-100 bg-slate-100 px-6 text-sm font-bold text-slate-400 cursor-not-allowed"
+              className="h-16 rounded-2xl border-slate-100 bg-slate-100 px-6 text-sm font-bold text-slate-500 placeholder:text-slate-400 cursor-not-allowed"
             />
           </div>
 

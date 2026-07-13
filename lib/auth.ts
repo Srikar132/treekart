@@ -34,7 +34,9 @@ export async function getUser() {
         updated_at: user.updated_at,
         ...profile,
         // Phone is the canonical identity; fall back to auth.users.phone.
-        phone: profile.phone ?? user.phone ?? null,
+        // `||` not `??` — Supabase returns "" (not null) for an unset phone
+        // on both auth.users and profiles, which `??` would let through.
+        phone: profile.phone || user.phone || null,
     };
 }
 
