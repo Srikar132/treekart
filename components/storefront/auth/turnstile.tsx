@@ -37,7 +37,13 @@ export function Turnstile({
 }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const widgetId = useRef<string | null>(null);
-    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    // Cloudflare's real site key is domain-locked to prod; it won't render on
+    // localhost. Use the universal Cloudflare test key outside production so
+    // dev keeps working without touching the prod key's allowed domains.
+    const siteKey =
+        process.env.NODE_ENV === "production"
+            ? process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+            : process.env.NEXT_PUBLIC_TURNSTILE_TEST_SITE_KEY ?? process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
     // Keep the latest callbacks without re-rendering the widget. Assigned in an
     // effect, not during render — a render can be discarded, and mutating a ref
