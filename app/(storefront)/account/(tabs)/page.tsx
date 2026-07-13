@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { requireUser } from "@/lib/auth";
 import { getMyRentals } from "@/actions/user.actions";
 import { getUserOrders } from "@/actions/order.actions";
-import { AccountClient } from "@/components/storefront/account/account-client";
+import { DashboardOverview } from "@/components/storefront/account/dashboard-overview";
 
 export const metadata: Metadata = {
   title: "My Account — TreeKart",
@@ -39,25 +39,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function AccountPage() {
-  // Authenticate user
+export default async function AccountDashboardPage() {
   const user = await requireUser();
+  const [rentals, orders] = await Promise.all([getMyRentals(), getUserOrders()]);
 
-  // Fetch data in parallel
-  const [rentals, orders] = await Promise.all([
-    getMyRentals(),
-    getUserOrders(),
-  ]);
-
-
-
-  return (
-    <div className="section overflow-x-hidden" style={{ overflowX: "hidden" }}>
-      <AccountClient
-        user={user}
-        rentals={rentals}
-        orders={orders}
-      />
-    </div>
-  );
+  return <DashboardOverview user={user} rentals={rentals} orders={orders} />;
 }
