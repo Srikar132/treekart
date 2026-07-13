@@ -139,13 +139,15 @@ export async function updateSession(request: NextRequest) {
     // every user who legitimately skipped it during onboarding.
     const profileComplete = !!profile?.full_name
 
-    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-    const isAAL2 = aal?.currentLevel === 'aal2'
-
     // ── PHASE 3 — Admin MFA, evaluated BEFORE the profile gate ─────────────────
     // Order matters: an admin without a full_name would otherwise ping-pong
     // between /admin/login (wants MFA) and /auth/signin (wants a profile).
+    // AAL is only relevant to admins, so fetch it only for them — this middleware
+    // runs on every request and the call is a needless round-trip otherwise.
     if (role === 'admin') {
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+        const isAAL2 = aal?.currentLevel === 'aal2'
+
         // An admin below AAL2 must be able to sit on the login page to finish MFA.
         if (pathname === ADMIN_LOGIN) {
             return isAAL2 ? redirectTo(request, '/admin') : supabaseResponse
