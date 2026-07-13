@@ -12,7 +12,7 @@ interface OrdersListProps {
 export function OrdersList({ orders }: OrdersListProps) {
   if (orders.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 sm:py-32 space-y-6 sm:space-y-8 text-center animate-in fade-in zoom-in duration-700 px-4">
+      <div className="flex flex-col items-center justify-center  space-y-6 sm:space-y-8 text-center animate-in fade-in zoom-in duration-700 px-4">
         <div className="w-20 h-20 sm:w-24 sm:h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center shadow-inner">
           <ShoppingBag size={36} className="text-slate-200" />
         </div>

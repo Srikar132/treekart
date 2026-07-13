@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { AppSidebar } from "@/components/storefront/app-sidebar";
 import { CartSidebar } from "@/components/storefront/cart-sidebar";
+import { GuestPromoDialog } from "@/components/shared/guest-promo-dialog";
 import { Footer } from "@/components/storefront/footer";
 import { Navbar } from "@/components/storefront/navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { getAppSettings } from "@/actions/admin.actions";
+import { getUser } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: {
@@ -70,14 +72,14 @@ export default async function StorefrontLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const settings = await getAppSettings();
+    const [settings, user] = await Promise.all([getAppSettings(), getUser()]);
 
     return (
         <SidebarProvider defaultOpen={false}>
             <div className="flex min-h-screen w-full">
                 <AppSidebar />
                 <div className="flex-1 flex flex-col overflow-x-hidden max-w-full">
-                    <Navbar />
+                    <Navbar user={user} />
                     <main className="flex-1">
                         {children}
                     </main>
@@ -88,6 +90,7 @@ export default async function StorefrontLayout({
                 storeDeliveryFee={settings.store_delivery_fee}
                 storeFreeDeliveryThreshold={settings.store_free_delivery_threshold}
             />
+            <GuestPromoDialog />
         </SidebarProvider>
     );
 }

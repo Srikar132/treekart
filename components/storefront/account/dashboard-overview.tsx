@@ -16,10 +16,9 @@ interface DashboardOverviewProps {
   user: any;
   rentals: any[];
   orders: any[];
-  onTabChange: (tab: any) => void;
 }
 
-export function DashboardOverview({ user, rentals, orders, onTabChange }: DashboardOverviewProps) {
+export function DashboardOverview({ user, rentals, orders }: DashboardOverviewProps) {
   const confirmedOrders = orders.filter(o => ["confirmed", "shipped", "delivered"].includes(o.status?.toLowerCase() || ""));
 
   const stats = [
@@ -61,12 +60,12 @@ export function DashboardOverview({ user, rentals, orders, onTabChange }: Dashbo
         <div className="space-y-5 sm:space-y-8">
           <div className="flex items-center justify-between px-1">
             <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Recent Rental</h3>
-            <button
-              onClick={() => onTabChange("rentals")}
+            <Link
+              href="/account/rentals"
               className="text-xs font-bold text-primary hover:underline flex items-center gap-1.5 group"
             >
               View all <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
-            </button>
+            </Link>
           </div>
 
           {recentRental ? (
@@ -140,12 +139,12 @@ export function DashboardOverview({ user, rentals, orders, onTabChange }: Dashbo
         <div className="space-y-5 sm:space-y-8">
           <div className="flex items-center justify-between px-1">
             <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">Latest Order</h3>
-            <button
-              onClick={() => onTabChange("orders")}
+            <Link
+              href="/account/orders"
               className="text-xs font-bold text-primary hover:underline flex items-center gap-1.5 group"
             >
               View all <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
-            </button>
+            </Link>
           </div>
 
           {recentOrder ? (

@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/tooltip";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useMangoCart } from "@/store/use-mango-cart";
+import { ProfileDropdown } from "@/components/storefront/profile-dropdown";
+import type { AuthUser } from "@/lib/auth";
 
 const navLinks = [
     { name: "Rent Trees", href: "/rent" },
@@ -21,7 +23,7 @@ const navLinks = [
     { name: "Contact", href: "/contact" },
 ];
 
-function NavContent() {
+function NavContent({ user }: { user: AuthUser | null }) {
     const { toggleCart, totalQty } = useMangoCart();
     const [mounted, setMounted] = useState(false);
 
@@ -80,22 +82,6 @@ function NavContent() {
                     </TooltipContent>
                 </Tooltip> */}
 
-                <Tooltip>
-                    <TooltipTrigger
-                        render={
-                            <Link
-                                href="/account"
-                                className="text-foreground hover:text-primary transition-colors inline-flex items-center"
-                            />
-                        }
-                    >
-                        <User className="w-5 h-5 lg:w-[22px] lg:h-[22px]" strokeWidth={1.5} />
-                        <span className="sr-only">Account</span>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" sideOffset={5}>
-                        <p>Account</p>
-                    </TooltipContent>
-                </Tooltip>
 
                 <Tooltip>
                     <TooltipTrigger
@@ -118,12 +104,34 @@ function NavContent() {
                         <p>Cart</p>
                     </TooltipContent>
                 </Tooltip>
+
+                {user ? (
+                    <ProfileDropdown user={user} />
+                ) : (
+                    <Tooltip>
+                        <TooltipTrigger
+                            render={
+                                <Link
+                                    href="/account"
+                                    className="text-foreground border border-black hover:text-primary transition-colors inline-flex items-center"
+                                />
+                            }
+                        >
+                            <User className="w-5 h-5 lg:w-[22px] lg:h-[22px]" strokeWidth={1.5} />
+                            <span className="sr-only">Account</span>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" sideOffset={5}>
+                            <p>Account</p>
+                        </TooltipContent>
+                    </Tooltip>
+                )}
+
             </div>
         </div>
     );
 }
 
-export function Navbar() {
+export function Navbar({ user }: { user: AuthUser | null }) {
     const { scrollY } = useScroll();
     const [isScrolled, setIsScrolled] = useState(false);
 
@@ -140,7 +148,7 @@ export function Navbar() {
         <>
             {/* Normal Navbar - sits at the top and scrolls away naturally */}
             <header className="relative z-40 w-full bg-transparent  border-b">
-                <NavContent />
+                <NavContent user={user} />
             </header>
 
             {/* Sticky Animated Navbar - slides from top with backdrop blur */}
@@ -153,7 +161,7 @@ export function Navbar() {
                         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                         className="fixed top-0 left-0 right-0 z-50 w-full bg-background/80 backdrop-blur-md shadow-sm border-b"
                     >
-                        <NavContent />
+                        <NavContent user={user} />
                     </motion.header>
                 )}
             </AnimatePresence>
