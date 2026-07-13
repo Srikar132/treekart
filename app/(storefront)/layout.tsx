@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AppSidebar } from "@/components/storefront/app-sidebar";
 import { CartSidebar } from "@/components/storefront/cart-sidebar";
+import { GuestPromoDialog } from "@/components/shared/guest-promo-dialog";
 import { Footer } from "@/components/storefront/footer";
 import { Navbar } from "@/components/storefront/navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -88,6 +89,7 @@ export default async function StorefrontLayout({
                 storeDeliveryFee={settings.store_delivery_fee}
                 storeFreeDeliveryThreshold={settings.store_free_delivery_threshold}
             />
+            <GuestPromoDialog />
         </SidebarProvider>
     );
 }
