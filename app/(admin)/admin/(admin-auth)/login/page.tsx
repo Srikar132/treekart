@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   TrendingUp,
@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
 import { toE164, formatE164ForDisplay } from "@/lib/phone";
-import { Turnstile } from "@/components/storefront/auth/turnstile";
+import { Turnstile, type TurnstileHandle } from "@/components/storefront/auth/turnstile";
 import { generateRecoveryCodes, redeemRecoveryCode } from "@/actions/admin-mfa.actions";
 
 type Step = "phone" | "otp" | "mfa-enroll" | "mfa-challenge" | "recovery" | "codes";
@@ -25,6 +25,8 @@ type Step = "phone" | "otp" | "mfa-enroll" | "mfa-challenge" | "recovery" | "cod
 export default function AdminLoginPage() {
   const router = useRouter();
   const supabase = createClient();
+
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   const [step, setStep] = useState<Step>("phone");
   const [loading, setLoading] = useState(false);
@@ -45,15 +47,34 @@ export default function AdminLoginPage() {
     const e164 = toE164(phone);
     if (!e164) return toast.error("Enter a valid 10-digit mobile number.");
 
+    // Turnstile re-solves asynchronously; if the widget hasn't produced a
+    // token yet the server-side captcha check fails and no code is sent.
+    if (!captchaToken) return toast.error("Verifying you're human — one moment, then try again.");
+
+    // Tokens are single-use — mint a fresh one for every send, or a resend
+    // silently fails the server-side captcha check.
+    const token = captchaToken;
+    setCaptchaToken("");
+    turnstileRef.current?.reset();
+
     setLoading(true);
     try {
-      // shouldCreateUser:false — admins must pre-exist. Supabase returns a distinct
-      // error for unknown numbers, so we swallow it: surfacing it would let anyone
-      // enumerate which numbers are admins.
+      // shouldCreateUser:false — admins must pre-exist. Supabase returns
+      // "user_not_found" for unknown numbers; that one is swallowed so this
+      // endpoint can't be used to enumerate which numbers are admins. Any
+      // other error (captcha rejected, rate-limited, SMS provider down) means
+      // no code was actually sent — surface it and stay on this step, or the
+      // admin is left typing into a code entry field with nothing to verify.
       const { error } = await supabase.auth.signInWithOtp({
         phone: e164,
-        options: { channel: "sms", shouldCreateUser: false, captchaToken },
+        options: { channel: "sms", shouldCreateUser: false, captchaToken: token },
       });
+
+      if (error && error.code !== "user_not_found") {
+        console.error("admin sendOtp:", error.message);
+        toast.error(error.message || "Could not send the code. Please try again.");
+        return;
+      }
       if (error) console.error("admin sendOtp:", error.message);
 
       setStep("otp");
@@ -225,7 +246,11 @@ export default function AdminLoginPage() {
                   placeholder="9876543210" className={inputClass}
                 />
               </div>
-              <Turnstile onVerify={setCaptchaToken} onExpire={() => setCaptchaToken("")} />
+              <Turnstile
+                ref={turnstileRef}
+                onVerify={setCaptchaToken}
+                onExpire={() => setCaptchaToken("")}
+              />
               <Button type="submit" disabled={loading} className={buttonClass}>
                 {loading ? <Loader2 className="animate-spin" size={18} /> : "Send OTP"}
               </Button>
