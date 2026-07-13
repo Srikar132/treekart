@@ -5,7 +5,7 @@ import { otpSchema } from "@/lib/validations";
 import { toE164 } from "@/lib/phone";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { otpAj } from "@/lib/arcjet";
+import { otpSendAj, otpVerifyAj, otpIpBackstopAj } from "@/lib/arcjet";
 
 export type SendOtpState = {
     error?: string;
@@ -34,15 +34,22 @@ export async function sendOtp(
     formData: FormData
 ): Promise<SendOtpState> {
     try {
-        const decision = await otpAj.protect({ headers: await headers() });
-        if (decision.isDenied()) {
-            return { error: "Too many requests. Please try again in a few minutes." };
-        }
-
         // toE164 accepts either a raw 10-digit number (first send) or an already
         // normalized +91 number (resend passes the stored E.164), so both paths validate.
+        // Parse BEFORE rate limiting so the primary limit can key on the number.
         const e164 = toE164((formData.get("phone") as string) ?? "");
         if (!e164) return { error: "Enter a valid 10-digit Indian mobile number." };
+
+        const reqHeaders = await headers();
+        // Primary limit is per-PHONE (CGNAT-safe); the IP backstop is a coarse
+        // per-host cap so one machine can't enumerate many numbers.
+        const [byPhone, byIp] = await Promise.all([
+            otpSendAj.protect({ headers: reqHeaders }, { phone: e164 }),
+            otpIpBackstopAj.protect({ headers: reqHeaders }),
+        ]);
+        if (byPhone.isDenied() || byIp.isDenied()) {
+            return { error: "Too many requests. Please try again in a few minutes." };
+        }
 
         const captchaToken = (formData.get("captchaToken") as string) || undefined;
 
@@ -82,6 +89,13 @@ export async function verifyOtp(
             return { error: "Your session expired. Please request a new code." };
         }
 
+        // Brute-force guard, keyed on the phone: bounds total guesses against one
+        // number regardless of how many IPs an attacker rotates through.
+        const decision = await otpVerifyAj.protect({ headers: await headers() }, { phone: e164 });
+        if (decision.isDenied()) {
+            return { error: "Too many attempts. Please request a new code." };
+        }
+
         const parsed = otpSchema.safeParse({ otp: formData.get("otp") as string });
         if (!parsed.success) {
             return { error: parsed.error.flatten().fieldErrors.otp?.[0] ?? "Enter the 6-digit code." };
@@ -98,11 +112,20 @@ export async function verifyOtp(
             return { error: "That code is incorrect or has expired. Please try again." };
         }
 
-        const { data: profile } = await supabase
+        // maybeSingle: a brand-new user with no row yet returns null WITHOUT an
+        // error, so a genuine query failure stays distinguishable from "no row".
+        const { data: profile, error: profileError } = await supabase
             .from("profiles")
             .select("full_name, role")
             .eq("id", data.user.id)
-            .single();
+            .maybeSingle();
+
+        if (profileError) {
+            // Don't misread an infra blip as "needs onboarding" — fail cleanly so
+            // the client retries rather than trapping a complete user in the dialog.
+            console.error("verifyOtp profile fetch:", profileError.message);
+            return { error: "Signed in, but we couldn't load your profile. Please try again." };
+        }
 
         revalidatePath("/", "layout");
         return {

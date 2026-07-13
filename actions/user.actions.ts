@@ -22,14 +22,21 @@ export async function completeProfile(input: { fullName: string; email?: string 
     const supabase = await getSupabaseServer();
     const email = parsed.data.email?.trim();
 
+    // Upsert, not update: the on_auth_user_created trigger normally seeds the row,
+    // but an UPDATE against a missing row silently affects zero rows and reports
+    // success — trapping the user in an endless onboarding loop. Upsert guarantees
+    // the name is written even if the row is somehow absent.
     const { error } = await supabase
         .from("profiles")
-        .update({
-            full_name: parsed.data.fullName.trim(),
-            // Only write email when one was actually given — skipping must leave it null.
-            ...(email ? { email } : {}),
-        })
-        .eq("id", user.id);
+        .upsert(
+            {
+                id: user.id,
+                full_name: parsed.data.fullName.trim(),
+                // Only write email when one was actually given — skipping must leave it null.
+                ...(email ? { email } : {}),
+            },
+            { onConflict: "id" }
+        );
 
     if (error) return { success: false as const, error: error.message };
 
@@ -68,23 +75,25 @@ export async function saveContactEmail(input: { email: string }) {
 
 export async function updateProfile(input: {
     fullName?: string;
-    phone?: string;
     avatarUrl?: string;
 }) {
     const user = await requireUser();
     const supabase = await getSupabaseServer();
 
+    // Phone is intentionally NOT updatable here. It is the auth identity in
+    // auth.users; writing profiles.phone alone desyncs the two (getUser prefers
+    // profiles.phone, so the UI would show a number the user can't log in with).
+    // A phone change must go through Supabase Auth's phone-change flow.
     const { error } = await supabase
         .from("profiles")
         .update({
             full_name: input.fullName,
-            phone: input.phone,
             avatar_url: input.avatarUrl,
         })
         .eq("id", user.id);
 
     if (error) throw new Error(error.message);
-    revalidatePath("/dashboard/profile");
+    revalidatePath("/account");
 }
 
 
@@ -166,8 +175,7 @@ export async function confirmDelivery(rentalId: string) {
         .eq("user_id", user.id); // can only confirm own rental
 
     if (error) throw new Error(error.message);
-    revalidatePath(`/dashboard/my-tree/${rentalId}`);
-    revalidatePath("/dashboard");
+    revalidatePath("/account");
 }
 
 // ── FARMER REGISTRATION ────────────────────────────────────────────

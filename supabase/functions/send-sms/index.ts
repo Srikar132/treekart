@@ -88,14 +88,21 @@ Deno.serve(async (req) => {
     const url = new URL(MSG91_OTP_URL);
     url.searchParams.set("template_id", templateId);
     url.searchParams.set("mobile", mobile);
+    // MSG91's SendOTP API requires the template's OTP placeholder to be ##OTP##,
+    // which is filled by the `otp` param. Also send it under MSG91_OTP_VAR for any
+    // additional custom variable the template may declare.
     url.searchParams.set("otp", sms.otp);
-    url.searchParams.set(otpVar, sms.otp);
+    if (otpVar && otpVar !== "otp") url.searchParams.set(otpVar, sms.otp);
 
     let res: Response;
     try {
+        // NO Content-Type header. When this request declares application/json,
+        // MSG91 parses params from the (empty) BODY and ignores the query string —
+        // dropping template_id and failing with "Template ID Missing or Invalid
+        // Template". Sending only the authkey header lets it read the query params.
         res = await fetch(url.toString(), {
             method: "POST",
-            headers: { authkey: authKey, "Content-Type": "application/json" },
+            headers: { authkey: authKey },
         });
     } catch (err) {
         console.error("send-sms: MSG91 request failed", {

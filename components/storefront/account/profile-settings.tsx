@@ -28,7 +28,6 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
     try {
       await updateProfile({
         fullName: formData.fullName,
-        phone: formData.phone,
       });
       toast.success("Profile updated successfully.");
     } catch (error: any) {
@@ -63,17 +62,17 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
             />
           </div>
 
-          {/* Phone Number */}
-          <div className="space-y-3">
+          {/* Phone Number — Read Only (auth identity; changing it must go through
+              Supabase Auth's phone-change + OTP flow, not a plain profile write). */}
+          <div className="space-y-3 opacity-60">
             <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 px-1 flex items-center gap-2">
-              <Phone size={14} className="text-primary" />
-              Contact Number
+              <Phone size={14} className="text-slate-400" />
+              Registered Mobile
             </label>
             <Input
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="Enter your mobile number"
-              className="h-16 rounded-2xl border-slate-100 bg-slate-50 px-6 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus-visible:ring-primary/20 focus-visible:bg-white transition-all shadow-sm"
+              readOnly
+              className="h-16 rounded-2xl border-slate-100 bg-slate-100 px-6 text-sm font-bold text-slate-400 cursor-not-allowed"
             />
           </div>
 

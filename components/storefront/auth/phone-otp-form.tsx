@@ -64,7 +64,14 @@ export function PhoneOtpForm({
         return token;
     };
 
-    const doSend = (rawPhone: string, token: string) =>
+    const doSend = (rawPhone: string, token: string) => {
+        // Turnstile is single-use and re-solves asynchronously after a reset. If a
+        // send fires before the fresh token lands, the server-side captcha check
+        // fails with a confusing error — guard here and ask the user to wait.
+        if (!token) {
+            setError("Verifying you're human — one moment, then try again.");
+            return;
+        }
         startTransition(async () => {
             setError(null);
             const fd = new FormData();
@@ -81,6 +88,7 @@ export function PhoneOtpForm({
                 setError(res.error ?? "Could not send the code.");
             }
         });
+    };
 
     const handleSendSubmit = (e: React.FormEvent) => {
         e.preventDefault();
