@@ -55,10 +55,16 @@ export async function generateStaticParams() {
 export default async function TreeDetailsPage({ params }: Props) {
   const { id } = await params;
 
-  const [tree, settings] = await Promise.all([
-    getTreeById(id),
-    getAppSettings(),
-  ]);
+  let tree, settings;
+  try {
+    [tree, settings] = await Promise.all([
+      getTreeById(id),
+      getAppSettings(),
+    ]);
+  } catch (error) {
+    console.error("Error fetching tree details:", error);
+    return notFound();
+  }
 
   if (!tree) return notFound();
 

@@ -65,17 +65,26 @@ export default async function RentPage({ searchParams }: Props) {
     ? params.plan.split(",").filter(Boolean)
     : [];
 
+  // age_years is an integer column — unlike price (numeric, tolerates the
+  // literal "NaN"), Postgres rejects "NaN" for an integer filter outright, so
+  // a garbage query param (e.g. minAge=abc) must be dropped, not forwarded.
+  const toFiniteNumber = (value: string | undefined) => {
+    if (!value) return undefined;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : undefined;
+  };
+
   const options = {
     filters: {
       planId: planIds.length > 0 ? planIds : undefined,
-      minPrice: params.minPrice ? Number(params.minPrice) : undefined,
-      maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
-      minAge: params.minAge ? Number(params.minAge) : undefined,
-      maxAge: params.maxAge ? Number(params.maxAge) : undefined,
+      minPrice: toFiniteNumber(params.minPrice),
+      maxPrice: toFiniteNumber(params.maxPrice),
+      minAge: toFiniteNumber(params.minAge),
+      maxAge: toFiniteNumber(params.maxAge),
       status: params.status ? (params.status.split(",") as any) : undefined,
     },
     sort: (params.sort as TreeSortOption) || "newest",
-    page: params.page ? Number(params.page) : 1,
+    page: toFiniteNumber(params.page) ?? 1,
     limit: 12,
   };
 
