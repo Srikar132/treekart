@@ -41,6 +41,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { clearClientState } from "@/lib/clear-client-state";
 import { toast } from "sonner";
 
 const NAV_ITEMS = [
@@ -59,6 +61,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const queryClient = useQueryClient();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   async function handleLogout() {
@@ -67,8 +70,9 @@ export function AdminSidebar() {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
+      clearClientState(queryClient); // wipe cached data + persisted stores
       toast.success("Admin session ended");
-      router.push("/admin/auth/login");
+      router.push("/admin/login");
       router.refresh();
     } catch (error: any) {
       toast.error(error.message || "Failed to log out");

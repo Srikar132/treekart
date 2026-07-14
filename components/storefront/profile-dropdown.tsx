@@ -14,7 +14,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { useQueryClient } from "@tanstack/react-query";
 import { logout } from "@/actions/auth.actions";
+import { clearClientState } from "@/lib/clear-client-state";
 import { toast } from "sonner";
 import type { AuthUser } from "@/lib/auth";
 
@@ -27,6 +29,7 @@ const LINKS = [
 
 export function ProfileDropdown({ user }: { user: AuthUser }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
   const initials = user.full_name
@@ -39,7 +42,8 @@ export function ProfileDropdown({ user }: { user: AuthUser }) {
 
   function handleLogout() {
     startTransition(async () => {
-      await logout();
+      await logout();                 // server: end session + revalidate
+      clearClientState(queryClient);  // client: wipe cache, carts, address, OTP
       toast.success("Logged out successfully");
       router.push("/");
       router.refresh();
