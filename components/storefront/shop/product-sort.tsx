@@ -40,7 +40,13 @@ export function ProductSort({ activeSort }: { activeSort: ProductSortOption }) {
       <span className="hidden sm:inline-block text-sm text-muted-foreground font-medium">Sort by:</span>
       <Select value={activeSort} onValueChange={onSortChange} disabled={isPending}>
         <SelectTrigger className="w-[180px] bg-background">
-          <SelectValue />
+          {/* SelectValue can only read a label off a mounted SelectItem, which
+              only exists once the popup has opened at least once — on first
+              load (e.g. reloading a URL with ?sort=price_asc already set) it
+              falls back to the raw value. Map the label explicitly instead. */}
+          <SelectValue>
+            {(value: string) => SORT_OPTIONS.find((opt) => opt.value === value)?.label ?? value}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {SORT_OPTIONS.map((opt) => (

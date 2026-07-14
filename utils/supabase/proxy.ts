@@ -4,19 +4,6 @@ import { safeRedirect } from '@/lib/safe-redirect'
 
 // ── Route Definitions ──────────────────────────────────────────────────────────
 
-const PUBLIC_PREFIXES = [
-    '/store',
-    '/rent',
-    '/blog',
-    '/about',
-    '/contact',
-    '/faq',
-    '/trees',
-    '/api',
-    '/privacy',
-    '/terms',
-]
-
 // The phone-OTP screens. Authenticated, fully-onboarded users are bounced away.
 // /auth/signin doubles as the onboarding host: when a signed-in user has no
 // full_name it renders the profile dialog instead of the phone form, which gives
@@ -37,6 +24,15 @@ const CUSTOMER_ONLY_PREFIXES = [
 const ADMIN_PREFIX = '/admin'
 const ADMIN_LOGIN = '/admin/login'
 const FARMER_PREFIX = '/farmer'
+
+// Only these need a session. Everything else — real pages, /blocked, and
+// unmatched/typo'd routes alike — passes straight through to Next's own
+// routing so 404s render normally instead of bouncing to sign-in.
+const PROTECTED_PREFIXES = [
+    ...CUSTOMER_ONLY_PREFIXES,
+    ADMIN_PREFIX,
+    FARMER_PREFIX,
+]
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -61,7 +57,7 @@ function isCustomerOnlyRoute(pathname: string) {
 }
 
 function isPublicRoute(pathname: string) {
-    return pathname === '/' || matchesPrefix(pathname, PUBLIC_PREFIXES)
+    return !matchesPrefix(pathname, PROTECTED_PREFIXES)
 }
 
 function redirectTo(request: NextRequest, destination: string) {
