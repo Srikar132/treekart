@@ -212,46 +212,55 @@ export default function AdminLoginPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  const inputClass =
-    "h-14 rounded-2xl border-white/5 bg-white/5 pl-12 font-medium text-white placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-orange-500/50";
-  const buttonClass =
-    "h-14 w-full rounded-2xl border-0 bg-[#E5603E] text-xs font-black uppercase tracking-[0.1em] text-white";
+  // ── Shared style tokens (admin light theme — brand colours via tokens) ──
+  const fieldIcon =
+    "pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground";
+  const inputBase =
+    "h-12 rounded-lg border-border bg-background pl-11 text-sm font-medium text-foreground placeholder:text-muted-foreground/50 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25";
+  const btnPrimary =
+    "h-12 w-full rounded-lg bg-primary text-primary-foreground text-xs font-bold uppercase tracking-[0.15em] hover:bg-primary/90 disabled:opacity-60";
 
   return (
-    <main className="admin-theme dark relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-6">
-      <div className="relative z-10 w-full max-w-[440px] animate-in space-y-8 fade-in zoom-in duration-700">
+    <main className="admin-theme flex min-h-screen w-full items-center justify-center bg-background p-6">
+      <div className="w-full max-w-[420px] space-y-8 animate-in fade-in zoom-in-95 duration-500">
+        {/* Brand */}
         <div className="space-y-4 text-center">
-          <div className="mx-auto flex h-20 w-20 rotate-3 items-center justify-center rounded-[24px] border border-white/10 bg-gradient-to-br from-[#E5603E] to-[#C44D2F] shadow-2xl shadow-orange-500/20">
-            <TrendingUp className="text-white" size={36} />
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10">
+            <TrendingUp className="text-primary" size={30} />
           </div>
           <div className="space-y-1">
-            <h1 className="text-4xl font-black uppercase tracking-tighter text-white">
-              Admin<span className="text-[#E5603E]">Portal</span>
+            <h1 className="text-3xl font-black uppercase tracking-tight text-foreground">
+              Admin<span className="text-primary">Portal</span>
             </h1>
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
-              TreeKart Corporate Terminal
+              TreeKart Control Terminal
             </p>
           </div>
         </div>
 
-        <div className="relative min-w-sm overflow-hidden p-8 md:p-10">
+        {/* Card */}
+        <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
           {step === "phone" && (
             <form onSubmit={handleSendOtp} className="space-y-6">
-              <FieldLabel>Admin Mobile</FieldLabel>
-              <div className="relative">
-                <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60" size={18} />
-                <Input
-                  type="tel" inputMode="numeric" maxLength={10} required
-                  value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-                  placeholder="9876543210" className={inputClass}
+              <StepHeader title="Sign In" subtitle="Enter your registered admin mobile" />
+              <Field label="Admin Mobile">
+                <div className="relative">
+                  <Smartphone className={fieldIcon} size={18} />
+                  <Input
+                    type="tel" inputMode="numeric" maxLength={10} required
+                    value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                    placeholder="9876543210" className={inputBase}
+                  />
+                </div>
+              </Field>
+              <div className="flex justify-center">
+                <Turnstile
+                  ref={turnstileRef}
+                  onVerify={setCaptchaToken}
+                  onExpire={() => setCaptchaToken("")}
                 />
               </div>
-              <Turnstile
-                ref={turnstileRef}
-                onVerify={setCaptchaToken}
-                onExpire={() => setCaptchaToken("")}
-              />
-              <Button type="submit" disabled={loading} className={buttonClass}>
+              <Button type="submit" disabled={loading} className={btnPrimary}>
                 {loading ? <Loader2 className="animate-spin" size={18} /> : "Send OTP"}
               </Button>
             </form>
@@ -259,16 +268,22 @@ export default function AdminLoginPage() {
 
           {step === "otp" && (
             <form onSubmit={handleVerifyOtp} className="space-y-6">
-              <FieldLabel>Code sent to {formatE164ForDisplay(toE164(phone) ?? phone)}</FieldLabel>
-              <div className="relative">
-                <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60" size={18} />
-                <Input
-                  type="text" inputMode="numeric" maxLength={6} autoFocus required
-                  value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                  placeholder="••••••" className={`${inputClass} text-center tracking-[0.5em]`}
-                />
-              </div>
-              <Button type="submit" disabled={loading} className={buttonClass}>
+              <StepHeader
+                title="Verify"
+                subtitle={`Code sent to ${formatE164ForDisplay(toE164(phone) ?? phone)}`}
+              />
+              <Field label="6-Digit Code">
+                <div className="relative">
+                  <KeyRound className={fieldIcon} size={18} />
+                  <Input
+                    type="text" inputMode="numeric" maxLength={6} autoFocus required
+                    autoComplete="one-time-code"
+                    value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                    placeholder="••••••" className={`${inputBase} text-center tracking-[0.5em]`}
+                  />
+                </div>
+              </Field>
+              <Button type="submit" disabled={loading} className={btnPrimary}>
                 {loading ? <Loader2 className="animate-spin" size={18} /> : "Verify"}
               </Button>
               <BackLink onClick={() => setStep("phone")}>Change number</BackLink>
@@ -277,17 +292,20 @@ export default function AdminLoginPage() {
 
           {step === "mfa-enroll" && (
             <form onSubmit={handleVerifyMfa} className="space-y-6">
-              <p className="text-center text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                Scan with your authenticator app, then enter the code
-              </p>
+              <StepHeader
+                title="Set Up Authenticator"
+                subtitle="Scan the code with your authenticator app, then enter the 6-digit code"
+              />
               {qrCode && (
-                <div className="flex justify-center rounded-2xl bg-white p-4">
+                <div className="flex justify-center rounded-lg border border-border bg-white p-4">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qrCode} alt="Authenticator QR code" width={180} height={180} />
+                  <img src={qrCode} alt="Authenticator QR code" width={176} height={176} />
                 </div>
               )}
-              <MfaCodeInput value={mfaCode} onChange={setMfaCode} className={inputClass} />
-              <Button type="submit" disabled={loading} className={buttonClass}>
+              <Field label="Authenticator Code">
+                <MfaCodeInput value={mfaCode} onChange={setMfaCode} icon={fieldIcon} inputClass={inputBase} />
+              </Field>
+              <Button type="submit" disabled={loading} className={btnPrimary}>
                 {loading ? <Loader2 className="animate-spin" size={18} /> : "Enable & Enter"}
               </Button>
             </form>
@@ -295,11 +313,14 @@ export default function AdminLoginPage() {
 
           {step === "mfa-challenge" && (
             <form onSubmit={handleVerifyMfa} className="space-y-6">
-              <p className="text-center text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                Enter the code from your authenticator app
-              </p>
-              <MfaCodeInput value={mfaCode} onChange={setMfaCode} className={inputClass} />
-              <Button type="submit" disabled={loading} className={buttonClass}>
+              <StepHeader
+                title="Two-Factor"
+                subtitle="Enter the current code from your authenticator app"
+              />
+              <Field label="Authenticator Code">
+                <MfaCodeInput value={mfaCode} onChange={setMfaCode} icon={fieldIcon} inputClass={inputBase} />
+              </Field>
+              <Button type="submit" disabled={loading} className={btnPrimary}>
                 {loading ? <Loader2 className="animate-spin" size={18} /> : "Verify & Enter"}
               </Button>
               <BackLink onClick={() => setStep("recovery")}>Lost your authenticator?</BackLink>
@@ -308,22 +329,22 @@ export default function AdminLoginPage() {
 
           {step === "recovery" && (
             <form onSubmit={handleRedeem} className="space-y-6">
-              <p className="text-center text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                Enter one of your recovery codes
-              </p>
-              <div className="relative">
-                <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60" size={18} />
-                <Input
-                  autoFocus required value={recoveryInput}
-                  onChange={(e) => setRecoveryInput(e.target.value)}
-                  placeholder="XXXXX-XXXXX"
-                  className={`${inputClass} text-center tracking-widest uppercase`}
-                />
-              </div>
-              <p className="text-center text-[10px] text-muted-foreground/60">
+              <StepHeader title="Recovery" subtitle="Enter one of your saved recovery codes" />
+              <Field label="Recovery Code">
+                <div className="relative">
+                  <ShieldCheck className={fieldIcon} size={18} />
+                  <Input
+                    autoFocus required value={recoveryInput}
+                    onChange={(e) => setRecoveryInput(e.target.value)}
+                    placeholder="XXXXX-XXXXX"
+                    className={`${inputBase} text-center uppercase tracking-widest`}
+                  />
+                </div>
+              </Field>
+              <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
                 This removes your old authenticator. You will set up a new one next.
               </p>
-              <Button type="submit" disabled={loading} className={buttonClass}>
+              <Button type="submit" disabled={loading} className={btnPrimary}>
                 {loading ? <Loader2 className="animate-spin" size={18} /> : "Use Recovery Code"}
               </Button>
               <BackLink onClick={() => setStep("mfa-challenge")}>Back to authenticator</BackLink>
@@ -332,40 +353,43 @@ export default function AdminLoginPage() {
 
           {step === "codes" && (
             <div className="space-y-6">
-              <p className="text-center text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                Save these recovery codes
-              </p>
-              <p className="text-center text-[10px] leading-relaxed text-muted-foreground/70">
-                Shown once. Each works a single time, and only after your phone OTP.
-                Without them, a lost authenticator locks you out permanently.
-              </p>
-              <div className="grid grid-cols-2 gap-2 rounded-2xl bg-white/5 p-4 font-mono text-sm text-white">
+              <StepHeader
+                title="Save Recovery Codes"
+                subtitle="Shown once. Each works a single time, only after your phone OTP."
+              />
+              <div className="grid grid-cols-2 gap-2 rounded-lg border border-border bg-muted/40 p-4 font-mono text-sm text-foreground">
                 {recoveryCodes.map((c) => (
                   <span key={c} className="tracking-wider">{c}</span>
                 ))}
               </div>
-              <Button type="button" onClick={copyCodes} className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 text-xs font-bold uppercase tracking-widest text-white">
-                {copied ? <><Check size={14} className="mr-2" />Copied</> : <><Copy size={14} className="mr-2" />Copy codes</>}
+              <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
+                Without them, a lost authenticator locks you out permanently.
+              </p>
+              <Button
+                type="button" onClick={copyCodes} variant="outline"
+                className="h-11 w-full rounded-lg border-border bg-background text-xs font-bold uppercase tracking-widest text-foreground hover:bg-muted"
+              >
+                {copied ? <><Check size={14} className="mr-2" />Copied</> : <><Copy size={14} className="mr-2" />Copy Codes</>}
               </Button>
               <Button
-                type="button"
-                className={buttonClass}
+                type="button" className={btnPrimary}
                 onClick={() => { router.push("/admin"); router.refresh(); }}
               >
-                I&apos;ve saved them — Enter
+                I&apos;ve Saved Them — Enter
               </Button>
             </div>
           )}
         </div>
 
+        {/* Footer */}
         <div className="flex flex-col items-center gap-2">
-          <div className="flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-3 py-1.5">
-            <ShieldCheck size={12} className="text-green-500" />
+          <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5">
+            <ShieldCheck size={12} className="text-primary" />
             <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
               OTP + Authenticator MFA
             </p>
           </div>
-          <p className="text-center text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground/60">
+          <p className="text-center text-[9px] font-medium uppercase tracking-[0.2em] text-muted-foreground/70">
             Authorized Personnel Only
           </p>
         </div>
@@ -374,11 +398,25 @@ export default function AdminLoginPage() {
   );
 }
 
-function FieldLabel({ children }: { children: React.ReactNode }) {
+// ── Shared step primitives (one visual language across all steps) ────
+
+function StepHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <label className="block px-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+    <div className="space-y-1">
+      <h2 className="text-lg font-black uppercase tracking-tight text-foreground">{title}</h2>
+      <p className="text-[11px] font-medium leading-relaxed text-muted-foreground">{subtitle}</p>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-2">
+      <label className="block px-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+        {label}
+      </label>
       {children}
-    </label>
+    </div>
   );
 }
 
@@ -387,7 +425,7 @@ function BackLink({ onClick, children }: { onClick: () => void; children: React.
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-white"
+      className="flex w-full items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-primary"
     >
       <ArrowLeft size={12} />
       {children}
@@ -396,15 +434,16 @@ function BackLink({ onClick, children }: { onClick: () => void; children: React.
 }
 
 function MfaCodeInput({
-  value, onChange, className,
-}: { value: string; onChange: (v: string) => void; className: string }) {
+  value, onChange, icon, inputClass,
+}: { value: string; onChange: (v: string) => void; icon: string; inputClass: string }) {
   return (
     <div className="relative">
-      <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60" size={18} />
+      <ShieldCheck className={icon} size={18} />
       <Input
         type="text" inputMode="numeric" maxLength={6} autoFocus required
+        autoComplete="one-time-code"
         value={value} onChange={(e) => onChange(e.target.value.replace(/\D/g, ""))}
-        placeholder="••••••" className={`${className} text-center tracking-[0.5em]`}
+        placeholder="••••••" className={`${inputClass} text-center tracking-[0.5em]`}
       />
     </div>
   );

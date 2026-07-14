@@ -12,8 +12,57 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
+      admin_recovery_codes: {
+        Row: {
+          code_hash: string
+          created_at: string | null
+          id: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string | null
+          id?: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string | null
+          id?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           id: number
@@ -290,6 +339,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      phone_migration_report: {
+        Row: {
+          id: number
+          normalized: string | null
+          profile_id: string | null
+          raw_phone: string | null
+          reason: string | null
+          reported_at: string | null
+        }
+        Insert: {
+          id?: number
+          normalized?: string | null
+          profile_id?: string | null
+          raw_phone?: string | null
+          reason?: string | null
+          reported_at?: string | null
+        }
+        Update: {
+          id?: number
+          normalized?: string | null
+          profile_id?: string | null
+          raw_phone?: string | null
+          reason?: string | null
+          reported_at?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -569,36 +645,37 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_admin_stats: { Args: never; Returns: Json }
+      confirm_order_by_order_id: {
+        Args: { p_rzp_order_id: string; p_rzp_payment_id: string }
+        Returns: {
+          order_id: string
+          total_amount: number
+          user_email: string
+          user_name: string
+        }[]
+      }
       fulfil_rental: {
         Args: {
           p_rental_id: string
+          p_reserved_until: string
           p_rzp_payment_id: string
           p_tree_id: string
-          p_reserved_until: string
         }
         Returns: boolean
       }
       fulfil_rental_by_order_id: {
         Args: { p_rzp_order_id: string; p_rzp_payment_id: string }
         Returns: {
-          rental_id: string | null
-          tree_id: string | null
-          amount_paid: number | null
-          season: string | null
-          user_email: string | null
-          user_name: string | null
+          amount_paid: number
+          rental_id: string
+          season: string
+          tree_id: string
+          user_email: string
+          user_name: string
         }[]
       }
-      confirm_order_by_order_id: {
-        Args: { p_rzp_order_id: string; p_rzp_payment_id: string }
-        Returns: {
-          order_id: string | null
-          total_amount: number | null
-          user_email: string | null
-          user_name: string | null
-        }[]
-      }
+      get_admin_stats: { Args: never; Returns: Json }
+      normalize_in_phone: { Args: { raw: string }; Returns: string }
     }
     Enums: {
       farmer_status: "pending" | "approved" | "rejected"
@@ -740,6 +817,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       farmer_status: ["pending", "approved", "rejected"],
