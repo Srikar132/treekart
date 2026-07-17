@@ -40,6 +40,10 @@ export function GuestPromoDialog() {
     router.push(`/auth/signin?redirectTo=${encodeURIComponent(pathname)}`);
   };
 
+  // Guards render, not just scheduling: if the promo was opened before the
+  // user navigated to /auth, it would otherwise stay mounted and open.
+  if (pathname.startsWith("/auth")) return null;
+
   return (
     <Dialog open={isOpen} onOpenChange={close}>
       <DialogContent
