@@ -139,6 +139,14 @@ export function PhoneOtpForm({
         setCaptchaToken("");
     };
 
+    const handleSubmit = (e: React.FormEvent) => {
+        if (step === "phone") {
+            handleSendSubmit(e);
+        } else {
+            handleVerify(e);
+        }
+    };
+
     return (
         <>
             <div className="flex min-h-[calc(100vh-200px)] items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
@@ -168,142 +176,152 @@ export function PhoneOtpForm({
                     </div>
 
                     <div className="border border-border bg-card p-card">
-                        {step === "phone" ? (
-                            <form onSubmit={handleSendSubmit} className="space-y-6">
-                                <div className="space-y-2">
-                                    <Label
-                                        htmlFor="phone"
-                                        className="text-xs font-bold uppercase tracking-widest text-foreground"
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            {step === "phone" ? (
+                                <>
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="phone"
+                                            className="text-xs font-bold uppercase tracking-widest text-foreground"
+                                        >
+                                            Mobile Number
+                                        </Label>
+                                        <div className="relative">
+                                            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">
+                                                +91
+                                            </span>
+                                            <Input
+                                                id="phone"
+                                                name="phone"
+                                                type="tel"
+                                                inputMode="numeric"
+                                                maxLength={10}
+                                                autoComplete="tel-national"
+                                                placeholder="9876543210"
+                                                value={phoneInput}
+                                                onChange={(e) =>
+                                                    setPhoneInput(e.target.value.replace(/\D/g, ""))
+                                                }
+                                                className={`h-12 rounded-none border-border bg-background pl-14 text-sm focus-visible:ring-primary ${
+                                                    error ? "border-destructive" : ""
+                                                }`}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {error && (
+                                        <div className="border border-destructive/50 bg-destructive/5 px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-destructive">
+                                            {error}
+                                        </div>
+                                    )}
+
+                                    <div
+                                        className={`flex items-start gap-3 border border-l-4 p-4 ${
+                                            termsError
+                                                ? "border-destructive border-l-destructive bg-destructive/5"
+                                                : "border-border border-l-primary bg-primary/5"
+                                        }`}
                                     >
-                                        Mobile Number
-                                    </Label>
-                                    <div className="relative">
-                                        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">
-                                            +91
-                                        </span>
+                                        <Checkbox
+                                            id="terms"
+                                            checked={agreedToTerms}
+                                            onCheckedChange={(c) => {
+                                                setAgreedToTerms(!!c);
+                                                if (c) setTermsError(false);
+                                            }}
+                                            className="mt-0.5 size-5"
+                                        />
+                                        <label
+                                            htmlFor="terms"
+                                            className="cursor-pointer select-none text-[11px] font-semibold leading-relaxed text-foreground"
+                                        >
+                                            I agree to the{" "}
+                                            <Link href="/terms" className="font-bold text-primary underline underline-offset-2">
+                                                Terms &amp; Conditions
+                                            </Link>{" "}
+                                            and{" "}
+                                            <Link href="/privacy" className="font-bold text-primary underline underline-offset-2">
+                                                Privacy Policy
+                                            </Link>
+                                        </label>
+                                    </div>
+                                    {termsError && (
+                                        <p className="text-[10px] font-bold uppercase tracking-wider text-destructive">
+                                            Please accept the Terms &amp; Privacy Policy to continue
+                                        </p>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="otp"
+                                            className="text-xs font-bold uppercase tracking-widest text-foreground"
+                                        >
+                                            6-Digit Code
+                                        </Label>
                                         <Input
-                                            id="phone"
-                                            name="phone"
-                                            type="tel"
+                                            id="otp"
+                                            name="otp"
+                                            type="text"
                                             inputMode="numeric"
-                                            maxLength={10}
-                                            autoComplete="tel-national"
-                                            placeholder="9876543210"
-                                            value={phoneInput}
-                                            onChange={(e) =>
-                                                setPhoneInput(e.target.value.replace(/\D/g, ""))
-                                            }
-                                            className={`h-12 rounded-none border-border bg-background pl-14 text-sm focus-visible:ring-primary ${
+                                            maxLength={6}
+                                            autoFocus
+                                            autoComplete="one-time-code"
+                                            placeholder="••••••"
+                                            value={otp}
+                                            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                                            className={`h-12 rounded-none border-border bg-background px-4 text-center text-lg tracking-[0.5em] focus-visible:ring-primary ${
                                                 error ? "border-destructive" : ""
                                             }`}
                                         />
                                     </div>
-                                </div>
 
-                                {error && (
-                                    <div className="border border-destructive/50 bg-destructive/5 px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-destructive">
-                                        {error}
-                                    </div>
-                                )}
+                                    {error && (
+                                        <div className="border border-destructive/50 bg-destructive/5 px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-destructive">
+                                            {error}
+                                        </div>
+                                    )}
+                                </>
+                            )}
 
-                                <div
-                                    className={`flex items-start gap-3 border border-l-4 p-4 ${
-                                        termsError
-                                            ? "border-destructive border-l-destructive bg-destructive/5"
-                                            : "border-border border-l-primary bg-primary/5"
-                                    }`}
-                                >
-                                    <Checkbox
-                                        id="terms"
-                                        checked={agreedToTerms}
-                                        onCheckedChange={(c) => {
-                                            setAgreedToTerms(!!c);
-                                            if (c) setTermsError(false);
-                                        }}
-                                        className="mt-0.5 size-5"
-                                    />
-                                    <label
-                                        htmlFor="terms"
-                                        className="cursor-pointer select-none text-[11px] font-semibold leading-relaxed text-foreground"
-                                    >
-                                        I agree to the{" "}
-                                        <Link href="/terms" className="font-bold text-primary underline underline-offset-2">
-                                            Terms &amp; Conditions
-                                        </Link>{" "}
-                                        and{" "}
-                                        <Link href="/privacy" className="font-bold text-primary underline underline-offset-2">
-                                            Privacy Policy
-                                        </Link>
-                                    </label>
-                                </div>
-                                {termsError && (
-                                    <p className="text-[10px] font-bold uppercase tracking-wider text-destructive">
-                                        Please accept the Terms &amp; Privacy Policy to continue
-                                    </p>
-                                )}
-
-                                <AnimatedButton
-                                    label={pending ? "Sending Code..." : "Send OTP"}
-                                    disabled={pending}
-                                    icon={
-                                        pending ? (
-                                            <Loader2 size={16} className="animate-spin" />
-                                        ) : (
-                                            <Smartphone size={16} />
-                                        )
-                                    }
-                                    className="h-12 w-full border-transparent bg-primary text-primary-foreground"
-                                    fillClassName="bg-mango"
-                                    hoverTextClassName="hover:text-foreground"
+                            {/* One widget for the whole flow, in one fixed spot right above the
+                                submit button: it must stay mounted across both steps so a resend
+                                (triggered from the OTP step) can mint a fresh single-use token. */}
+                            <div className={step === "phone" ? "" : "sr-only"}>
+                                <Turnstile
+                                    ref={turnstileRef}
+                                    onVerify={setCaptchaToken}
+                                    onExpire={() => setCaptchaToken("")}
                                 />
-                            </form>
-                        ) : (
-                            <form onSubmit={handleVerify} className="space-y-6">
-                                <div className="space-y-2">
-                                    <Label
-                                        htmlFor="otp"
-                                        className="text-xs font-bold uppercase tracking-widest text-foreground"
-                                    >
-                                        6-Digit Code
-                                    </Label>
-                                    <Input
-                                        id="otp"
-                                        name="otp"
-                                        type="text"
-                                        inputMode="numeric"
-                                        maxLength={6}
-                                        autoFocus
-                                        autoComplete="one-time-code"
-                                        placeholder="••••••"
-                                        value={otp}
-                                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                                        className={`h-12 rounded-none border-border bg-background px-4 text-center text-lg tracking-[0.5em] focus-visible:ring-primary ${
-                                            error ? "border-destructive" : ""
-                                        }`}
-                                    />
-                                </div>
+                            </div>
 
-                                {error && (
-                                    <div className="border border-destructive/50 bg-destructive/5 px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-destructive">
-                                        {error}
-                                    </div>
-                                )}
+                            <AnimatedButton
+                                label={
+                                    step === "phone"
+                                        ? pending
+                                            ? "Sending Code..."
+                                            : "Send OTP"
+                                        : pending
+                                          ? "Verifying..."
+                                          : "Verify & Continue"
+                                }
+                                disabled={step === "phone" ? pending : pending || otp.length !== 6}
+                                icon={
+                                    pending ? (
+                                        <Loader2 size={16} className="animate-spin" />
+                                    ) : step === "phone" ? (
+                                        <Smartphone size={16} />
+                                    ) : (
+                                        <ShieldCheck size={16} />
+                                    )
+                                }
+                                className="h-12 w-full border-transparent bg-primary text-primary-foreground"
+                                fillClassName="bg-mango"
+                                hoverTextClassName="hover:text-foreground"
+                            />
 
-                                <AnimatedButton
-                                    label={pending ? "Verifying..." : "Verify & Continue"}
-                                    disabled={pending || otp.length !== 6}
-                                    icon={
-                                        pending ? (
-                                            <Loader2 size={16} className="animate-spin" />
-                                        ) : (
-                                            <ShieldCheck size={16} />
-                                        )
-                                    }
-                                    className="h-12 w-full border-transparent bg-primary text-primary-foreground"
-                                    fillClassName="bg-mango"
-                                    hoverTextClassName="hover:text-foreground"
-                                />
-
+                            {step === "otp" && (
                                 <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest">
                                     <button
                                         type="button"
@@ -322,19 +340,8 @@ export function PhoneOtpForm({
                                         {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
                                     </button>
                                 </div>
-
-                            </form>
-                        )}
-
-                        {/* One widget for the whole flow: it must stay mounted across both
-                            steps so a resend can mint a fresh single-use token. */}
-                        <div className={step === "phone" ? "mt-6" : "sr-only"}>
-                            <Turnstile
-                                ref={turnstileRef}
-                                onVerify={setCaptchaToken}
-                                onExpire={() => setCaptchaToken("")}
-                            />
-                        </div>
+                            )}
+                        </form>
                     </div>
 
                     <p className="flex items-center justify-center gap-2 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">

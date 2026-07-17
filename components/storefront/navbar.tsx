@@ -17,7 +17,7 @@ import type { AuthUser } from "@/lib/auth";
 
 const navLinks = [
     { name: "Rent Trees", href: "/rent" },
-    { name: "Mango Store", href: "/store" },
+    { name: "Organic Store", href: "/store" },
     { name: "Blog", href: "/blog" },
     { name: "About Us", href: "/about" },
     { name: "Contact", href: "/contact" },
